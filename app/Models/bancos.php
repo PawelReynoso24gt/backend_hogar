@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class bancos extends Model
+{
+    use HasFactory;
+    protected $table = 'bancos';
+    protected $primaryKey = 'id_bancos';
+    protected $fillable = ['banco', 'estado'];
+}
