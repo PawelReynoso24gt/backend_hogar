@@ -145,6 +145,7 @@ Route::prefix('in_eg')->group(function() {
     // reporte final agricola
     Route::post('/reporteFinalAG', [ingresos_egresosController::class, 'getReporteFinalAG']);
     Route::post('/reporteFinalCA', [ingresos_egresosController::class, 'getReporteFinalCA']);
+    Route::post('/getReporteEstadoResultadosCA', [ingresos_egresosController::class, 'getReporteEstadoResultadosCA']);
 });
 // Rutas de cuentas bancarias
 Route::prefix('cuentasB')->group(function() {

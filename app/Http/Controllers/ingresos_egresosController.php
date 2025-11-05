@@ -23,6 +23,224 @@ class ingresos_egresosController extends Controller
             return response()->json(['error' => $th ->getMessage()],500);
         }
     }
+
+    // reporte estado de resultados de capilla (solo EGRESOS) - POST only
+    public function getReporteEstadoResultadosCA(Request $request)
+    {
+        try {
+            // Requerir 'tipo' y demás campos en POST
+            $validaciondata = $request->validate([
+                'tipo' => 'required|string',
+                'mes' => 'required|string|in:enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
+                'sirviente' => 'required|string',
+                'responsable' => 'required|string',
+                'economa' => 'required|string'
+            ]);
+
+            $tipo = $validaciondata['tipo'];
+            $mes = $validaciondata['mes'];
+            $sirviente = $validaciondata['sirviente'];
+            $responsable = $validaciondata['responsable'];
+            $economa = $validaciondata['economa'];
+
+            // calcular rango de fechas según tipo (mensual, trimestral, semestral, anual)
+            $fechaInicial = null;
+            $fechaFinal = null;
+            $añoActual = Carbon::now()->year;
+
+            switch ($tipo) {
+                case 'mensual':
+                    switch ($mes) {
+                        case 'enero':
+                            $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 1, 31);
+                            break;
+                        case 'febrero':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 1, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 2, Carbon::createFromDate($añoActual, 2, 1)->daysInMonth);
+                            break;
+                        case 'marzo':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 2, Carbon::createFromDate($añoActual, 2, 1)->daysInMonth);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 3, 31);
+                            break;
+                        case 'abril':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 3, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 4, 30);
+                            break;
+                        case 'mayo':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 4, 30);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 5, 31);
+                            break;
+                        case 'junio':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 5, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 6, 30);
+                            break;
+                        case 'julio':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 6, 30);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 7, 31);
+                            break;
+                        case 'agosto':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 7, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 8, 31);
+                            break;
+                        case 'septiembre':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 8, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 9, 30);
+                            break;
+                        case 'octubre':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 9, 30);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 10, 31);
+                            break;
+                        case 'noviembre':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 10, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 11, 30);
+                            break;
+                        case 'diciembre':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 11, 30);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
+                            break;
+                        default:
+                            return response()->json(['error' => 'Mes inválido'], 400);
+                    }
+                    break;
+                // Para trimestral, semestral y anual puedes ampliar aquí (por simplicidad trataré trimestral similar al original)
+                case 'trimestral':
+                    // definir trimestres por mes de inicio
+                    switch ($mes) {
+                        case 'enero':
+                            $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 3, 31);
+                            break;
+                        case 'abril':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 3, 31);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 6, 30);
+                            break;
+                        case 'julio':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 6, 30);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 9, 30);
+                            break;
+                        case 'octubre':
+                            $fechaInicial = Carbon::createFromDate($añoActual, 9, 30);
+                            $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
+                            break;
+                        default:
+                            return response()->json(['error' => 'Mes inválido para trimestral'], 400);
+                    }
+                    break;
+                case 'semestral':
+                    if ($mes === 'enero') {
+                        $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
+                        $fechaFinal = Carbon::createFromDate($añoActual, 6, 30);
+                    } elseif ($mes === 'julio') {
+                        $fechaInicial = Carbon::createFromDate($añoActual, 6, 30);
+                        $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
+                    } else {
+                        return response()->json(['error' => 'Mes inválido para semestral'], 400);
+                    }
+                    break;
+                case 'anual':
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
+                    $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
+                    break;
+                default:
+                    return response()->json(['error' => 'Tipo inválido'], 400);
+            }
+
+            // fecha anterior (saldo inicial hasta el día anterior a fechaInicial)
+            $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
+
+            // Calcular saldos iniciales (bancos y caja) hasta fechaAnterior — considerar ingresos y egresos previos
+            $ingresosAnterioresBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->where('tipo', 'bancos')
+                ->where('nomenclatura', 'like', 'IN%')
+                ->sum('monto');
+
+            $egresosAnterioresBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->where('tipo', 'bancos')
+                ->where('nomenclatura', 'like', 'EG%')
+                ->sum('monto');
+
+            $ingresosAnterioresCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->where('tipo', 'caja')
+                ->where('nomenclatura', 'like', 'IN%')
+                ->sum('monto');
+
+            $egresosAnterioresCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->where('tipo', 'caja')
+                ->where('nomenclatura', 'like', 'EG%')
+                ->sum('monto');
+
+            $saldoInicialBancos = $ingresosAnterioresBancos - $egresosAnterioresBancos;
+            $saldoInicialCaja = $ingresosAnterioresCaja - $egresosAnterioresCaja;
+            $saldoInicial = $saldoInicialBancos + $saldoInicialCaja;
+
+            // Consultar y agrupar EGRESOS en el período para Capilla (id_proyectos = 2)
+            $dataCaja = ingresos_egresos::with('cuentas')
+                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                ->where('tipo', 'caja')
+                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->get();
+
+            $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                $egresos = $group->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
+                if ($egresos > 0) {
+                    return [
+                        'cuenta' => $group->first()->cuentas->cuenta,
+                        'egresos' => number_format($egresos, 2)
+                    ];
+                }
+            })->filter()->values();
+
+            $dataBancos = ingresos_egresos::with('cuentas')
+                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                ->where('tipo', 'bancos')
+                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->get();
+
+            $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
+                $egresos = $group->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
+                if ($egresos > 0) {
+                    return [
+                        'cuenta' => $group->first()->cuentas->cuenta,
+                        'egresos' => number_format($egresos, 2)
+                    ];
+                }
+            })->filter()->values();
+
+            $totalEgresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
+            $totalEgresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
+            $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
+
+            // Calcular saldo final restando solo EGRESOS (estado de resultados centrado en egresos)
+            $saldoFinal = ($saldoInicial) - $totalGeneralEgresos;
+
+            return response()->json([
+                'fecha_anterior' => $fechaAnterior,
+                'mes' => $mes,
+                'fecha_inicial' => $fechaInicial->toDateString(),
+                'fecha_final' => $fechaFinal->toDateString(),
+                'saldo_inicial_bancos' => $saldoInicialBancos,
+                'saldo_inicial_caja' => $saldoInicialCaja,
+                'saldo_inicial' => $saldoInicial,
+                'total_egresos_caja' => $totalEgresosCaja,
+                'total_egresos_bancos' => $totalEgresosBancos,
+                'total_general_egresos' => $totalGeneralEgresos,
+                'data_caja' => $dataGroupedCaja,
+                'data_bancos' => $dataGroupedBancos,
+                'total_saldo_final' => $saldoFinal,
+                'responsable' => $responsable,
+                'sirviente' => $sirviente,
+                'economa' => $economa
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
     // Método Get con nombres de cuentas
     public function getWithCuentas()
     {
