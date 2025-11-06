@@ -32,16 +32,16 @@ class ingresos_egresosController extends Controller
             $validaciondata = $request->validate([
                 'tipo' => 'required|string',
                 'mes' => 'required|string|in:enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
-                'sirviente' => 'required|string',
-                'responsable' => 'required|string',
-                'economa' => 'required|string'
+                //'sirviente' => 'required|string',
+                //'responsable' => 'required|string',
+                //'economa' => 'required|string'
             ]);
 
             $tipo = $validaciondata['tipo'];
             $mes = $validaciondata['mes'];
-            $sirviente = $validaciondata['sirviente'];
-            $responsable = $validaciondata['responsable'];
-            $economa = $validaciondata['economa'];
+            //$sirviente = $validaciondata['sirviente'];
+            //$responsable = $validaciondata['responsable'];
+            //$economa = $validaciondata['economa'];
 
             // calcular rango de fechas según tipo (mensual, trimestral, semestral, anual)
             $fechaInicial = null;
@@ -274,9 +274,9 @@ class ingresos_egresosController extends Controller
                 'data_caja' => $dataGroupedCaja,
                 'data_bancos' => $dataGroupedBancos,
                 'total_saldo_final' => $saldoFinal,
-                'responsable' => $responsable,
-                'sirviente' => $sirviente,
-                'economa' => $economa
+                //'responsable' => $responsable,
+                //'sirviente' => $sirviente,
+                //'economa' => $economa
             ], 200);
 
         } catch (\Throwable $th) {
@@ -292,16 +292,10 @@ class ingresos_egresosController extends Controller
             $validaciondata = $request->validate([
                 'tipo' => 'required|string',
                 'mes' => 'required|string|in:enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
-                'sirviente' => 'required|string',
-                'responsable' => 'required|string',
-                'economa' => 'required|string'
             ]);
 
             $tipo = $validaciondata['tipo'];
             $mes = $validaciondata['mes'];
-            $sirviente = $validaciondata['sirviente'];
-            $responsable = $validaciondata['responsable'];
-            $economa = $validaciondata['economa'];
 
             // calcular rango de fechas según tipo (mensual, trimestral, semestral, anual)
             $fechaInicial = null;
@@ -533,10 +527,7 @@ class ingresos_egresosController extends Controller
                 'total_general_egresos' => $totalGeneralEgresos,
                 'data_caja' => $dataGroupedCaja,
                 'data_bancos' => $dataGroupedBancos,
-                'total_saldo_final' => $saldoFinal,
-                'responsable' => $responsable,
-                'sirviente' => $sirviente,
-                'economa' => $economa
+                'total_saldo_final' => $saldoFinal
             ], 200);
 
         } catch (\Throwable $th) {
