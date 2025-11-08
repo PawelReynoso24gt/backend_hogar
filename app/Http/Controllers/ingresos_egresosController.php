@@ -8123,19 +8123,29 @@ class ingresos_egresosController extends Controller
     }
 
     public function anticipoAG(Request $request){
-
-        // Aqui vamos a validar los datos (los campos calculados se asignan automáticamente)
+  // Aqui vamos a validar los datos (los campos calculados se asignan automáticamente)
         $request->validate([
             'fecha' => 'required|date',
             'identificacion' => 'required',
             'nombre' => 'required',
             'descripcion' => 'required',
             'monto' => 'required|numeric',
-            'tipo' => 'required',
+            'tipo' => 'required|in:caja,banco',
             'cuenta' => 'required',
+            
+            'documento' => 'required_if:tipo,banco',
+            'numero_documento' => 'required_if:tipo,banco',
+            'fecha_emision' => 'required_if:tipo,banco',
+            'id_cuentas_bancarias' => 'required_if:tipo,banco',
+        ], [
+            'documento.required_if'            => 'El documento es obligatorio cuando el tipo es banco.',
+            'numero_documento.required_if'     => 'El número de documento es obligatorio cuando el tipo es banco.',
+            'fecha_emision.required_if'        => 'La fecha de emisión es obligatoria cuando el tipo es banco.',
+            'id_cuentas_bancarias.required_if' => 'La cuenta bancaria es obligatoria cuando el tipo es banco.',
         ]);
 
         try{
+            return DB::transaction(function () use ($request) {
             // Buscar la cuenta por su nombre
             $cuenta = cuentas::where('cuenta', 'Anticipo de compras y gastos')->where('id_clasificacion', '2')->where('id_proyectos', '1')->first();
             // Si la cuenta no se encuentra, devolver un error
@@ -8143,65 +8153,12 @@ class ingresos_egresosController extends Controller
                 return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
             }
 
-            // Verificar si la cuenta pertenece al id_proyectos 2
+            // Verificar si la cuenta pertenece al id_proyectos 1
              if ($cuenta->id_proyectos != 1) {
                  return response()->json(['error' => 'La cuenta no pertenece al proyecto agricola'], 400);
              }
 
-            // Crear un nuevo registro en la tabla ingresos_egresos
-            $ingreso_egreso = new ingresos_egresos();
-            $ingreso_egreso->fecha = $request->input('fecha');
-            $ingreso_egreso->identificacion = $request->input('identificacion');
-            $ingreso_egreso->nombre = $request->input('nombre');
-            $ingreso_egreso->descripcion = $request->input('descripcion');
-            $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
-            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-
-            // Asignar montos calculados automáticamente según la solicitud:
-            // - monto_debe debe igualar el monto ingresado
-            // - monto_haber queda en 0.00
-            // - es_pendiente pasa a 1
-            $ingreso_egreso->monto_debe = $request->input('monto');
-            $ingreso_egreso->monto_haber = 0.00;
-            $ingreso_egreso->es_pendiente = 1;
-
-            // Guardar el ingreso/egreso
-            $ingreso_egreso->save();
-
-            // Retornar el recurso creado
-            return response()->json($ingreso_egreso, 201);
-
-        }catch(\Exception $e){
-           return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function anticipoCA(Request $request){
-
-        // Aqui vamos a validar los datos (los campos calculados se asignan automáticamente)
-        $request->validate([
-            'fecha' => 'required|date',
-            'identificacion' => 'required',
-            'nombre' => 'required',
-            'descripcion' => 'required',
-            'monto' => 'required|numeric',
-            'tipo' => 'required',
-            'cuenta' => 'required',
-        ]);
-
-        try{
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', 'Anticipo de compras y gastos')->where('id_clasificacion', '2')->where('id_proyectos', '2')->first();
-            // Si la cuenta no se encuentra, devolver un error
-            if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-            }
-
-            // Verificar si la cuenta pertenece al id_proyectos 2
-             if ($cuenta->id_proyectos != 2) {
-                 return response()->json(['error' => 'La cuenta no pertenece al proyecto agricola'], 400);
-             }
+                 $tipo = strtolower($request->input('tipo'));
 
             // Crear un nuevo registro en la tabla ingresos_egresos
             $ingreso_egreso = new ingresos_egresos();
@@ -8210,7 +8167,7 @@ class ingresos_egresosController extends Controller
             $ingreso_egreso->nombre = $request->input('nombre');
             $ingreso_egreso->descripcion = $request->input('descripcion');
             $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
+            $ingreso_egreso->tipo = $tipo;
             $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
 
             // Asignar montos calculados automáticamente según la solicitud:
@@ -8227,22 +8184,127 @@ class ingresos_egresosController extends Controller
             // Obtener el id del ingreso/egreso recién creado
             $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
 
-            // Crear un nuevo registro en la tabla datos_de_pago_ingresos
-            $datos_pago = new datos_de_pago_ingresos();
-            $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
-            $datos_pago->documento = $request->input('documento'); // ingreso manual
-            $datos_pago->numero_documento = $request->input('numero_documento'); // ingreso manual
-            $datos_pago->fecha_emision = $request->input('fecha_emision'); // ingreso manual
-            // Asociar la cuenta bancaria
-            $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-            // Llenar los otros campos según el request
-            $datos_pago->save();
+              if ($tipo === 'banco') {
+                $cuenta_bancaria = cuentas_bancarias::find($request->input('id_cuentas_bancarias'));
+                if (!$cuenta_bancaria) {
+                    throw new \RuntimeException('La cuenta bancaria indicada no existe.');
+                }
+
+                $datos_pago = new datos_de_pago_ingresos();
+                $datos_pago->id_ingresos_egresos  = $ingreso_egreso->id_ingresos_egresos; 
+                $datos_pago->documento            = $request->input('documento');
+                $datos_pago->numero_documento     = $request->input('numero_documento');
+                $datos_pago->fecha_emision        = $request->input('fecha_emision');
+                $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+                $datos_pago->save();
+
+                // Devuelve ambos cuando es banco
+                return response()->json([
+                    'ingreso_egreso' => $ingreso_egreso,
+                    'datos_pago'     => $datos_pago,
+                ], 201);
+            }
 
             // Retornar el recurso creado
             return response()->json($ingreso_egreso, 201);
 
+              });
         }catch(\Exception $e){
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function anticipoCA(Request $request){
+
+        // Aqui vamos a validar los datos (los campos calculados se asignan automáticamente)
+        $request->validate([
+            'fecha' => 'required|date',
+            'identificacion' => 'required',
+            'nombre' => 'required',
+            'descripcion' => 'required',
+            'monto' => 'required|numeric',
+            'tipo' => 'required|in:caja,banco',
+            'cuenta' => 'required',
+            
+            'documento' => 'required_if:tipo,banco',
+            'numero_documento' => 'required_if:tipo,banco',
+            'fecha_emision' => 'required_if:tipo,banco',
+            'id_cuentas_bancarias' => 'required_if:tipo,banco',
+        ], [
+            'documento.required_if'            => 'El documento es obligatorio cuando el tipo es banco.',
+            'numero_documento.required_if'     => 'El número de documento es obligatorio cuando el tipo es banco.',
+            'fecha_emision.required_if'        => 'La fecha de emisión es obligatoria cuando el tipo es banco.',
+            'id_cuentas_bancarias.required_if' => 'La cuenta bancaria es obligatoria cuando el tipo es banco.',
+        ]);
+
+        try{
+            return DB::transaction(function () use ($request) {
+            // Buscar la cuenta por su nombre
+            $cuenta = cuentas::where('cuenta', 'Anticipo de compras y gastos')->where('id_clasificacion', '2')->where('id_proyectos', '2')->first();
+            // Si la cuenta no se encuentra, devolver un error
+            if (!$cuenta) {
+                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
+            }
+
+            // Verificar si la cuenta pertenece al id_proyectos 2
+             if ($cuenta->id_proyectos != 2) {
+                 return response()->json(['error' => 'La cuenta no pertenece al proyecto capilla'], 400);
+             }
+
+                 $tipo = strtolower($request->input('tipo'));
+
+            // Crear un nuevo registro en la tabla ingresos_egresos
+            $ingreso_egreso = new ingresos_egresos();
+            $ingreso_egreso->fecha = $request->input('fecha');
+            $ingreso_egreso->identificacion = $request->input('identificacion');
+            $ingreso_egreso->nombre = $request->input('nombre');
+            $ingreso_egreso->descripcion = $request->input('descripcion');
+            $ingreso_egreso->monto = $request->input('monto');
+            $ingreso_egreso->tipo = $tipo;
+            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // Asignar montos calculados automáticamente según la solicitud:
+            // - monto_debe debe igualar el monto ingresado
+            // - monto_haber queda en 0.00
+            // - es_pendiente pasa a 1
+            $ingreso_egreso->monto_debe = $request->input('monto');
+            $ingreso_egreso->monto_haber = 0.00;
+            $ingreso_egreso->es_pendiente = 1;
+
+            // Guardar el ingreso/egreso
+            $ingreso_egreso->save();
+
+            // Obtener el id del ingreso/egreso recién creado
+            $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+
+              if ($tipo === 'banco') {
+                $cuenta_bancaria = cuentas_bancarias::find($request->input('id_cuentas_bancarias'));
+                if (!$cuenta_bancaria) {
+                    throw new \RuntimeException('La cuenta bancaria indicada no existe.');
+                }
+
+                $datos_pago = new datos_de_pago_ingresos();
+                $datos_pago->id_ingresos_egresos  = $ingreso_egreso->id_ingresos_egresos; 
+                $datos_pago->documento            = $request->input('documento');
+                $datos_pago->numero_documento     = $request->input('numero_documento');
+                $datos_pago->fecha_emision        = $request->input('fecha_emision');
+                $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+                $datos_pago->save();
+
+                // Devuelve ambos cuando es banco
+                return response()->json([
+                    'ingreso_egreso' => $ingreso_egreso,
+                    'datos_pago'     => $datos_pago,
+                ], 201);
+            }
+
+            // Retornar el recurso creado
+            return response()->json($ingreso_egreso, 201);
+
+              });
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+        
     }
 }
