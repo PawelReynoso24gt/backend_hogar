@@ -10,7 +10,7 @@ class ingresos_egresos extends Model
     use HasFactory;
     protected $table = 'ingresos_egresos';
     protected $primaryKey = 'id_ingresos_egresos';
-    protected $fillable = ['nomenclatura', 'fecha', 'identificación', 'nombre', 'descripcion', 'monto', 'tipo', 'id_cuentas'];
+    protected $fillable = ['nomenclatura', 'fecha', 'identificación', 'nombre', 'descripcion', 'monto', 'monto_debe', 'monto_haber', 'es_pendiente', 'tipo', 'id_cuentas'];
 
     public function cuentas()
     {

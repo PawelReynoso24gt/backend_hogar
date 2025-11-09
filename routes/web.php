@@ -103,16 +103,16 @@ Route::prefix('in_eg')->group(function() {
     // datos de ingresos de bancos
     Route::get('/getINB', [ingresos_egresosController::class, 'getDatosIngresoBancos']);
     Route::get('/getINEGBDatos', [ingresos_egresosController::class, 'getWithDatosINGB']);
-    Route::post('/createALLIN', [ingresos_egresosController::class, 'createALLIN']);
-    Route::post('/createALLEG', [ingresos_egresosController::class, 'createALLEG']);
-    Route::post('/createALLINEGCaja', [ingresos_egresosController::class, 'createALLINEGCaja']);
+    // Route::post('/createALLIN', [ingresos_egresosController::class, 'createALLIN']);
+    // Route::post('/createALLEG', [ingresos_egresosController::class, 'createALLEG']);
+    // Route::post('/createALLINEGCaja', [ingresos_egresosController::class, 'createALLINEGCaja']);
 
-    // ingresos de proyecto agricola 
+    // ingresos de proyecto agricola ----------------------------------------------------------
     Route::post('/createALLINAG', [ingresos_egresosController::class, 'createALLINAG']);
     Route::post('/createALLEGAG', [ingresos_egresosController::class, 'createALLEGAG']);
     Route::post('/createALLINEGCajaAG', [ingresos_egresosController::class, 'createALLINEGCajaAG']);
 
-    // ingresos de proyecto capilla
+    // ingresos de proyecto capilla -----------------------------------------------------------
     Route::post('/createALLINCA', [ingresos_egresosController::class, 'createALLINCA']);
     Route::post('/createALLEGCA', [ingresos_egresosController::class, 'createALLEGCA']);
     Route::post('/createALLINEGCajaCA', [ingresos_egresosController::class, 'createALLINEGCajaCA']);
