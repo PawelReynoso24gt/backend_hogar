@@ -151,6 +151,10 @@ Route::prefix('in_eg')->group(function() {
     Route::post('/reporteGeneralCA', [reportesGenerales::class, 'reporteGeneralCapilla']);
     Route::post('/getReporteEstadoResultadosCA', [ingresos_egresosController::class, 'getReporteEstadoResultadosCA']);
     Route::post('/getReporteEstadoResultadosAG', [ingresos_egresosController::class, 'getReporteEstadoResultadosAG']);
+
+    // Anticipo sobre compras
+    Route::post('/createAnticipoCompraAG', [ingresos_egresosController::class, 'anticipoAG']);
+    Route::post('/createAnticipoCompraCA', [ingresos_egresosController::class, 'anticipoCA']);
 });
 // Rutas de cuentas bancarias
 Route::prefix('cuentasB')->group(function() {
