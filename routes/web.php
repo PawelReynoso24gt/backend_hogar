@@ -20,6 +20,7 @@ use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\cuentasController;
 use App\Http\Controllers\ingresos_egresosController;
 use App\Http\Controllers\cuentas_bancariasController;
+use App\Http\Controllers\reportesGenerales;
 
 Route::get('/', function () {
     return view('welcome');
@@ -145,6 +146,9 @@ Route::prefix('in_eg')->group(function() {
     // reporte final agricola
     Route::post('/reporteFinalAG', [ingresos_egresosController::class, 'getReporteFinalAG']);
     Route::post('/reporteFinalCA', [ingresos_egresosController::class, 'getReporteFinalCA']);
+    // reportes generales (nuevos controladores optimizados)
+    Route::post('/reporteGeneralAG', [reportesGenerales::class, 'reporteGeneralAgricola']);
+    Route::post('/reporteGeneralCA', [reportesGenerales::class, 'reporteGeneralCapilla']);
     Route::post('/getReporteEstadoResultadosCA', [ingresos_egresosController::class, 'getReporteEstadoResultadosCA']);
     Route::post('/getReporteEstadoResultadosAG', [ingresos_egresosController::class, 'getReporteEstadoResultadosAG']);
 });
