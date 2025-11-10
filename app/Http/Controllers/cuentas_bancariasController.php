@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\cuentas_bancarias;
@@ -221,6 +222,22 @@ class cuentas_bancariasController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
+    }
+
+    //mostrar nombre y numero cuenta pero enviar id de cuenta bancaria
+      public function getIdCuenta(): JsonResponse
+    {
+        $rows = cuentas_bancarias::with('bancos:id_bancos,banco')
+            ->where('estado', 1)
+            ->orderBy('id_cuentas_bancarias', 'asc')
+            ->get(['id_cuentas_bancarias','numero_cuenta','id_bancos']);
+
+        $result = $rows->map(fn($r) => [
+            'id'    => (int) $r->id_cuentas_bancarias,
+            'label' => ($r->bancos?->banco ?? 'Sin banco').' • '.$r->numero_cuenta,
+        ]);
+
+        return response()->json($result, 200);
     }
     
 }

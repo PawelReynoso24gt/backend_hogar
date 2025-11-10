@@ -8185,7 +8185,7 @@ class ingresos_egresosController extends Controller
             // Obtener el id del ingreso/egreso recién creado
             $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
 
-              if ($tipo === 'banco') {
+              if ($tipo === 'bancos') {
                 $cuenta_bancaria = cuentas_bancarias::find($request->input('id_cuentas_bancarias'));
                 if (!$cuenta_bancaria) {
                     throw new \RuntimeException('La cuenta bancaria indicada no existe.');
@@ -8278,7 +8278,7 @@ class ingresos_egresosController extends Controller
             // Obtener el id del ingreso/egreso recién creado
             $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
 
-              if ($tipo === 'banco') {
+              if ($tipo === 'bancos') {
                 $cuenta_bancaria = cuentas_bancarias::find($request->input('id_cuentas_bancarias'));
                 if (!$cuenta_bancaria) {
                     throw new \RuntimeException('La cuenta bancaria indicada no existe.');
