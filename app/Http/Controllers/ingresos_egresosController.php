@@ -13,6 +13,9 @@ use App\Models\datos_de_pago_egresos;
 use App\Models\cuentas_bancarias;
 use App\Models\bancos;
 
+// Para el manejo de Cuentas por Pagar y Cobrar
+use App\Utils\CuentasPorPagarCobrar;
+
 class ingresos_egresosController extends Controller
 {
     // Método Get
@@ -826,105 +829,105 @@ class ingresos_egresosController extends Controller
     //     }
     // }
 
-    public function createALLIN(Request $request) // este igual, sorry TT
-    {
-        try {
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
+    // public function createALLIN(Request $request) // este igual, sorry TT
+    // {
+    //     try {
+    //         // Buscar la cuenta por su nombre
+    //         $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
 
-            // Si la cuenta no se encuentra, devolver un error
-            if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-            }
+    //         // Si la cuenta no se encuentra, devolver un error
+    //         if (!$cuenta) {
+    //             return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
+    //         }
 
-            // Buscar la cuenta bancaria por su número
-            $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
+    //         // Buscar la cuenta bancaria por su número
+    //         $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
 
-            // Si la cuenta bancaria no se encuentra, devolver un error
-            if (!$cuenta_bancaria) {
-                return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
-            }
+    //         // Si la cuenta bancaria no se encuentra, devolver un error
+    //         if (!$cuenta_bancaria) {
+    //             return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
+    //         }
 
-            // Crear un nuevo registro en la tabla ingresos_egresos
-            $ingreso_egreso = new ingresos_egresos();
-            $ingreso_egreso->fecha = $request->input('fecha');
-            $ingreso_egreso->identificacion = $request->input('identificacion');
-            $ingreso_egreso->nombre = $request->input('nombre');
-            $ingreso_egreso->descripcion = $request->input('descripcion');
-            $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
-            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-            $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
+    //         // Crear un nuevo registro en la tabla ingresos_egresos
+    //         $ingreso_egreso = new ingresos_egresos();
+    //         $ingreso_egreso->fecha = $request->input('fecha');
+    //         $ingreso_egreso->identificacion = $request->input('identificacion');
+    //         $ingreso_egreso->nombre = $request->input('nombre');
+    //         $ingreso_egreso->descripcion = $request->input('descripcion');
+    //         $ingreso_egreso->monto = $request->input('monto');
+    //         $ingreso_egreso->tipo = $request->input('tipo');
+    //         $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+    //         $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
 
-            // Obtener el id del ingreso/egreso recién creado
-            $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+    //         // Obtener el id del ingreso/egreso recién creado
+    //         $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
 
-            // Crear un nuevo registro en la tabla datos_de_pago_ingresos
-            $datos_pago = new datos_de_pago_ingresos();
-            $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
-            $datos_pago->documento = $request->input('documento');
-            $datos_pago->numero_documento = $request->input('numero_documento');
-            $datos_pago->fecha_emision = $request->input('fecha_emision');
-            // Asociar la cuenta bancaria
-            $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-            // Llenar los otros campos según el request
-            $datos_pago->save();
+    //         // Crear un nuevo registro en la tabla datos_de_pago_ingresos
+    //         $datos_pago = new datos_de_pago_ingresos();
+    //         $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
+    //         $datos_pago->documento = $request->input('documento');
+    //         $datos_pago->numero_documento = $request->input('numero_documento');
+    //         $datos_pago->fecha_emision = $request->input('fecha_emision');
+    //         // Asociar la cuenta bancaria
+    //         $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+    //         // Llenar los otros campos según el request
+    //         $datos_pago->save();
 
-            return response()->json($ingreso_egreso, 201);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
-    }
+    //         return response()->json($ingreso_egreso, 201);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['error' => $th->getMessage()], 500);
+    //     }
+    // }
 
-    public function createALLEG(Request $request) // este tampoco
-    {
-        try {
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
+    // public function createALLEG(Request $request) // este tampoco
+    // {
+    //     try {
+    //         // Buscar la cuenta por su nombre
+    //         $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
 
-            // Si la cuenta no se encuentra, devolver un error
-            if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-            }
+    //         // Si la cuenta no se encuentra, devolver un error
+    //         if (!$cuenta) {
+    //             return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
+    //         }
 
-            // Buscar la cuenta bancaria por su número
-            $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
+    //         // Buscar la cuenta bancaria por su número
+    //         $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
 
-            // Si la cuenta bancaria no se encuentra, devolver un error
-            if (!$cuenta_bancaria) {
-                return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
-            }
+    //         // Si la cuenta bancaria no se encuentra, devolver un error
+    //         if (!$cuenta_bancaria) {
+    //             return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
+    //         }
 
-            // Crear un nuevo registro en la tabla ingresos_egresos
-            $ingreso_egreso = new ingresos_egresos();
-            $ingreso_egreso->fecha = $request->input('fecha');
-            $ingreso_egreso->identificacion = $request->input('identificacion');
-            $ingreso_egreso->nombre = $request->input('nombre');
-            $ingreso_egreso->descripcion = $request->input('descripcion');
-            $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
-            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-            $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
+    //         // Crear un nuevo registro en la tabla ingresos_egresos
+    //         $ingreso_egreso = new ingresos_egresos();
+    //         $ingreso_egreso->fecha = $request->input('fecha');
+    //         $ingreso_egreso->identificacion = $request->input('identificacion');
+    //         $ingreso_egreso->nombre = $request->input('nombre');
+    //         $ingreso_egreso->descripcion = $request->input('descripcion');
+    //         $ingreso_egreso->monto = $request->input('monto');
+    //         $ingreso_egreso->tipo = $request->input('tipo');
+    //         $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+    //         $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
 
-            // Obtener el id del ingreso/egreso recién creado
-            $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+    //         // Obtener el id del ingreso/egreso recién creado
+    //         $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
 
-            // Crear un nuevo registro en la tabla datos_de_pago_ingresos
-            $datos_pago = new datos_de_pago_egresos();
-            $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
-            $datos_pago->documento = $request->input('documento');
-            $datos_pago->numero_documento = $request->input('numero_documento');
-            $datos_pago->fecha_emision = $request->input('fecha_emision');
-            // Asociar la cuenta bancaria
-            $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-            // Llenar los otros campos según el request
-            $datos_pago->save();
+    //         // Crear un nuevo registro en la tabla datos_de_pago_ingresos
+    //         $datos_pago = new datos_de_pago_egresos();
+    //         $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
+    //         $datos_pago->documento = $request->input('documento');
+    //         $datos_pago->numero_documento = $request->input('numero_documento');
+    //         $datos_pago->fecha_emision = $request->input('fecha_emision');
+    //         // Asociar la cuenta bancaria
+    //         $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+    //         // Llenar los otros campos según el request
+    //         $datos_pago->save();
 
-            return response()->json($ingreso_egreso, 201);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
-    }
+    //         return response()->json($ingreso_egreso, 201);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['error' => $th->getMessage()], 500);
+    //     }
+    // }
 
     // ingresos de proyecto agrícola (bancos)
     // ingresos de bancos
@@ -953,6 +956,20 @@ class ingresos_egresosController extends Controller
                 return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
             }
 
+            // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
+            // Usamos 'es_pendiente' o 0 por defecto si no se envía.
+            // Asegúrate que 'es_pendiente' se mande desde el frontend (0 o 1).
+            $esPendiente = (bool) $request->input('es_pendiente', 0);
+            $monto = (float) $request->input('monto');
+            $tipoTransaccion = 'INGRESOS'; // Esto se sabe por la función
+
+            // >> 2. Usar la utilidad para calcular DEBE/HABER
+            $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
+                $monto, 
+                $tipoTransaccion, 
+                $esPendiente
+            );
+
             // Crear un nuevo registro en la tabla ingresos_egresos
             $ingreso_egreso = new ingresos_egresos();
             $ingreso_egreso->fecha = $request->input('fecha');
@@ -960,8 +977,14 @@ class ingresos_egresosController extends Controller
             $ingreso_egreso->nombre = $request->input('nombre');
             $ingreso_egreso->descripcion = $request->input('descripcion');
             $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
+            $ingreso_egreso->tipo = $request->input('tipo'); // "bancos"
             $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // >> 3. Asignar los valores de DEBE, HABER y Pendiente ANTES de guardar
+            $ingreso_egreso->monto_debe = $montosContables['monto_debe'];
+            $ingreso_egreso->monto_haber = $montosContables['monto_haber'];
+            $ingreso_egreso->es_pendiente = $montosContables['es_pendiente'];
+
             $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
 
             // Obtener el id del ingreso/egreso recién creado
@@ -1010,6 +1033,20 @@ class ingresos_egresosController extends Controller
                 return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
             }
 
+            // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
+            // Usamos 'es_pendiente' o 0 por defecto si no se envía.
+            // Asegúrate que 'es_pendiente' se mande desde el frontend (0 o 1).
+            $esPendiente = (bool) $request->input('es_pendiente', 0);
+            $monto = (float) $request->input('monto');
+            $tipoTransaccion = 'EGRESOS'; // Esto se sabe por la función
+
+            // >> 2. Usar la utilidad para calcular DEBE/HABER
+            $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
+                $monto, 
+                $tipoTransaccion, 
+                $esPendiente
+            );
+
             // Crear un nuevo registro en la tabla ingresos_egresos
             $ingreso_egreso = new ingresos_egresos();
             $ingreso_egreso->fecha = $request->input('fecha');
@@ -1017,8 +1054,14 @@ class ingresos_egresosController extends Controller
             $ingreso_egreso->nombre = $request->input('nombre');
             $ingreso_egreso->descripcion = $request->input('descripcion');
             $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
+            $ingreso_egreso->tipo = $request->input('tipo'); // "bancos"
             $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // >> 3. Asignar los valores de DEBE, HABER y Pendiente ANTES de guardar
+            $ingreso_egreso->monto_debe = $montosContables['monto_debe'];
+            $ingreso_egreso->monto_haber = $montosContables['monto_haber'];
+            $ingreso_egreso->es_pendiente = $montosContables['es_pendiente'];
+
             $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
 
             // Obtener el id del ingreso/egreso recién creado
@@ -1066,6 +1109,20 @@ class ingresos_egresosController extends Controller
              if (!$cuenta_bancaria) {
                  return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
              }
+
+            // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
+            // Usamos 'es_pendiente' o 0 por defecto si no se envía.
+            // Asegúrate que 'es_pendiente' se mande desde el frontend (0 o 1).
+            $esPendiente = (bool) $request->input('es_pendiente', 0);
+            $monto = (float) $request->input('monto');
+            $tipoTransaccion = 'INGRESOS'; // Esto se sabe por la función
+
+            // >> 2. Usar la utilidad para calcular DEBE/HABER
+            $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
+                $monto, 
+                $tipoTransaccion, 
+                $esPendiente
+            );
  
              // Crear un nuevo registro en la tabla ingresos_egresos
              $ingreso_egreso = new ingresos_egresos();
@@ -1074,8 +1131,14 @@ class ingresos_egresosController extends Controller
              $ingreso_egreso->nombre = $request->input('nombre');
              $ingreso_egreso->descripcion = $request->input('descripcion');
              $ingreso_egreso->monto = $request->input('monto');
-             $ingreso_egreso->tipo = $request->input('tipo');
+             $ingreso_egreso->tipo = $request->input('tipo'); // "bancos"
              $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // >> 3. Asignar los valores de DEBE, HABER y Pendiente ANTES de guardar
+            $ingreso_egreso->monto_debe = $montosContables['monto_debe'];
+            $ingreso_egreso->monto_haber = $montosContables['monto_haber'];
+            $ingreso_egreso->es_pendiente = $montosContables['es_pendiente'];
+
              $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
  
              // Obtener el id del ingreso/egreso recién creado
@@ -1123,6 +1186,20 @@ class ingresos_egresosController extends Controller
              if (!$cuenta_bancaria) {
                  return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
              }
+
+            // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
+            // Usamos 'es_pendiente' o 0 por defecto si no se envía.
+            // Asegúrate que 'es_pendiente' se mande desde el frontend (0 o 1).
+            $esPendiente = (bool) $request->input('es_pendiente', 0);
+            $monto = (float) $request->input('monto');
+            $tipoTransaccion = 'EGRESOS'; // Esto se sabe por la función
+
+            // >> 2. Usar la utilidad para calcular DEBE/HABER
+            $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
+                $monto, 
+                $tipoTransaccion, 
+                $esPendiente
+            );
  
              // Crear un nuevo registro en la tabla ingresos_egresos
              $ingreso_egreso = new ingresos_egresos();
@@ -1131,8 +1208,14 @@ class ingresos_egresosController extends Controller
              $ingreso_egreso->nombre = $request->input('nombre');
              $ingreso_egreso->descripcion = $request->input('descripcion');
              $ingreso_egreso->monto = $request->input('monto');
-             $ingreso_egreso->tipo = $request->input('tipo');
+             $ingreso_egreso->tipo = $request->input('tipo'); // "bancos"
              $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // >> 3. Asignar los valores de DEBE, HABER y Pendiente ANTES de guardar
+            $ingreso_egreso->monto_debe = $montosContables['monto_debe'];
+            $ingreso_egreso->monto_haber = $montosContables['monto_haber'];
+            $ingreso_egreso->es_pendiente = $montosContables['es_pendiente'];
+
              $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
  
              // Obtener el id del ingreso/egreso recién creado
@@ -1155,44 +1238,44 @@ class ingresos_egresosController extends Controller
          }
      }
     
-    public function createALLINEGCaja(Request $request) // la neta no recuerdo de que era este
-    {
-        // Validar los datos de entrada
-        $request->validate([
-            'fecha' => 'required|date',
-            'identificacion' => 'required',
-            'nombre' => 'required',
-            'descripcion' => 'required',
-            'monto' => 'required|numeric',
-            'tipo' => 'required',
-            'cuenta' => 'required',
-        ]);
+    // public function createALLINEGCaja(Request $request) // la neta no recuerdo de que era este
+    // {
+    //     // Validar los datos de entrada
+    //     $request->validate([
+    //         'fecha' => 'required|date',
+    //         'identificacion' => 'required',
+    //         'nombre' => 'required',
+    //         'descripcion' => 'required',
+    //         'monto' => 'required|numeric',
+    //         'tipo' => 'required',
+    //         'cuenta' => 'required',
+    //     ]);
 
-        try {
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
+    //     try {
+    //         // Buscar la cuenta por su nombre
+    //         $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
 
-            // Si la cuenta no se encuentra, devolver un error
-            if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-            }
+    //         // Si la cuenta no se encuentra, devolver un error
+    //         if (!$cuenta) {
+    //             return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
+    //         }
 
-            // Crear un nuevo registro en la tabla ingresos_egresos
-            $ingreso_egreso = new ingresos_egresos();
-            $ingreso_egreso->fecha = $request->input('fecha');
-            $ingreso_egreso->identificacion = $request->input('identificacion');
-            $ingreso_egreso->nombre = $request->input('nombre');
-            $ingreso_egreso->descripcion = $request->input('descripcion');
-            $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
-            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-            $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
+    //         // Crear un nuevo registro en la tabla ingresos_egresos
+    //         $ingreso_egreso = new ingresos_egresos();
+    //         $ingreso_egreso->fecha = $request->input('fecha');
+    //         $ingreso_egreso->identificacion = $request->input('identificacion');
+    //         $ingreso_egreso->nombre = $request->input('nombre');
+    //         $ingreso_egreso->descripcion = $request->input('descripcion');
+    //         $ingreso_egreso->monto = $request->input('monto');
+    //         $ingreso_egreso->tipo = $request->input('tipo');
+    //         $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+    //         $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
 
-            return response()->json($ingreso_egreso, 201);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
-    }
+    //         return response()->json($ingreso_egreso, 201);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['error' => $th->getMessage()], 500);
+    //     }
+    // }
 
     // ingreso o egreso de caja agricola
     public function createALLINEGCajaAG(Request $request)
@@ -1206,6 +1289,7 @@ class ingresos_egresosController extends Controller
             'monto' => 'required|numeric',
             'tipo' => 'required',
             'cuenta' => 'required',
+            'flujo_contable' => 'required|string|in:INGRESOS,EGRESOS', // Asegurarse de que el flujo contable sea válido
         ]);
 
         try {
@@ -1221,6 +1305,20 @@ class ingresos_egresosController extends Controller
              if ($cuenta->id_proyectos != 1) {
                  return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 1'], 400);
              }
+            
+            // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
+            // Usamos 'es_pendiente' o 0 por defecto si no se envía.
+            // Asegúrate que 'es_pendiente' se mande desde el frontend (0 o 1).
+            $esPendiente = (bool) $request->input('es_pendiente', 0);
+            $monto = (float) $request->input('monto');
+            $tipoTransaccion = strtoupper($request->input('flujo_contable')); // INGRESOS o EGRESOS
+
+            // >> 2. Usar la utilidad para calcular DEBE/HABER
+            $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
+                $monto, 
+                $tipoTransaccion, 
+                $esPendiente
+            );
 
             // Crear un nuevo registro en la tabla ingresos_egresos
             $ingreso_egreso = new ingresos_egresos();
@@ -1229,8 +1327,14 @@ class ingresos_egresosController extends Controller
             $ingreso_egreso->nombre = $request->input('nombre');
             $ingreso_egreso->descripcion = $request->input('descripcion');
             $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
+            $ingreso_egreso->tipo = $request->input('tipo'); // "caja"
             $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // >> 3. Asignar los valores de DEBE, HABER y Pendiente ANTES de guardar
+            $ingreso_egreso->monto_debe = $montosContables['monto_debe'];
+            $ingreso_egreso->monto_haber = $montosContables['monto_haber'];
+            $ingreso_egreso->es_pendiente = $montosContables['es_pendiente'];
+
             $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
 
             return response()->json($ingreso_egreso, 201);
@@ -1251,6 +1355,7 @@ class ingresos_egresosController extends Controller
             'monto' => 'required|numeric',
             'tipo' => 'required',
             'cuenta' => 'required',
+            'flujo_contable' => 'required|string|in:INGRESOS,EGRESOS', // Asegurarse de que el flujo contable sea válido
         ]);
 
         try {
@@ -1267,6 +1372,20 @@ class ingresos_egresosController extends Controller
                  return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 2'], 400);
              }
 
+            // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
+            // Usamos 'es_pendiente' o 0 por defecto si no se envía.
+            // Asegúrate que 'es_pendiente' se mande desde el frontend (0 o 1).
+            $esPendiente = (bool) $request->input('es_pendiente', 0);
+            $monto = (float) $request->input('monto');
+            $tipoTransaccion = strtoupper($request->input('flujo_contable')); // INGRESOS o EGRESOS
+
+            // >> 2. Usar la utilidad para calcular DEBE/HABER
+            $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
+                $monto, 
+                $tipoTransaccion, 
+                $esPendiente
+            );
+
             // Crear un nuevo registro en la tabla ingresos_egresos
             $ingreso_egreso = new ingresos_egresos();
             $ingreso_egreso->fecha = $request->input('fecha');
@@ -1274,8 +1393,14 @@ class ingresos_egresosController extends Controller
             $ingreso_egreso->nombre = $request->input('nombre');
             $ingreso_egreso->descripcion = $request->input('descripcion');
             $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
+            $ingreso_egreso->tipo = $request->input('tipo'); // "caja"
             $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // >> 3. Asignar los valores de DEBE, HABER y Pendiente ANTES de guardar
+            $ingreso_egreso->monto_debe = $montosContables['monto_debe'];
+            $ingreso_egreso->monto_haber = $montosContables['monto_haber'];
+            $ingreso_egreso->es_pendiente = $montosContables['es_pendiente'];
+
             $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
 
             return response()->json($ingreso_egreso, 201);
