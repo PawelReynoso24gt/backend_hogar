@@ -28,6 +28,42 @@ class ingresos_egresosController extends Controller
         }
     }
 
+    public function getTransaccionesPendientes(Request $request)
+    {
+        // 1. Validar y obtener los filtros
+        $request->validate([
+            'id_proyectos' => 'required|integer|in:1,2',
+            'id_clasificacion' => 'required|integer|in:1,2',
+        ]);
+        
+        $idProyecto = $request->input('id_proyectos');
+        $idClasificacion = $request->input('id_clasificacion');
+        
+        try {
+            $transaccionesPendientes = ingresos_egresos::where('es_pendiente', 1)
+                                                
+                                                // >>> FILTRO UNIFICADO POR CLASIFICACIÓN Y PROYECTO <<<
+                                                // Se quita la dependencia de nomenclatura ('IN%', 'EG%')
+                                                ->whereHas('cuentas', function ($query) use ($idProyecto, $idClasificacion) {
+                                                    $query->where('id_clasificacion', $idClasificacion) 
+                                                        ->where('id_proyectos', $idProyecto);
+                                                })
+                                                
+                                                ->with('cuentas') 
+                                                ->get();
+
+            if ($transaccionesPendientes->isEmpty()) {
+                $tipo = ($idClasificacion == 1) ? 'Ingresos' : 'Egresos';
+                return response()->json(['message' => 'No se encontraron registros de transacciones pendientes (Clasificación: ' . $tipo . ', Proyecto ID: ' . $idProyecto . ').'], 404);
+            }
+
+            return response()->json($transaccionesPendientes, 200);
+
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Error al obtener transacciones pendientes: ' . $th->getMessage()], 500);
+        }
+    }
+
     // reporte estado de resultados de capilla (solo EGRESOS) - POST only
     public function getReporteEstadoResultadosCA(Request $request)
     {

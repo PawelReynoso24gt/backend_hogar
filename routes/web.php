@@ -90,6 +90,10 @@ Route::prefix('cuentas')->group(function () {
 // Rutas de Ingresos y Egresos
 Route::prefix('in_eg')->group(function() {
     Route::get('/get', [ingresos_egresosController::class, 'get']);
+
+    // get de pendientes de ingreso y egresos
+    Route::get('/get/transacciones_pendientes', [ingresos_egresosController::class, 'getTransaccionesPendientes']);
+
     Route::get('/getWithCuenta', [ingresos_egresosController::class, 'getWithCuentas']);
     // cuentas a usar
     Route::get('/getAllCuentasIngresoAG', [ingresos_egresosController::class, 'getAllCuentasIngresoAG']);
