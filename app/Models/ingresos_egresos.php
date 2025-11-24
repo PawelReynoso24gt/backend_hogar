@@ -27,4 +27,4 @@ class ingresos_egresos extends Model
     {
         return $this->hasMany(datos_de_pago_egresos::class, 'id_ingresos_egresos');
     }
-}
+} 
