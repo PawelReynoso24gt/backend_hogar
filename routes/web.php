@@ -96,6 +96,10 @@ Route::prefix('in_eg')->group(function() {
     Route::get('/getAllCuentasEgresoAG', [ingresos_egresosController::class, 'getAllCuentasEgresoAG']);
     Route::get('/getAllCuentasIngresoCA', [ingresos_egresosController::class, 'getAllCuentasIngresoCA']);
     Route::get('/getAllCuentasEgresoCA', [ingresos_egresosController::class, 'getAllCuentasEgresoCA']);
+
+    // Ruta para la vista de la tabla de anticipo
+    Route::get('/tablaVistaAnticipoAG', [ingresos_egresosController::class, 'tablaVistaAnticipoAG']);
+    Route::get('/tablaVistaAnticipoCA', [ingresos_egresosController::class, 'tablaVistaAnticipoCA']);
     
     // Route::post('/create', [ingresos_egresosController::class, 'create']);
     //Route::post('/create', [ingresos_egresosController::class, 'create']);

@@ -19,12 +19,13 @@ use App\Utils\CuentasPorPagarCobrar;
 class ingresos_egresosController extends Controller
 {
     // Método Get
-    public function get(){
-        try{
+    public function get()
+    {
+        try {
             $data = ingresos_egresos::get();
             return response()->json($data, 200);
-        } catch (\Throwable $th){
-            return response()->json(['error' => $th ->getMessage()],500);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 
@@ -155,25 +156,33 @@ class ingresos_egresosController extends Controller
 
             // Calcular saldos iniciales (bancos y caja) hasta fechaAnterior — considerar ingresos y egresos previos
             $ingresosAnterioresBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->whereHas('cuentas', function ($q) {
+                    $q->where('id_proyectos', 2);
+                })
                 ->where('tipo', 'bancos')
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
             $egresosAnterioresBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->whereHas('cuentas', function ($q) {
+                    $q->where('id_proyectos', 2);
+                })
                 ->where('tipo', 'bancos')
                 ->where('nomenclatura', 'like', 'EG%')
                 ->sum('monto');
 
             $ingresosAnterioresCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->whereHas('cuentas', function ($q) {
+                    $q->where('id_proyectos', 2);
+                })
                 ->where('tipo', 'caja')
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
             $egresosAnterioresCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                ->whereHas('cuentas', function ($q) {
+                    $q->where('id_proyectos', 2);
+                })
                 ->where('tipo', 'caja')
                 ->where('nomenclatura', 'like', 'EG%')
                 ->sum('monto');
@@ -196,7 +205,9 @@ class ingresos_egresosController extends Controller
                 ]);
 
                 $countEg = ingresos_egresos::whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 2); })
+                    ->whereHas('cuentas', function ($q) {
+                        $q->where('id_proyectos', 2);
+                    })
                     ->where('nomenclatura', 'like', 'EG%')
                     ->count();
 
@@ -409,25 +420,33 @@ class ingresos_egresosController extends Controller
 
             // Calcular saldos iniciales (bancos y caja) hasta fechaAnterior — considerar ingresos y egresos previos
             $ingresosAnterioresBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 1); })
+                ->whereHas('cuentas', function ($q) {
+                    $q->where('id_proyectos', 1);
+                })
                 ->where('tipo', 'bancos')
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
             $egresosAnterioresBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 1); })
+                ->whereHas('cuentas', function ($q) {
+                    $q->where('id_proyectos', 1);
+                })
                 ->where('tipo', 'bancos')
                 ->where('nomenclatura', 'like', 'EG%')
                 ->sum('monto');
 
             $ingresosAnterioresCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 1); })
+                ->whereHas('cuentas', function ($q) {
+                    $q->where('id_proyectos', 1);
+                })
                 ->where('tipo', 'caja')
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
             $egresosAnterioresCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 1); })
+                ->whereHas('cuentas', function ($q) {
+                    $q->where('id_proyectos', 1);
+                })
                 ->where('tipo', 'caja')
                 ->where('nomenclatura', 'like', 'EG%')
                 ->sum('monto');
@@ -450,7 +469,9 @@ class ingresos_egresosController extends Controller
                 ]);
 
                 $countEg = ingresos_egresos::whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->whereHas('cuentas', function ($q) { $q->where('id_proyectos', 1); })
+                    ->whereHas('cuentas', function ($q) {
+                        $q->where('id_proyectos', 1);
+                    })
                     ->where('nomenclatura', 'like', 'EG%')
                     ->count();
 
@@ -556,7 +577,7 @@ class ingresos_egresosController extends Controller
                     'cuenta' => $ingreso_egreso->cuentas->cuenta
                 ];
             });
-            
+
             return response()->json($data, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
@@ -602,7 +623,8 @@ class ingresos_egresosController extends Controller
         }
     }
 
-    public function getAllCuentasEgreso(){
+    public function getAllCuentasEgreso()
+    {
         try {
             $data = cuentas::where('id_clasificacion', '2')->get();
             if ($data->isEmpty()) {
@@ -614,7 +636,8 @@ class ingresos_egresosController extends Controller
         }
     }
 
-    public function getAllCuentasIngreso(){
+    public function getAllCuentasIngreso()
+    {
         try {
             $data = cuentas::where('id_clasificacion', '1')->get();
             if ($data->isEmpty()) {
@@ -627,7 +650,8 @@ class ingresos_egresosController extends Controller
     }
 
     // get de cuentas de ingresos de proyecto agrícola
-    public function getAllCuentasIngresoAG() {
+    public function getAllCuentasIngresoAG()
+    {
         try {
             $data = cuentas::where('id_clasificacion', '1')
                 ->where('id_proyectos', '1')
@@ -640,15 +664,16 @@ class ingresos_egresosController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
-    }       
+    }
 
     // get de cuentas de egresos de proyecto agrícola
-    public function getAllCuentasEgresoAG(){
+    public function getAllCuentasEgresoAG()
+    {
         try {
             $data = cuentas::where('id_clasificacion', '2')
-            ->where('id_proyectos', '1')
-            ->whereNotIn('cuenta', ['Traslado a Bancos desde Caja', 'Traslado a Caja desde Bancos'])
-            ->get();
+                ->where('id_proyectos', '1')
+                ->whereNotIn('cuenta', ['Traslado a Bancos desde Caja', 'Traslado a Caja desde Bancos'])
+                ->get();
             if ($data->isEmpty()) {
                 return response()->json(['error' => 'No se encontraron cuentas de tipo Egreso'], 404);
             }
@@ -659,12 +684,13 @@ class ingresos_egresosController extends Controller
     }
 
     // get de cuentas de ingresos de proyecto capilla
-    public function getAllCuentasIngresoCA(){
+    public function getAllCuentasIngresoCA()
+    {
         try {
             $data = cuentas::where('id_clasificacion', '1')
-            ->where('id_proyectos', '2')
-            ->whereNotIn('cuenta', ['Traslado a Bancos desde Caja', 'Traslado a Caja desde Bancos'])
-            ->get();
+                ->where('id_proyectos', '2')
+                ->whereNotIn('cuenta', ['Traslado a Bancos desde Caja', 'Traslado a Caja desde Bancos'])
+                ->get();
             if ($data->isEmpty()) {
                 return response()->json(['error' => 'No se encontraron cuentas de tipo Egreso'], 404);
             }
@@ -675,12 +701,13 @@ class ingresos_egresosController extends Controller
     }
 
     // get de cuentas de egresos de proyecto capilla
-    public function getAllCuentasEgresoCA(){
+    public function getAllCuentasEgresoCA()
+    {
         try {
             $data = cuentas::where('id_clasificacion', '2')
-            ->where('id_proyectos', '2')
-            ->whereNotIn('cuenta', ['Traslado a Bancos desde Caja', 'Traslado a Caja desde Bancos'])
-            ->get();
+                ->where('id_proyectos', '2')
+                ->whereNotIn('cuenta', ['Traslado a Bancos desde Caja', 'Traslado a Caja desde Bancos'])
+                ->get();
             if ($data->isEmpty()) {
                 return response()->json(['error' => 'No se encontraron cuentas de tipo Egreso'], 404);
             }
@@ -690,15 +717,16 @@ class ingresos_egresosController extends Controller
         }
     }
 
-    public function getByNombreBanco(){
-        try{
+    public function getByNombreBanco()
+    {
+        try {
             $data = cuentas_bancarias::get();
             return response()->json($data, 200);
-            } catch (\Throwable $th){
-                return response()->json(['error' => $th ->getMessage()],500);
-            }
-       }
-    
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
 
     // Método update con nombres de cuentas
     public function update(Request $request, $nomenclatura)
@@ -706,7 +734,7 @@ class ingresos_egresosController extends Controller
         try {
             // Buscar el ingreso/egreso por su nomenclatura
             $ingreso_egreso = ingresos_egresos::where('nomenclatura', $nomenclatura)->first();
-            
+
             // Verificar si el ingreso/egreso existe
             if (!$ingreso_egreso) {
                 return response()->json(['error' => 'El ingreso/egreso no existe'], 404);
@@ -761,12 +789,13 @@ class ingresos_egresosController extends Controller
     // INGRESOS Y EGRESOS DE BANCOS
 
     // Método get
-    public function getDatosIngresoBancos(){
-        try{
+    public function getDatosIngresoBancos()
+    {
+        try {
             $data = datos_de_pago_ingresos::get();
             return response()->json($data, 200);
-        } catch (\Throwable $th){
-            return response()->json(['error' => $th ->getMessage()],500);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 
@@ -795,7 +824,7 @@ class ingresos_egresosController extends Controller
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-    
+
     // public function getWithDatosINGB()
     // {
     //     try {
@@ -965,8 +994,8 @@ class ingresos_egresosController extends Controller
 
             // >> 2. Usar la utilidad para calcular DEBE/HABER
             $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
-                $monto, 
-                $tipoTransaccion, 
+                $monto,
+                $tipoTransaccion,
                 $esPendiente
             );
 
@@ -1042,8 +1071,8 @@ class ingresos_egresosController extends Controller
 
             // >> 2. Usar la utilidad para calcular DEBE/HABER
             $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
-                $monto, 
-                $tipoTransaccion, 
+                $monto,
+                $tipoTransaccion,
                 $esPendiente
             );
 
@@ -1084,31 +1113,31 @@ class ingresos_egresosController extends Controller
         }
     }
 
-     // ingresos de proyecto capilla (bancos)
+    // ingresos de proyecto capilla (bancos)
 
-     public function createALLINCA(Request $request)
-     {
-         try {
-             // Buscar la cuenta por su nombre
-             $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->where('id_proyectos', 2)->first();
- 
-             // Si la cuenta no se encuentra, devolver un error
-             if (!$cuenta) {
-                 return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-             }
- 
-             // Verificar si la cuenta pertenece al id_proyectos 2
-             if ($cuenta->id_proyectos != 2) {
-                 return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 2'], 400);
-             }
- 
-             // Buscar la cuenta bancaria por su número
-             $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
- 
-             // Si la cuenta bancaria no se encuentra, devolver un error
-             if (!$cuenta_bancaria) {
-                 return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
-             }
+    public function createALLINCA(Request $request)
+    {
+        try {
+            // Buscar la cuenta por su nombre
+            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->where('id_proyectos', 2)->first();
+
+            // Si la cuenta no se encuentra, devolver un error
+            if (!$cuenta) {
+                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
+            }
+
+            // Verificar si la cuenta pertenece al id_proyectos 2
+            if ($cuenta->id_proyectos != 2) {
+                return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 2'], 400);
+            }
+
+            // Buscar la cuenta bancaria por su número
+            $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
+
+            // Si la cuenta bancaria no se encuentra, devolver un error
+            if (!$cuenta_bancaria) {
+                return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
+            }
 
             // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
             // Usamos 'es_pendiente' o 0 por defecto si no se envía.
@@ -1119,73 +1148,73 @@ class ingresos_egresosController extends Controller
 
             // >> 2. Usar la utilidad para calcular DEBE/HABER
             $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
-                $monto, 
-                $tipoTransaccion, 
+                $monto,
+                $tipoTransaccion,
                 $esPendiente
             );
- 
-             // Crear un nuevo registro en la tabla ingresos_egresos
-             $ingreso_egreso = new ingresos_egresos();
-             $ingreso_egreso->fecha = $request->input('fecha');
-             $ingreso_egreso->identificacion = $request->input('identificacion');
-             $ingreso_egreso->nombre = $request->input('nombre');
-             $ingreso_egreso->descripcion = $request->input('descripcion');
-             $ingreso_egreso->monto = $request->input('monto');
-             $ingreso_egreso->tipo = $request->input('tipo'); // "bancos"
-             $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // Crear un nuevo registro en la tabla ingresos_egresos
+            $ingreso_egreso = new ingresos_egresos();
+            $ingreso_egreso->fecha = $request->input('fecha');
+            $ingreso_egreso->identificacion = $request->input('identificacion');
+            $ingreso_egreso->nombre = $request->input('nombre');
+            $ingreso_egreso->descripcion = $request->input('descripcion');
+            $ingreso_egreso->monto = $request->input('monto');
+            $ingreso_egreso->tipo = $request->input('tipo'); // "bancos"
+            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
 
             // >> 3. Asignar los valores de DEBE, HABER y Pendiente ANTES de guardar
             $ingreso_egreso->monto_debe = $montosContables['monto_debe'];
             $ingreso_egreso->monto_haber = $montosContables['monto_haber'];
             $ingreso_egreso->es_pendiente = $montosContables['es_pendiente'];
 
-             $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
- 
-             // Obtener el id del ingreso/egreso recién creado
-             $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
- 
-             // Crear un nuevo registro en la tabla datos_de_pago_ingresos
-             $datos_pago = new datos_de_pago_ingresos();
-             $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
-             $datos_pago->documento = $request->input('documento');
-             $datos_pago->numero_documento = $request->input('numero_documento');
-             $datos_pago->fecha_emision = $request->input('fecha_emision');
-             // Asociar la cuenta bancaria
-             $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-             // Llenar los otros campos según el request
-             $datos_pago->save();
- 
-             return response()->json($ingreso_egreso, 201);
-         } catch (\Throwable $th) {
-             return response()->json(['error' => $th->getMessage()], 500);
-         }
-     }
- 
-     // egresos de proyecto capilla (bancos)
- 
-     public function createALLEGCA(Request $request)
-     {
-         try {
-             // Buscar la cuenta por su nombre
-             $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->where('id_proyectos', 2)->first();
- 
-             // Si la cuenta no se encuentra, devolver un error
-             if (!$cuenta) {
-                 return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-             }
- 
-             // Verificar si la cuenta pertenece al id_proyectos 2
-             if ($cuenta->id_proyectos != 2) {
-                 return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 2'], 400);
-             }
- 
-             // Buscar la cuenta bancaria por su número
-             $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
- 
-             // Si la cuenta bancaria no se encuentra, devolver un error
-             if (!$cuenta_bancaria) {
-                 return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
-             }
+            $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
+
+            // Obtener el id del ingreso/egreso recién creado
+            $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+
+            // Crear un nuevo registro en la tabla datos_de_pago_ingresos
+            $datos_pago = new datos_de_pago_ingresos();
+            $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
+            $datos_pago->documento = $request->input('documento');
+            $datos_pago->numero_documento = $request->input('numero_documento');
+            $datos_pago->fecha_emision = $request->input('fecha_emision');
+            // Asociar la cuenta bancaria
+            $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+            // Llenar los otros campos según el request
+            $datos_pago->save();
+
+            return response()->json($ingreso_egreso, 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // egresos de proyecto capilla (bancos)
+
+    public function createALLEGCA(Request $request)
+    {
+        try {
+            // Buscar la cuenta por su nombre
+            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->where('id_proyectos', 2)->first();
+
+            // Si la cuenta no se encuentra, devolver un error
+            if (!$cuenta) {
+                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
+            }
+
+            // Verificar si la cuenta pertenece al id_proyectos 2
+            if ($cuenta->id_proyectos != 2) {
+                return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 2'], 400);
+            }
+
+            // Buscar la cuenta bancaria por su número
+            $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
+
+            // Si la cuenta bancaria no se encuentra, devolver un error
+            if (!$cuenta_bancaria) {
+                return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
+            }
 
             // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
             // Usamos 'es_pendiente' o 0 por defecto si no se envía.
@@ -1196,48 +1225,48 @@ class ingresos_egresosController extends Controller
 
             // >> 2. Usar la utilidad para calcular DEBE/HABER
             $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
-                $monto, 
-                $tipoTransaccion, 
+                $monto,
+                $tipoTransaccion,
                 $esPendiente
             );
- 
-             // Crear un nuevo registro en la tabla ingresos_egresos
-             $ingreso_egreso = new ingresos_egresos();
-             $ingreso_egreso->fecha = $request->input('fecha');
-             $ingreso_egreso->identificacion = $request->input('identificacion');
-             $ingreso_egreso->nombre = $request->input('nombre');
-             $ingreso_egreso->descripcion = $request->input('descripcion');
-             $ingreso_egreso->monto = $request->input('monto');
-             $ingreso_egreso->tipo = $request->input('tipo'); // "bancos"
-             $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+            // Crear un nuevo registro en la tabla ingresos_egresos
+            $ingreso_egreso = new ingresos_egresos();
+            $ingreso_egreso->fecha = $request->input('fecha');
+            $ingreso_egreso->identificacion = $request->input('identificacion');
+            $ingreso_egreso->nombre = $request->input('nombre');
+            $ingreso_egreso->descripcion = $request->input('descripcion');
+            $ingreso_egreso->monto = $request->input('monto');
+            $ingreso_egreso->tipo = $request->input('tipo'); // "bancos"
+            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
 
             // >> 3. Asignar los valores de DEBE, HABER y Pendiente ANTES de guardar
             $ingreso_egreso->monto_debe = $montosContables['monto_debe'];
             $ingreso_egreso->monto_haber = $montosContables['monto_haber'];
             $ingreso_egreso->es_pendiente = $montosContables['es_pendiente'];
 
-             $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
- 
-             // Obtener el id del ingreso/egreso recién creado
-             $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
- 
-             // Crear un nuevo registro en la tabla datos_de_pago_ingresos
-             $datos_pago = new datos_de_pago_egresos();
-             $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
-             $datos_pago->documento = $request->input('documento');
-             $datos_pago->numero_documento = $request->input('numero_documento');
-             $datos_pago->fecha_emision = $request->input('fecha_emision');
-             // Asociar la cuenta bancaria
-             $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-             // Llenar los otros campos según el request
-             $datos_pago->save();
- 
-             return response()->json($ingreso_egreso, 201);
-         } catch (\Throwable $th) {
-             return response()->json(['error' => $th->getMessage()], 500);
-         }
-     }
-    
+            $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
+
+            // Obtener el id del ingreso/egreso recién creado
+            $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+
+            // Crear un nuevo registro en la tabla datos_de_pago_ingresos
+            $datos_pago = new datos_de_pago_egresos();
+            $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
+            $datos_pago->documento = $request->input('documento');
+            $datos_pago->numero_documento = $request->input('numero_documento');
+            $datos_pago->fecha_emision = $request->input('fecha_emision');
+            // Asociar la cuenta bancaria
+            $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+            // Llenar los otros campos según el request
+            $datos_pago->save();
+
+            return response()->json($ingreso_egreso, 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
     // public function createALLINEGCaja(Request $request) // la neta no recuerdo de que era este
     // {
     //     // Validar los datos de entrada
@@ -1302,10 +1331,10 @@ class ingresos_egresosController extends Controller
             }
 
             // Verificar si la cuenta pertenece al id_proyectos 1
-             if ($cuenta->id_proyectos != 1) {
-                 return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 1'], 400);
-             }
-            
+            if ($cuenta->id_proyectos != 1) {
+                return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 1'], 400);
+            }
+
             // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
             // Usamos 'es_pendiente' o 0 por defecto si no se envía.
             // Asegúrate que 'es_pendiente' se mande desde el frontend (0 o 1).
@@ -1315,8 +1344,8 @@ class ingresos_egresosController extends Controller
 
             // >> 2. Usar la utilidad para calcular DEBE/HABER
             $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
-                $monto, 
-                $tipoTransaccion, 
+                $monto,
+                $tipoTransaccion,
                 $esPendiente
             );
 
@@ -1368,9 +1397,9 @@ class ingresos_egresosController extends Controller
             }
 
             // Verificar si la cuenta pertenece al id_proyectos 2
-             if ($cuenta->id_proyectos != 2) {
-                 return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 2'], 400);
-             }
+            if ($cuenta->id_proyectos != 2) {
+                return response()->json(['error' => 'La cuenta no pertenece al proyecto con id 2'], 400);
+            }
 
             // >> 1. Capturar el estado pendiente del request (se asume que viene en el request)
             // Usamos 'es_pendiente' o 0 por defecto si no se envía.
@@ -1381,8 +1410,8 @@ class ingresos_egresosController extends Controller
 
             // >> 2. Usar la utilidad para calcular DEBE/HABER
             $montosContables = CuentasPorPagarCobrar::prepararMontosContables(
-                $monto, 
-                $tipoTransaccion, 
+                $monto,
+                $tipoTransaccion,
                 $esPendiente
             );
 
@@ -1556,7 +1585,7 @@ class ingresos_egresosController extends Controller
             $ingreso->tipo = 'caja';
             $ingreso->id_cuentas = $cuentaINGRESO->id_cuentas;
             $ingreso->save(); // Guardar el ingreso/egreso primero
-          
+
             return response()->json($ingreso, 201);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
@@ -1708,7 +1737,7 @@ class ingresos_egresosController extends Controller
             $ingreso->tipo = 'caja';
             $ingreso->id_cuentas = $cuentaINGRESO->id_cuentas;
             $ingreso->save(); // Guardar el ingreso/egreso primero
-          
+
             return response()->json($ingreso, 201);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
@@ -1735,16 +1764,16 @@ class ingresos_egresosController extends Controller
 
             // Obtener el saldo inicial hasta la fecha anterior
             $ingresosAnteriores = ingresos_egresos::whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 1);
-                })
+                $query->where('id_proyectos', 1);
+            })
                 ->where('tipo', 'caja')
                 ->where('fecha', '<', $fechaInicial)
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
             $egresosAnteriores = ingresos_egresos::whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 1);
-                })
+                $query->where('id_proyectos', 1);
+            })
                 ->where('tipo', 'caja')
                 ->where('fecha', '<', $fechaInicial)
                 ->where('nomenclatura', 'like', 'EG%')
@@ -1961,7 +1990,7 @@ class ingresos_egresosController extends Controller
         }
     }
 
-        
+
     //Informe Libro Diario Agricola
     // Informe Libro Diario Agricola
     public function getWithCuentasLibroDiario(Request $request)
@@ -2107,16 +2136,16 @@ class ingresos_egresosController extends Controller
 
             // Obtener el saldo inicial hasta la fecha anterior
             $ingresosAnteriores = ingresos_egresos::whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 2); // proyecto capilla
-                })
+                $query->where('id_proyectos', 2); // proyecto capilla
+            })
                 ->where('tipo', 'caja')
                 ->where('fecha', '<', $fechaInicial)
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
             $egresosAnteriores = ingresos_egresos::whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 2); // proyecto capilla
-                })
+                $query->where('id_proyectos', 2); // proyecto capilla
+            })
                 ->where('tipo', 'caja')
                 ->where('fecha', '<', $fechaInicial)
                 ->where('nomenclatura', 'like', 'EG%')
@@ -2474,8 +2503,7 @@ class ingresos_egresosController extends Controller
         $responsable = $validaciondata['responsable'];
         $economa = $validaciondata['economa'];
 
-        if ($tipo == 'mensual')
-        {
+        if ($tipo == 'mensual') {
             // Obtener el año actual
             $añoActual = Carbon::now()->year;
 
@@ -2484,54 +2512,54 @@ class ingresos_egresosController extends Controller
             $fechaFinal = null;
 
             // Opciones de meses y asignación de fechas
-            switch($mes) {
+            switch ($mes) {
                 case 'enero':
-                    $fechaInicial = Carbon::createFromDate($añoActual-1, 12, 31);
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
                     $fechaFinal = Carbon::createFromDate($añoActual, 1, 31);
                     // Calcular la fecha anterior a la fechaInicial
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -2539,78 +2567,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para caja
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -2645,45 +2673,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -2691,78 +2719,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -2797,45 +2825,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -2843,78 +2871,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -2949,45 +2977,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -2995,78 +3023,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para caja
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -3102,121 +3130,121 @@ class ingresos_egresosController extends Controller
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
                     $saldoInicial = $saldoInicialBancos + $saldoInicialCaja;
 
-                
+
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para caja
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
@@ -3246,7 +3274,7 @@ class ingresos_egresosController extends Controller
                     $saldoFinalsuma = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
                     $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
                     $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
- 
+
                     break;
 
                 case 'junio':
@@ -3257,45 +3285,45 @@ class ingresos_egresosController extends Controller
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -3303,78 +3331,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -3409,45 +3437,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -3455,78 +3483,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -3561,45 +3589,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -3607,78 +3635,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -3713,45 +3741,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -3759,78 +3787,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -3865,45 +3893,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -3911,78 +3939,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -4017,45 +4045,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -4063,78 +4091,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para caja
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -4169,45 +4197,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -4215,78 +4243,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para caja
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -4344,65 +4372,64 @@ class ingresos_egresosController extends Controller
                 'contador' => $contador,
                 'economa' => $economa
             ]);
-        } 
-        if ($tipo == 'trimestral')
-        {
-                // Obtener el año actual
-                $añoActual = Carbon::now()->year;
+        }
+        if ($tipo == 'trimestral') {
+            // Obtener el año actual
+            $añoActual = Carbon::now()->year;
 
-                // Inicializar las variables de fecha
-                $fechaInicial = null;
-                $fechaFinal = null;
- 
-                switch($mes){
-                    
+            // Inicializar las variables de fecha
+            $fechaInicial = null;
+            $fechaFinal = null;
+
+            switch ($mes) {
+
                 case 'enero':
-                    $fechaInicial = Carbon::createFromDate($añoActual-1, 12, 31);
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
                     $fechaFinal = Carbon::createFromDate($añoActual, 3, 31);
                     // Calcular la fecha anterior a la fechaInicial
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -4410,78 +4437,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -4516,45 +4543,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -4562,78 +4589,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -4668,45 +4695,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -4714,78 +4741,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -4821,45 +4848,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -4867,78 +4894,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para caja
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -4966,96 +4993,95 @@ class ingresos_egresosController extends Controller
                     $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
 
                     break;
-                    
-                 default:
+
+                default:
                     return response()->json(['error' => 'Mes inválido'], 400);
-                 
-                }
- 
-                return response()->json([
-                    'fecha_anterior' => $fechaAnterior,
-                    'mes' => $mes,
-                    'fecha_inicial' => $fechaInicial->toDateString(),
-                    'fecha_final' => $fechaFinal->toDateString(),
-                    'saldo_inicial_bancos' => $saldoInicialBancos,
-                    'saldo_inicial_caja' => $saldoInicialCaja,
-                    'saldo_inicial' => $saldoInicial,
-                    'total_ingresos_caja' => $totalIngresosCaja,
-                    'total_egresos_caja' => $totalEgresosCaja,
-                    'total_ingresos_bancos' => $totalIngresosBancos,
-                    'total_egresos_bancos' => $totalEgresosBancos,
-                    'total_general_ingresos' => $totalGeneralIngresos,
-                    'total_general_egresos' => $totalGeneralEgresos,
-                    'data_caja' => $dataGroupedCaja,
-                    'data_bancos' => $dataGroupedBancos,
-                    'total_saldo_final' => $saldoFinal,
-                    //'total_saldo_final2' => $saldoFinalsuma,
-                    'total_saldo_final_caja' => $saldoFinalCaja,
-                    'total_saldo_final_bancos' => $saldoFinalBancos,
-                    'responsable' => $responsable,
-                    'contador' => $contador,
-                    'economa' => $economa
-                ]);
+
+            }
+
+            return response()->json([
+                'fecha_anterior' => $fechaAnterior,
+                'mes' => $mes,
+                'fecha_inicial' => $fechaInicial->toDateString(),
+                'fecha_final' => $fechaFinal->toDateString(),
+                'saldo_inicial_bancos' => $saldoInicialBancos,
+                'saldo_inicial_caja' => $saldoInicialCaja,
+                'saldo_inicial' => $saldoInicial,
+                'total_ingresos_caja' => $totalIngresosCaja,
+                'total_egresos_caja' => $totalEgresosCaja,
+                'total_ingresos_bancos' => $totalIngresosBancos,
+                'total_egresos_bancos' => $totalEgresosBancos,
+                'total_general_ingresos' => $totalGeneralIngresos,
+                'total_general_egresos' => $totalGeneralEgresos,
+                'data_caja' => $dataGroupedCaja,
+                'data_bancos' => $dataGroupedBancos,
+                'total_saldo_final' => $saldoFinal,
+                //'total_saldo_final2' => $saldoFinalsuma,
+                'total_saldo_final_caja' => $saldoFinalCaja,
+                'total_saldo_final_bancos' => $saldoFinalBancos,
+                'responsable' => $responsable,
+                'contador' => $contador,
+                'economa' => $economa
+            ]);
 
         }
-        if ($tipo == 'semestral')
-        {
-                // Obtener el año actual
-                $añoActual = Carbon::now()->year;
+        if ($tipo == 'semestral') {
+            // Obtener el año actual
+            $añoActual = Carbon::now()->year;
 
-                // Inicializar las variables de fecha
-                $fechaInicial = null;
-                $fechaFinal = null;
- 
-                switch($mes){
-                    
+            // Inicializar las variables de fecha
+            $fechaInicial = null;
+            $fechaFinal = null;
+
+            switch ($mes) {
+
                 case 'enero':
-                    $fechaInicial = Carbon::createFromDate($añoActual-1, 12, 31);
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
                     $fechaFinal = Carbon::createFromDate($añoActual, 6, 30);
                     // Calcular la fecha anterior a la fechaInicial
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -5063,78 +5089,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para caja
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -5169,45 +5195,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -5215,78 +5241,78 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
-                     // Agrupar y sumar montos por cuenta para caja
-                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
-                    })->filter()->values(); 
+                    })->filter()->values();
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 1);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta para bancos
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         // Solo incluir cuentas con ingresos o egresos distintos de cero
                         if ($ingresos > 0 || $egresos > 0) {
                             $result = [
                                 'cuenta' => $group->first()->cuentas->cuenta
                             ];
-                            
+
                             if ($ingresos > 0) {
                                 $result['ingresos'] = number_format($ingresos, 2);
                             }
-                            
+
                             if ($egresos > 0) {
                                 $result['egresos'] = number_format($egresos, 2);
                             }
-                            
+
                             return $result;
                         }
                     })->filter()->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -5315,37 +5341,36 @@ class ingresos_egresosController extends Controller
 
                     break;
 
-                    default:
+                default:
                     return response()->json(['error' => 'Mes inválido'], 400);
-             }
- 
-                return response()->json([
-                    'fecha_anterior' => $fechaAnterior,
-                    'mes' => $mes,
-                    'fecha_inicial' => $fechaInicial->toDateString(),
-                    'fecha_final' => $fechaFinal->toDateString(),
-                    'saldo_inicial_bancos' => $saldoInicialBancos,
-                    'saldo_inicial_caja' => $saldoInicialCaja,
-                    'saldo_inicial' => $saldoInicial,
-                    'total_ingresos_caja' => $totalIngresosCaja,
-                    'total_egresos_caja' => $totalEgresosCaja,
-                    'total_ingresos_bancos' => $totalIngresosBancos,
-                    'total_egresos_bancos' => $totalEgresosBancos,
-                    'total_general_ingresos' => $totalGeneralIngresos,
-                    'total_general_egresos' => $totalGeneralEgresos,
-                    'data_caja' => $dataGroupedCaja,
-                    'data_bancos' => $dataGroupedBancos,
-                    'total_saldo_final' => $saldoFinal,
-                    //'total_saldo_final2' => $saldoFinalsuma,
-                    'total_saldo_final_caja' => $saldoFinalCaja,
-                    'total_saldo_final_bancos' => $saldoFinalBancos,
-                    'responsable' => $responsable,
-                    'contador' => $contador,
-                    'economa' => $economa
-                ]);
+            }
+
+            return response()->json([
+                'fecha_anterior' => $fechaAnterior,
+                'mes' => $mes,
+                'fecha_inicial' => $fechaInicial->toDateString(),
+                'fecha_final' => $fechaFinal->toDateString(),
+                'saldo_inicial_bancos' => $saldoInicialBancos,
+                'saldo_inicial_caja' => $saldoInicialCaja,
+                'saldo_inicial' => $saldoInicial,
+                'total_ingresos_caja' => $totalIngresosCaja,
+                'total_egresos_caja' => $totalEgresosCaja,
+                'total_ingresos_bancos' => $totalIngresosBancos,
+                'total_egresos_bancos' => $totalEgresosBancos,
+                'total_general_ingresos' => $totalGeneralIngresos,
+                'total_general_egresos' => $totalGeneralEgresos,
+                'data_caja' => $dataGroupedCaja,
+                'data_bancos' => $dataGroupedBancos,
+                'total_saldo_final' => $saldoFinal,
+                //'total_saldo_final2' => $saldoFinalsuma,
+                'total_saldo_final_caja' => $saldoFinalCaja,
+                'total_saldo_final_bancos' => $saldoFinalBancos,
+                'responsable' => $responsable,
+                'contador' => $contador,
+                'economa' => $economa
+            ]);
         }
-        if ($tipo = 'anual')
-        {
+        if ($tipo = 'anual') {
             // Obtener el año actual
             $añoActual = Carbon::now()->year;
 
@@ -5353,164 +5378,164 @@ class ingresos_egresosController extends Controller
             $fechaInicial = null;
             $fechaFinal = null;
 
-            switch($mes){
-                
-            case 'enero':
-                $fechaInicial = Carbon::createFromDate($añoActual-1, 12, 31);
-                $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
-                // Calcular la fecha anterior a la fechaInicial
-                $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
+            switch ($mes) {
 
-                // Obtener el saldo inicial hasta la fecha anterior
-                $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 1);
-                })
-                ->where(function ($query) {
-                    $query->where('tipo', 'bancos');
-                })
-                ->where('nomenclatura', 'like', 'IN%')
-                ->sum('monto');
+                case 'enero':
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
+                    $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
+                    // Calcular la fecha anterior a la fechaInicial
+                    $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
 
-                $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 1);
-                })
-                ->where(function ($query) {
-                    $query->where('tipo', 'bancos');
-                })
-                ->where('nomenclatura', 'like', 'EG%')
-                ->sum('monto');
+                    // Obtener el saldo inicial hasta la fecha anterior
+                    $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
-                // Obtener el saldo inicial hasta la fecha anterior
-                $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 1);
-                })
-                ->where(function ($query) {
-                    $query->where('tipo', 'Caja');
-                })
-                ->where('nomenclatura', 'like', 'IN%')
-                ->sum('monto');
+                    $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
-                $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 1);
-                })
-                ->where(function ($query) {
-                    $query->where('tipo', 'caja');
-                })
-                ->where('nomenclatura', 'like', 'EG%')
-                ->sum('monto');
+                    // Obtener el saldo inicial hasta la fecha anterior
+                    $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
-                $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
-                $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
-                $saldoInicial = $saldoInicialBancos + $saldoInicialCaja;
+                    $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
-                // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
-                $dataCaja = ingresos_egresos::with('cuentas')
-                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                ->where('tipo', 'caja')
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 1);
-                })
-                ->get();
-                // Agrupar y sumar montos por cuenta para caja
-                $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
-                    $ingresos = $group->filter(function ($item) {
+                    $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
+                    $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
+                    $saldoInicial = $saldoInicialBancos + $saldoInicialCaja;
+
+                    // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
+                    $dataCaja = ingresos_egresos::with('cuentas')
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
+                    // Agrupar y sumar montos por cuenta para caja
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                        $ingresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'IN') === 0;
+                        })->sum('monto');
+
+                        $egresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'EG') === 0;
+                        })->sum('monto');
+
+                        // Solo incluir cuentas con ingresos o egresos distintos de cero
+                        if ($ingresos > 0 || $egresos > 0) {
+                            $result = [
+                                'cuenta' => $group->first()->cuentas->cuenta
+                            ];
+
+                            if ($ingresos > 0) {
+                                $result['ingresos'] = number_format($ingresos, 2);
+                            }
+
+                            if ($egresos > 0) {
+                                $result['egresos'] = number_format($egresos, 2);
+                            }
+
+                            return $result;
+                        }
+                    })->filter()->values();
+                    // datos de bancos
+                    // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
+                    $dataBancos = ingresos_egresos::with('cuentas')
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 1);
+                        })
+                        ->get();
+
+                    // Agrupar y sumar montos por cuenta para bancos
+                    $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
+                        $ingresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'IN') === 0;
+                        })->sum('monto');
+
+                        $egresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'EG') === 0;
+                        })->sum('monto');
+
+                        // Solo incluir cuentas con ingresos o egresos distintos de cero
+                        if ($ingresos > 0 || $egresos > 0) {
+                            $result = [
+                                'cuenta' => $group->first()->cuentas->cuenta
+                            ];
+
+                            if ($ingresos > 0) {
+                                $result['ingresos'] = number_format($ingresos, 2);
+                            }
+
+                            if ($egresos > 0) {
+                                $result['egresos'] = number_format($egresos, 2);
+                            }
+
+                            return $result;
+                        }
+                    })->filter()->values();
+
+                    // Calcular totales
+                    $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
                     })->sum('monto');
-                    
-                    $egresos = $group->filter(function ($item) {
+
+                    $totalEgresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'EG') === 0;
                     })->sum('monto');
-                    
-                    // Solo incluir cuentas con ingresos o egresos distintos de cero
-                    if ($ingresos > 0 || $egresos > 0) {
-                        $result = [
-                            'cuenta' => $group->first()->cuentas->cuenta
-                        ];
-                        
-                        if ($ingresos > 0) {
-                            $result['ingresos'] = number_format($ingresos, 2);
-                        }
-                        
-                        if ($egresos > 0) {
-                            $result['egresos'] = number_format($egresos, 2);
-                        }
-                        
-                        return $result;
-                    }
-                })->filter()->values(); 
-                // datos de bancos
-                // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
-                $dataBancos = ingresos_egresos::with('cuentas')
-                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                ->where('tipo', 'bancos')
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 1);
-                })
-                ->get();
 
-                // Agrupar y sumar montos por cuenta para bancos
-                $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
-                    $ingresos = $group->filter(function ($item) {
+                    $totalIngresosBancos = $dataBancos->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
                     })->sum('monto');
-                    
-                    $egresos = $group->filter(function ($item) {
+
+                    $totalEgresosBancos = $dataBancos->filter(function ($item) {
                         return strpos($item->nomenclatura, 'EG') === 0;
                     })->sum('monto');
-                    
-                    // Solo incluir cuentas con ingresos o egresos distintos de cero
-                    if ($ingresos > 0 || $egresos > 0) {
-                        $result = [
-                            'cuenta' => $group->first()->cuentas->cuenta
-                        ];
-                        
-                        if ($ingresos > 0) {
-                            $result['ingresos'] = number_format($ingresos, 2);
-                        }
-                        
-                        if ($egresos > 0) {
-                            $result['egresos'] = number_format($egresos, 2);
-                        }
-                        
-                        return $result;
-                    }
-                })->filter()->values();
-                
-                // Calcular totales
-                $totalIngresosCaja = $dataCaja->filter(function ($item) {
-                    return strpos($item->nomenclatura, 'IN') === 0;
-                })->sum('monto');
 
-                $totalEgresosCaja = $dataCaja->filter(function ($item) {
-                    return strpos($item->nomenclatura, 'EG') === 0;
-                })->sum('monto');
+                    $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
+                    $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
 
-                $totalIngresosBancos = $dataBancos->filter(function ($item) {
-                    return strpos($item->nomenclatura, 'IN') === 0;
-                })->sum('monto');
+                    //saldo final
+                    $saldoFinal = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
+                    $saldoFinalsuma = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
+                    $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
+                    $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
 
-                $totalEgresosBancos = $dataBancos->filter(function ($item) {
-                    return strpos($item->nomenclatura, 'EG') === 0;
-                })->sum('monto');
-
-                $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
-                $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
-
-                //saldo final
-                $saldoFinal = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
-                $saldoFinalsuma = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
-                $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
-                $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
-
-                break;
+                    break;
 
                 default:
-                return response()->json(['error' => 'Mes inválido'], 400);
-         }
+                    return response()->json(['error' => 'Mes inválido'], 400);
+            }
 
             return response()->json([
                 'fecha_anterior' => $fechaAnterior,
@@ -5536,13 +5561,13 @@ class ingresos_egresosController extends Controller
                 'economa' => $economa
             ]);
 
-        }else {
+        } else {
             return response()->json(['error' => 'Tipo inválido'], 400);
         }
     }
 
     // reporte final d capilla
-    
+
     public function getReporteFinalCA(Request $request)
     {
         // Validar las fechas de entrada
@@ -5560,8 +5585,7 @@ class ingresos_egresosController extends Controller
         $responsable = $validaciondata['responsable'];
         $economa = $validaciondata['economa'];
 
-        if ($tipo == 'mensual')
-        {
+        if ($tipo == 'mensual') {
             // Obtener el año actual
             $añoActual = Carbon::now()->year;
 
@@ -5570,54 +5594,54 @@ class ingresos_egresosController extends Controller
             $fechaFinal = null;
 
             // Opciones de meses y asignación de fechas
-            switch($mes) {
+            switch ($mes) {
                 case 'enero':
-                    $fechaInicial = Carbon::createFromDate($añoActual-1, 12, 31);
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
                     $fechaFinal = Carbon::createFromDate($añoActual, 1, 31);
                     // Calcular la fecha anterior a la fechaInicial
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -5625,23 +5649,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -5650,33 +5674,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -5711,45 +5735,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -5757,23 +5781,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -5782,33 +5806,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -5843,45 +5867,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -5889,23 +5913,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -5914,33 +5938,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -5975,45 +5999,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -6021,23 +6045,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6046,33 +6070,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -6108,70 +6132,70 @@ class ingresos_egresosController extends Controller
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
                     $saldoInicial = $saldoInicialBancos + $saldoInicialCaja;
 
-                
+
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6182,23 +6206,23 @@ class ingresos_egresosController extends Controller
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6231,7 +6255,7 @@ class ingresos_egresosController extends Controller
                     $saldoFinalsuma = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
                     $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
                     $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
- 
+
                     break;
 
                 case 'junio':
@@ -6242,45 +6266,45 @@ class ingresos_egresosController extends Controller
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -6288,23 +6312,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6313,33 +6337,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -6374,45 +6398,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -6420,23 +6444,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6445,33 +6469,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -6506,45 +6530,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -6552,23 +6576,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6577,33 +6601,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -6638,45 +6662,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -6684,23 +6708,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6709,33 +6733,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -6770,45 +6794,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -6816,23 +6840,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6841,33 +6865,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -6902,45 +6926,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -6948,23 +6972,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -6973,33 +6997,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -7034,45 +7058,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -7080,23 +7104,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -7105,33 +7129,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -7189,65 +7213,64 @@ class ingresos_egresosController extends Controller
                 'sirviente' => $sirviente,
                 'economa' => $economa
             ]);
-        } 
-        if ($tipo == 'trimestral')
-        {
-                // Obtener el año actual
-                $añoActual = Carbon::now()->year;
+        }
+        if ($tipo == 'trimestral') {
+            // Obtener el año actual
+            $añoActual = Carbon::now()->year;
 
-                // Inicializar las variables de fecha
-                $fechaInicial = null;
-                $fechaFinal = null;
- 
-                switch($mes){
-                    
+            // Inicializar las variables de fecha
+            $fechaInicial = null;
+            $fechaFinal = null;
+
+            switch ($mes) {
+
                 case 'enero':
-                    $fechaInicial = Carbon::createFromDate($añoActual-1, 12, 31);
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
                     $fechaFinal = Carbon::createFromDate($añoActual, 3, 31);
                     // Calcular la fecha anterior a la fechaInicial
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -7255,23 +7278,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -7280,33 +7303,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -7341,45 +7364,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -7387,23 +7410,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -7412,33 +7435,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -7473,45 +7496,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -7519,23 +7542,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -7544,33 +7567,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -7606,45 +7629,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -7652,23 +7675,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -7677,33 +7700,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                        // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -7731,96 +7754,95 @@ class ingresos_egresosController extends Controller
                     $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
 
                     break;
-                    
-                 default:
+
+                default:
                     return response()->json(['error' => 'Mes inválido'], 400);
-                 
-                }
- 
-                return response()->json([
-                    'fecha_anterior' => $fechaAnterior,
-                    'mes' => $mes,
-                    'fecha_inicial' => $fechaInicial->toDateString(),
-                    'fecha_final' => $fechaFinal->toDateString(),
-                    'saldo_inicial_bancos' => $saldoInicialBancos,
-                    'saldo_inicial_caja' => $saldoInicialCaja,
-                    'saldo_inicial' => $saldoInicial,
-                    'total_ingresos_caja' => $totalIngresosCaja,
-                    'total_egresos_caja' => $totalEgresosCaja,
-                    'total_ingresos_bancos' => $totalIngresosBancos,
-                    'total_egresos_bancos' => $totalEgresosBancos,
-                    'total_general_ingresos' => $totalGeneralIngresos,
-                    'total_general_egresos' => $totalGeneralEgresos,
-                    'data_caja' => $dataGroupedCaja,
-                    'data_bancos' => $dataGroupedBancos,
-                    'total_saldo_final' => $saldoFinal,
-                    //'total_saldo_final2' => $saldoFinalsuma,
-                    'total_saldo_final_caja' => $saldoFinalCaja,
-                    'total_saldo_final_bancos' => $saldoFinalBancos,
-                    'responsable' => $responsable,
-                    'sirviente' => $sirviente,
-                    'economa' => $economa
-                ]);
+
+            }
+
+            return response()->json([
+                'fecha_anterior' => $fechaAnterior,
+                'mes' => $mes,
+                'fecha_inicial' => $fechaInicial->toDateString(),
+                'fecha_final' => $fechaFinal->toDateString(),
+                'saldo_inicial_bancos' => $saldoInicialBancos,
+                'saldo_inicial_caja' => $saldoInicialCaja,
+                'saldo_inicial' => $saldoInicial,
+                'total_ingresos_caja' => $totalIngresosCaja,
+                'total_egresos_caja' => $totalEgresosCaja,
+                'total_ingresos_bancos' => $totalIngresosBancos,
+                'total_egresos_bancos' => $totalEgresosBancos,
+                'total_general_ingresos' => $totalGeneralIngresos,
+                'total_general_egresos' => $totalGeneralEgresos,
+                'data_caja' => $dataGroupedCaja,
+                'data_bancos' => $dataGroupedBancos,
+                'total_saldo_final' => $saldoFinal,
+                //'total_saldo_final2' => $saldoFinalsuma,
+                'total_saldo_final_caja' => $saldoFinalCaja,
+                'total_saldo_final_bancos' => $saldoFinalBancos,
+                'responsable' => $responsable,
+                'sirviente' => $sirviente,
+                'economa' => $economa
+            ]);
 
         }
-        if ($tipo == 'semestral')
-        {
-                // Obtener el año actual
-                $añoActual = Carbon::now()->year;
+        if ($tipo == 'semestral') {
+            // Obtener el año actual
+            $añoActual = Carbon::now()->year;
 
-                // Inicializar las variables de fecha
-                $fechaInicial = null;
-                $fechaFinal = null;
- 
-                switch($mes){
-                    
+            // Inicializar las variables de fecha
+            $fechaInicial = null;
+            $fechaFinal = null;
+
+            switch ($mes) {
+
                 case 'enero':
-                    $fechaInicial = Carbon::createFromDate($añoActual-1, 12, 31);
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
                     $fechaFinal = Carbon::createFromDate($añoActual, 6, 30);
                     // Calcular la fecha anterior a la fechaInicial
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -7828,23 +7850,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -7853,33 +7875,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -7914,45 +7936,45 @@ class ingresos_egresosController extends Controller
                     $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'bancos');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     // Obtener el saldo inicial hasta la fecha anterior
                     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'Caja');
-                    })
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
 
                     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->where(function ($query) {
-                        $query->where('tipo', 'caja');
-                    })
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
 
                     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
                     $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
@@ -7960,23 +7982,23 @@ class ingresos_egresosController extends Controller
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
@@ -7985,33 +8007,33 @@ class ingresos_egresosController extends Controller
                     })->values();
 
 
-                     // datos de bancos
+                    // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) {
-                        $query->where('id_proyectos', 2);
-                    })
-                    ->get();
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
 
                     // Agrupar y sumar montos por cuenta
                     $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
                         $ingresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'IN') === 0;
                         })->sum('monto');
-                        
+
                         $egresos = $group->filter(function ($item) {
                             return strpos($item->nomenclatura, 'EG') === 0;
                         })->sum('monto');
-                        
+
                         return [
                             'cuenta' => $group->first()->cuentas->cuenta,
                             'ingresos' => number_format($ingresos, 2),
                             'egresos' => number_format($egresos, 2)
                         ];
                     })->values();
-                    
+
                     // Calcular totales
                     $totalIngresosCaja = $dataCaja->filter(function ($item) {
                         return strpos($item->nomenclatura, 'IN') === 0;
@@ -8040,184 +8062,9 @@ class ingresos_egresosController extends Controller
 
                     break;
 
-                    default:
-                    return response()->json(['error' => 'Mes inválido'], 400);
-             }
- 
-                return response()->json([
-                    'fecha_anterior' => $fechaAnterior,
-                    'mes' => $mes,
-                    'fecha_inicial' => $fechaInicial->toDateString(),
-                    'fecha_final' => $fechaFinal->toDateString(),
-                    'saldo_inicial_bancos' => $saldoInicialBancos,
-                    'saldo_inicial_caja' => $saldoInicialCaja,
-                    'saldo_inicial' => $saldoInicial,
-                    'total_ingresos_caja' => $totalIngresosCaja,
-                    'total_egresos_caja' => $totalEgresosCaja,
-                    'total_ingresos_bancos' => $totalIngresosBancos,
-                    'total_egresos_bancos' => $totalEgresosBancos,
-                    'total_general_ingresos' => $totalGeneralIngresos,
-                    'total_general_egresos' => $totalGeneralEgresos,
-                    'data_caja' => $dataGroupedCaja,
-                    'data_bancos' => $dataGroupedBancos,
-                    'total_saldo_final' => $saldoFinal,
-                    //'total_saldo_final2' => $saldoFinalsuma,
-                    'total_saldo_final_caja' => $saldoFinalCaja,
-                    'total_saldo_final_bancos' => $saldoFinalBancos,
-                    'responsable' => $responsable,
-                    'sirviente' => $sirviente,
-                    'economa' => $economa
-                ]);
-
-        }
-        if ($tipo = 'anual')
-        {
-            // Obtener el año actual
-            $añoActual = Carbon::now()->year;
-
-            // Inicializar las variables de fecha
-            $fechaInicial = null;
-            $fechaFinal = null;
-
-            switch($mes){
-                
-            case 'enero':
-                $fechaInicial = Carbon::createFromDate($añoActual-1, 12, 31);
-                $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
-                // Calcular la fecha anterior a la fechaInicial
-                $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
-
-                // Obtener el saldo inicial hasta la fecha anterior
-                $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 2);
-                })
-                ->where(function ($query) {
-                    $query->where('tipo', 'bancos');
-                })
-                ->where('nomenclatura', 'like', 'IN%')
-                ->sum('monto');
-
-                $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 2);
-                })
-                ->where(function ($query) {
-                    $query->where('tipo', 'bancos');
-                })
-                ->where('nomenclatura', 'like', 'EG%')
-                ->sum('monto');
-
-                // Obtener el saldo inicial hasta la fecha anterior
-                $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 2);
-                })
-                ->where(function ($query) {
-                    $query->where('tipo', 'Caja');
-                })
-                ->where('nomenclatura', 'like', 'IN%')
-                ->sum('monto');
-
-                $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 2);
-                })
-                ->where(function ($query) {
-                    $query->where('tipo', 'caja');
-                })
-                ->where('nomenclatura', 'like', 'EG%')
-                ->sum('monto');
-
-                $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
-                $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
-                $saldoInicial = $saldoInicialBancos + $saldoInicialCaja;
-
-                // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
-                $dataCaja = ingresos_egresos::with('cuentas')
-                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                ->where('tipo', 'caja')
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 2);
-                })
-                ->get();
-
-                // Agrupar y sumar montos por cuenta
-                $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
-                    $ingresos = $group->filter(function ($item) {
-                        return strpos($item->nomenclatura, 'IN') === 0;
-                    })->sum('monto');
-                    
-                    $egresos = $group->filter(function ($item) {
-                        return strpos($item->nomenclatura, 'EG') === 0;
-                    })->sum('monto');
-                    
-                    return [
-                        'cuenta' => $group->first()->cuentas->cuenta,
-                        'ingresos' => number_format($ingresos, 2),
-                        'egresos' => number_format($egresos, 2),
-                    ];
-                })->values();
-
-
-                 // datos de bancos
-                // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
-                $dataBancos = ingresos_egresos::with('cuentas')
-                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                ->where('tipo', 'bancos')
-                ->whereHas('cuentas', function ($query) {
-                    $query->where('id_proyectos', 2);
-                })
-                ->get();
-
-                // Agrupar y sumar montos por cuenta
-                $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
-                    $ingresos = $group->filter(function ($item) {
-                        return strpos($item->nomenclatura, 'IN') === 0;
-                    })->sum('monto');
-                    
-                    $egresos = $group->filter(function ($item) {
-                        return strpos($item->nomenclatura, 'EG') === 0;
-                    })->sum('monto');
-                    
-                    return [
-                        'cuenta' => $group->first()->cuentas->cuenta,
-                        'ingresos' => number_format($ingresos, 2),
-                        'egresos' => number_format($egresos, 2)
-                    ];
-                })->values();
-                
-                // Calcular totales
-                $totalIngresosCaja = $dataCaja->filter(function ($item) {
-                    return strpos($item->nomenclatura, 'IN') === 0;
-                })->sum('monto');
-
-                $totalEgresosCaja = $dataCaja->filter(function ($item) {
-                    return strpos($item->nomenclatura, 'EG') === 0;
-                })->sum('monto');
-
-                $totalIngresosBancos = $dataBancos->filter(function ($item) {
-                    return strpos($item->nomenclatura, 'IN') === 0;
-                })->sum('monto');
-
-                $totalEgresosBancos = $dataBancos->filter(function ($item) {
-                    return strpos($item->nomenclatura, 'EG') === 0;
-                })->sum('monto');
-
-                $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
-                $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
-
-                //saldo final
-                $saldoFinal = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
-                $saldoFinalsuma = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
-                $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
-                $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
-
-                break;
-
                 default:
-                return response()->json(['error' => 'Mes inválido'], 400);
-         }
+                    return response()->json(['error' => 'Mes inválido'], 400);
+            }
 
             return response()->json([
                 'fecha_anterior' => $fechaAnterior,
@@ -8243,13 +8090,188 @@ class ingresos_egresosController extends Controller
                 'sirviente' => $sirviente,
                 'economa' => $economa
             ]);
-        }else {
+
+        }
+        if ($tipo = 'anual') {
+            // Obtener el año actual
+            $añoActual = Carbon::now()->year;
+
+            // Inicializar las variables de fecha
+            $fechaInicial = null;
+            $fechaFinal = null;
+
+            switch ($mes) {
+
+                case 'enero':
+                    $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
+                    $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
+                    // Calcular la fecha anterior a la fechaInicial
+                    $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
+
+                    // Obtener el saldo inicial hasta la fecha anterior
+                    $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
+
+                    $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'bancos');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
+
+                    // Obtener el saldo inicial hasta la fecha anterior
+                    $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'Caja');
+                        })
+                        ->where('nomenclatura', 'like', 'IN%')
+                        ->sum('monto');
+
+                    $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->where(function ($query) {
+                            $query->where('tipo', 'caja');
+                        })
+                        ->where('nomenclatura', 'like', 'EG%')
+                        ->sum('monto');
+
+                    $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
+                    $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
+                    $saldoInicial = $saldoInicialBancos + $saldoInicialCaja;
+
+                    // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
+                    $dataCaja = ingresos_egresos::with('cuentas')
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'caja')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
+
+                    // Agrupar y sumar montos por cuenta
+                    $dataGroupedCaja = $dataCaja->groupBy('cuentas.cuenta')->map(function ($group) {
+                        $ingresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'IN') === 0;
+                        })->sum('monto');
+
+                        $egresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'EG') === 0;
+                        })->sum('monto');
+
+                        return [
+                            'cuenta' => $group->first()->cuentas->cuenta,
+                            'ingresos' => number_format($ingresos, 2),
+                            'egresos' => number_format($egresos, 2),
+                        ];
+                    })->values();
+
+
+                    // datos de bancos
+                    // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
+                    $dataBancos = ingresos_egresos::with('cuentas')
+                        ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                        ->where('tipo', 'bancos')
+                        ->whereHas('cuentas', function ($query) {
+                            $query->where('id_proyectos', 2);
+                        })
+                        ->get();
+
+                    // Agrupar y sumar montos por cuenta
+                    $dataGroupedBancos = $dataBancos->groupBy('cuentas.cuenta')->map(function ($group) {
+                        $ingresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'IN') === 0;
+                        })->sum('monto');
+
+                        $egresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'EG') === 0;
+                        })->sum('monto');
+
+                        return [
+                            'cuenta' => $group->first()->cuentas->cuenta,
+                            'ingresos' => number_format($ingresos, 2),
+                            'egresos' => number_format($egresos, 2)
+                        ];
+                    })->values();
+
+                    // Calcular totales
+                    $totalIngresosCaja = $dataCaja->filter(function ($item) {
+                        return strpos($item->nomenclatura, 'IN') === 0;
+                    })->sum('monto');
+
+                    $totalEgresosCaja = $dataCaja->filter(function ($item) {
+                        return strpos($item->nomenclatura, 'EG') === 0;
+                    })->sum('monto');
+
+                    $totalIngresosBancos = $dataBancos->filter(function ($item) {
+                        return strpos($item->nomenclatura, 'IN') === 0;
+                    })->sum('monto');
+
+                    $totalEgresosBancos = $dataBancos->filter(function ($item) {
+                        return strpos($item->nomenclatura, 'EG') === 0;
+                    })->sum('monto');
+
+                    $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
+                    $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
+
+                    //saldo final
+                    $saldoFinal = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
+                    $saldoFinalsuma = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
+                    $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
+                    $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
+
+                    break;
+
+                default:
+                    return response()->json(['error' => 'Mes inválido'], 400);
+            }
+
+            return response()->json([
+                'fecha_anterior' => $fechaAnterior,
+                'mes' => $mes,
+                'fecha_inicial' => $fechaInicial->toDateString(),
+                'fecha_final' => $fechaFinal->toDateString(),
+                'saldo_inicial_bancos' => $saldoInicialBancos,
+                'saldo_inicial_caja' => $saldoInicialCaja,
+                'saldo_inicial' => $saldoInicial,
+                'total_ingresos_caja' => $totalIngresosCaja,
+                'total_egresos_caja' => $totalEgresosCaja,
+                'total_ingresos_bancos' => $totalIngresosBancos,
+                'total_egresos_bancos' => $totalEgresosBancos,
+                'total_general_ingresos' => $totalGeneralIngresos,
+                'total_general_egresos' => $totalGeneralEgresos,
+                'data_caja' => $dataGroupedCaja,
+                'data_bancos' => $dataGroupedBancos,
+                'total_saldo_final' => $saldoFinal,
+                //'total_saldo_final2' => $saldoFinalsuma,
+                'total_saldo_final_caja' => $saldoFinalCaja,
+                'total_saldo_final_bancos' => $saldoFinalBancos,
+                'responsable' => $responsable,
+                'sirviente' => $sirviente,
+                'economa' => $economa
+            ]);
+        } else {
             return response()->json(['error' => 'Tipo inválido'], 400);
         }
     }
 
-    public function anticipoAG(Request $request){
-  // Aqui vamos a validar los datos (los campos calculados se asignan automáticamente)
+    public function anticipoAG(Request $request)
+    {
+        // Aqui vamos a validar los datos (los campos calculados se asignan automáticamente)
         $request->validate([
             'fecha' => 'required|date',
             'identificacion' => 'required',
@@ -8258,89 +8280,90 @@ class ingresos_egresosController extends Controller
             'monto' => 'required|numeric',
             'tipo' => 'required|in:caja,bancos',
             'cuenta' => 'required',
-            
+
             'documento' => 'required_if:tipo,bancos',
             'numero_documento' => 'required_if:tipo,bancos',
             'fecha_emision' => 'required_if:tipo,bancos',
             'id_cuentas_bancarias' => 'required_if:tipo,bancos',
         ], [
-            'documento.required_if'            => 'El documento es obligatorio cuando el tipo es banco.',
-            'numero_documento.required_if'     => 'El número de documento es obligatorio cuando el tipo es banco.',
-            'fecha_emision.required_if'        => 'La fecha de emisión es obligatoria cuando el tipo es banco.',
+            'documento.required_if' => 'El documento es obligatorio cuando el tipo es banco.',
+            'numero_documento.required_if' => 'El número de documento es obligatorio cuando el tipo es banco.',
+            'fecha_emision.required_if' => 'La fecha de emisión es obligatoria cuando el tipo es banco.',
             'id_cuentas_bancarias.required_if' => 'La cuenta bancaria es obligatoria cuando el tipo es banco.',
         ]);
 
-        try{
+        try {
             return DB::transaction(function () use ($request) {
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', 'Anticipo de compras y gastos')->where('id_clasificacion', '2')->where('id_proyectos', '1')->first();
-            // Si la cuenta no se encuentra, devolver un error
-            if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-            }
-
-            // Verificar si la cuenta pertenece al id_proyectos 1
-             if ($cuenta->id_proyectos != 1) {
-                 return response()->json(['error' => 'La cuenta no pertenece al proyecto agricola'], 400);
-             }
-
-                 $tipo = strtolower($request->input('tipo'));
-
-            // Crear un nuevo registro en la tabla ingresos_egresos
-            $ingreso_egreso = new ingresos_egresos();
-            $ingreso_egreso->fecha = $request->input('fecha');
-            $ingreso_egreso->identificacion = $request->input('identificacion');
-            $ingreso_egreso->nombre = $request->input('nombre');
-            $ingreso_egreso->descripcion = $request->input('descripcion');
-            $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $tipo;
-            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-
-            // Asignar montos calculados automáticamente según la solicitud:
-            // - monto_debe debe igualar el monto ingresado
-            // - monto_haber queda en 0.00
-            // - es_pendiente pasa a 1
-            $ingreso_egreso->monto_debe = $request->input('monto');
-            $ingreso_egreso->monto_haber = 0.00;
-            $ingreso_egreso->es_pendiente = 1;
-
-            // Guardar el ingreso/egreso
-            $ingreso_egreso->save();
-
-            // Obtener el id del ingreso/egreso recién creado
-            $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
-
-              if ($tipo === 'bancos') {
-                $cuenta_bancaria = cuentas_bancarias::find($request->input('id_cuentas_bancarias'));
-                if (!$cuenta_bancaria) {
-                    throw new \RuntimeException('La cuenta bancaria indicada no existe.');
+                // Buscar la cuenta por su nombre
+                $cuenta = cuentas::where('cuenta', 'Anticipo de compras y gastos')->where('id_clasificacion', '2')->where('id_proyectos', '1')->first();
+                // Si la cuenta no se encuentra, devolver un error
+                if (!$cuenta) {
+                    return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
                 }
 
-                $datos_pago = new datos_de_pago_ingresos();
-                $datos_pago->id_ingresos_egresos  = $ingreso_egreso->id_ingresos_egresos; 
-                $datos_pago->documento            = $request->input('documento');
-                $datos_pago->numero_documento     = $request->input('numero_documento');
-                $datos_pago->fecha_emision        = $request->input('fecha_emision');
-                $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-                $datos_pago->save();
+                // Verificar si la cuenta pertenece al id_proyectos 1
+                if ($cuenta->id_proyectos != 1) {
+                    return response()->json(['error' => 'La cuenta no pertenece al proyecto agricola'], 400);
+                }
 
-                // Devuelve ambos cuando es banco
-                return response()->json([
-                    'ingreso_egreso' => $ingreso_egreso,
-                    'datos_pago'     => $datos_pago,
-                ], 201);
-            }
+                $tipo = strtolower($request->input('tipo'));
 
-            // Retornar el recurso creado
-            return response()->json($ingreso_egreso, 201);
+                // Crear un nuevo registro en la tabla ingresos_egresos
+                $ingreso_egreso = new ingresos_egresos();
+                $ingreso_egreso->fecha = $request->input('fecha');
+                $ingreso_egreso->identificacion = $request->input('identificacion');
+                $ingreso_egreso->nombre = $request->input('nombre');
+                $ingreso_egreso->descripcion = $request->input('descripcion');
+                $ingreso_egreso->monto = $request->input('monto');
+                $ingreso_egreso->tipo = $tipo;
+                $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
 
-              });
-        }catch(\Exception $e){
+                // Asignar montos calculados automáticamente según la solicitud:
+                // - monto_debe debe igualar el monto ingresado
+                // - monto_haber queda en 0.00
+                // - es_pendiente pasa a 1
+                $ingreso_egreso->monto_debe = $request->input('monto');
+                $ingreso_egreso->monto_haber = 0.00;
+                $ingreso_egreso->es_pendiente = 1;
+
+                // Guardar el ingreso/egreso
+                $ingreso_egreso->save();
+
+                // Obtener el id del ingreso/egreso recién creado
+                $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+
+                if ($tipo === 'bancos') {
+                    $cuenta_bancaria = cuentas_bancarias::find($request->input('id_cuentas_bancarias'));
+                    if (!$cuenta_bancaria) {
+                        throw new \RuntimeException('La cuenta bancaria indicada no existe.');
+                    }
+
+                    $datos_pago = new datos_de_pago_ingresos();
+                    $datos_pago->id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+                    $datos_pago->documento = $request->input('documento');
+                    $datos_pago->numero_documento = $request->input('numero_documento');
+                    $datos_pago->fecha_emision = $request->input('fecha_emision');
+                    $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+                    $datos_pago->save();
+
+                    // Devuelve ambos cuando es banco
+                    return response()->json([
+                        'ingreso_egreso' => $ingreso_egreso,
+                        'datos_pago' => $datos_pago,
+                    ], 201);
+                }
+
+                // Retornar el recurso creado
+                return response()->json($ingreso_egreso, 201);
+
+            });
+        } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
-    public function anticipoCA(Request $request){
+    public function anticipoCA(Request $request)
+    {
 
         // Aqui vamos a validar los datos (los campos calculados se asignan automáticamente)
         $request->validate([
@@ -8351,86 +8374,132 @@ class ingresos_egresosController extends Controller
             'monto' => 'required|numeric',
             'tipo' => 'required|in:caja,bancos',
             'cuenta' => 'required',
-            
+
             'documento' => 'required_if:tipo,bancos',
             'numero_documento' => 'required_if:tipo,bancos',
             'fecha_emision' => 'required_if:tipo,bancos',
             'id_cuentas_bancarias' => 'required_if:tipo,bancos',
         ], [
-            'documento.required_if'            => 'El documento es obligatorio cuando el tipo es banco.',
-            'numero_documento.required_if'     => 'El número de documento es obligatorio cuando el tipo es banco.',
-            'fecha_emision.required_if'        => 'La fecha de emisión es obligatoria cuando el tipo es banco.',
+            'documento.required_if' => 'El documento es obligatorio cuando el tipo es banco.',
+            'numero_documento.required_if' => 'El número de documento es obligatorio cuando el tipo es banco.',
+            'fecha_emision.required_if' => 'La fecha de emisión es obligatoria cuando el tipo es banco.',
             'id_cuentas_bancarias.required_if' => 'La cuenta bancaria es obligatoria cuando el tipo es banco.',
         ]);
 
-        try{
+        try {
             return DB::transaction(function () use ($request) {
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', 'Anticipo de compras y gastos')->where('id_clasificacion', '2')->where('id_proyectos', '2')->first();
-            // Si la cuenta no se encuentra, devolver un error
-            if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-            }
-
-            // Verificar si la cuenta pertenece al id_proyectos 2
-             if ($cuenta->id_proyectos != 2) {
-                 return response()->json(['error' => 'La cuenta no pertenece al proyecto capilla'], 400);
-             }
-
-                 $tipo = strtolower($request->input('tipo'));
-
-            // Crear un nuevo registro en la tabla ingresos_egresos
-            $ingreso_egreso = new ingresos_egresos();
-            $ingreso_egreso->fecha = $request->input('fecha');
-            $ingreso_egreso->identificacion = $request->input('identificacion');
-            $ingreso_egreso->nombre = $request->input('nombre');
-            $ingreso_egreso->descripcion = $request->input('descripcion');
-            $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $tipo;
-            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-
-            // Asignar montos calculados automáticamente según la solicitud:
-            // - monto_debe debe igualar el monto ingresado
-            // - monto_haber queda en 0.00
-            // - es_pendiente pasa a 1
-            $ingreso_egreso->monto_debe = $request->input('monto');
-            $ingreso_egreso->monto_haber = 0.00;
-            $ingreso_egreso->es_pendiente = 1;
-
-            // Guardar el ingreso/egreso
-            $ingreso_egreso->save();
-
-            // Obtener el id del ingreso/egreso recién creado
-            $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
-
-              if ($tipo === 'bancos') {
-                $cuenta_bancaria = cuentas_bancarias::find($request->input('id_cuentas_bancarias'));
-                if (!$cuenta_bancaria) {
-                    throw new \RuntimeException('La cuenta bancaria indicada no existe.');
+                // Buscar la cuenta por su nombre
+                $cuenta = cuentas::where('cuenta', 'Anticipo de compras y gastos')->where('id_clasificacion', '2')->where('id_proyectos', '2')->first();
+                // Si la cuenta no se encuentra, devolver un error
+                if (!$cuenta) {
+                    return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
                 }
 
-                $datos_pago = new datos_de_pago_ingresos();
-                $datos_pago->id_ingresos_egresos  = $ingreso_egreso->id_ingresos_egresos; 
-                $datos_pago->documento            = $request->input('documento');
-                $datos_pago->numero_documento     = $request->input('numero_documento');
-                $datos_pago->fecha_emision        = $request->input('fecha_emision');
-                $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-                $datos_pago->save();
+                // Verificar si la cuenta pertenece al id_proyectos 2
+                if ($cuenta->id_proyectos != 2) {
+                    return response()->json(['error' => 'La cuenta no pertenece al proyecto capilla'], 400);
+                }
 
-                // Devuelve ambos cuando es banco
-                return response()->json([
-                    'ingreso_egreso' => $ingreso_egreso,
-                    'datos_pago'     => $datos_pago,
-                ], 201);
-            }
+                $tipo = strtolower($request->input('tipo'));
 
-            // Retornar el recurso creado
-            return response()->json($ingreso_egreso, 201);
+                // Crear un nuevo registro en la tabla ingresos_egresos
+                $ingreso_egreso = new ingresos_egresos();
+                $ingreso_egreso->fecha = $request->input('fecha');
+                $ingreso_egreso->identificacion = $request->input('identificacion');
+                $ingreso_egreso->nombre = $request->input('nombre');
+                $ingreso_egreso->descripcion = $request->input('descripcion');
+                $ingreso_egreso->monto = $request->input('monto');
+                $ingreso_egreso->tipo = $tipo;
+                $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
 
-              });
-        }catch(\Exception $e){
+                // Asignar montos calculados automáticamente según la solicitud:
+                // - monto_debe debe igualar el monto ingresado
+                // - monto_haber queda en 0.00
+                // - es_pendiente pasa a 1
+                $ingreso_egreso->monto_debe = $request->input('monto');
+                $ingreso_egreso->monto_haber = 0.00;
+                $ingreso_egreso->es_pendiente = 1;
+
+                // Guardar el ingreso/egreso
+                $ingreso_egreso->save();
+
+                // Obtener el id del ingreso/egreso recién creado
+                $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+
+                if ($tipo === 'bancos') {
+                    $cuenta_bancaria = cuentas_bancarias::find($request->input('id_cuentas_bancarias'));
+                    if (!$cuenta_bancaria) {
+                        throw new \RuntimeException('La cuenta bancaria indicada no existe.');
+                    }
+
+                    $datos_pago = new datos_de_pago_ingresos();
+                    $datos_pago->id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+                    $datos_pago->documento = $request->input('documento');
+                    $datos_pago->numero_documento = $request->input('numero_documento');
+                    $datos_pago->fecha_emision = $request->input('fecha_emision');
+                    $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+                    $datos_pago->save();
+
+                    // Devuelve ambos cuando es banco
+                    return response()->json([
+                        'ingreso_egreso' => $ingreso_egreso,
+                        'datos_pago' => $datos_pago,
+                    ], 201);
+                }
+
+                // Retornar el recurso creado
+                return response()->json($ingreso_egreso, 201);
+
+            });
+        } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-        
+
+    }
+
+    // tablaVistaAnticipoAG: retorna fecha, nomenclatura, nombre, id_cuentas (nombre de la cuenta), tipo, monto
+    public function tablaVistaAnticipoAG()
+    {
+        try {
+            $data = DB::table('ingresos_egresos')
+                ->leftJoin('cuentas', 'ingresos_egresos.id_cuentas', '=', 'cuentas.id_cuentas')
+                ->select(
+                    'ingresos_egresos.fecha',
+                    'ingresos_egresos.nomenclatura',
+                    'ingresos_egresos.nombre',
+                    DB::raw("COALESCE(cuentas.cuenta, ingresos_egresos.id_cuentas) as id_cuentas"),
+                    'ingresos_egresos.tipo',
+                    'ingresos_egresos.monto'
+                )
+                ->where('cuentas.id_cuentas', 75)
+                ->get();
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // tablaVistaAnticipoAG: retorna fecha, nomenclatura, nombre, id_cuentas (nombre de la cuenta), tipo, monto
+    public function tablaVistaAnticipoCA()
+    {
+        try {
+            $data = DB::table('ingresos_egresos')
+                ->leftJoin('cuentas', 'ingresos_egresos.id_cuentas', '=', 'cuentas.id_cuentas')
+                ->select(
+                    'ingresos_egresos.fecha',
+                    'ingresos_egresos.nomenclatura',
+                    'ingresos_egresos.nombre',
+                    DB::raw("COALESCE(cuentas.cuenta, ingresos_egresos.id_cuentas) as id_cuentas"),
+                    'ingresos_egresos.tipo',
+                    'ingresos_egresos.monto'
+                )
+                ->where('cuentas.id_cuentas', 76)
+                ->get();
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
     }
 }
