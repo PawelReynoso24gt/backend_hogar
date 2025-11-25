@@ -8469,7 +8469,9 @@ class ingresos_egresosController extends Controller
                     'ingresos_egresos.nombre',
                     DB::raw("COALESCE(cuentas.cuenta, ingresos_egresos.id_cuentas) as id_cuentas"),
                     'ingresos_egresos.tipo',
-                    'ingresos_egresos.monto'
+                    'ingresos_egresos.monto',
+                    'ingresos_egresos.descripcion',
+                    'ingresos_egresos.identificacion'
                 )
                 ->where('cuentas.id_cuentas', 75)
                 ->get();
@@ -8480,7 +8482,7 @@ class ingresos_egresosController extends Controller
         }
     }
 
-    // tablaVistaAnticipoAG: retorna fecha, nomenclatura, nombre, id_cuentas (nombre de la cuenta), tipo, monto
+    // tablaVistaAnticipoCA: retorna fecha, nomenclatura, nombre, id_cuentas (nombre de la cuenta), tipo, monto
     public function tablaVistaAnticipoCA()
     {
         try {
@@ -8492,9 +8494,25 @@ class ingresos_egresosController extends Controller
                     'ingresos_egresos.nombre',
                     DB::raw("COALESCE(cuentas.cuenta, ingresos_egresos.id_cuentas) as id_cuentas"),
                     'ingresos_egresos.tipo',
-                    'ingresos_egresos.monto'
+                    'ingresos_egresos.monto',
+                    'ingresos_egresos.descripcion',
+                    'ingresos_egresos.identificacion'
                 )
                 ->where('cuentas.id_cuentas', 76)
+                ->get();
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // getInfoAnticipoAG: retorna todos los campos de ingresos_egresos para la cuenta con id_cuentas = 75
+    public function getInfoAnticipoAG()
+    {
+        try {
+            $data = ingresos_egresos::with('cuentas')
+                ->where('id_cuentas', 75)
                 ->get();
 
             return response()->json($data, 200);
