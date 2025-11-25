@@ -179,3 +179,7 @@ Route::prefix('cuentasB')->group(function () {
 Route::prefix('pago_pendientes')->group(function () {
     Route::post('/createNewPagoPendiente', [pagoPendientesController::class, 'addNewPendientes']);
 });
+
+Route::prefix('saldar_anticipos')->group(function () {
+    Route::post('/saldarAnticipo', [App\Http\Controllers\saldarAnticipos::class, 'saldarAnticipo']);
+});
