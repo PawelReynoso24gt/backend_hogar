@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\proyectos;
 use App\Models\clasificacion;
 use App\Models\cuentas;
+use Illuminate\Support\Facades\DB;
+use App\Models\ingresos_egresos;
+
 
 class cuentasController extends Controller
 {
@@ -423,4 +426,83 @@ class cuentasController extends Controller
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
+     public function getMovimientosPorCuenta(Request $request)
+{
+    try {
+       
+        $request->validate([
+            'cuenta' => 'required|string',
+            'year'   => 'nullable|integer',
+        ]);
+
+        $nombreCuenta = $request->input('cuenta');          
+        $year         = $request->input('year', date('Y')); 
+        $cuenta = cuentas::with('clasificacion')
+            ->where('cuenta', $nombreCuenta)
+            ->first();
+
+        if (!$cuenta) {
+            return response()->json([
+                'error' => "No existe una cuenta con nombre: {$nombreCuenta}"
+            ], 404);
+        }
+
+        $esIngreso = $cuenta->clasificacion
+            && strtoupper($cuenta->clasificacion->tipo) === 'INGRESOS';
+
+      $rows = ingresos_egresos::with(['datos_de_pago_ingresos', 'datos_de_pago_egresos'])
+        ->where('id_cuentas', $cuenta->id_cuentas)
+        ->whereYear('fecha', $year)
+        ->get();
+
+        
+        $saldo = 0;
+        $movimientos = [];
+
+      foreach ($rows as $row) {
+
+            $numeroDocumento = '-';
+
+            if ($row->datos_de_pago_ingresos->count() > 0) {
+                $numeroDocumento = $row->datos_de_pago_ingresos->first()->numero_documento;
+            }
+
+            if ($row->datos_de_pago_egresos->count() > 0) {
+                $numeroDocumento = $row->datos_de_pago_egresos->first()->numero_documento;
+            }
+
+            $monto = (float) $row->monto;
+
+            if ($esIngreso) {
+                $debita   = $monto;
+                $acredita = 0;
+                $saldo   += $monto;
+            } else {
+                $debita   = 0;
+                $acredita = $monto;
+                $saldo   -= $monto;
+            }
+
+            $movimientos[] = [
+                'nomenclatura'     => $row->nomenclatura,
+                'numero_documento' => $numeroDocumento,
+                'fecha'            => $row->fecha,
+                'cuenta'           => $nombreCuenta,
+                'descripcion'      => $row->descripcion,
+                'acredita'         => number_format($acredita, 2, '.', ''),
+                'debita'           => number_format($debita, 2, '.', ''),
+                'total'            => $saldo,
+            ];
+        }
+
+        return response()->json($movimientos, 200);
+
+    } catch (\Throwable $th) {
+        return response()->json([
+            'error' => $th->getMessage()
+        ], 500);
+    }
+}
+
 }

@@ -6,7 +6,8 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\cuentas_bancarias;
-use App\Models\bancos;
+use App\Models\datos_de_pago_egresos;
+use App\Models\datos_de_pago_ingresos;
 
 class cuentas_bancariasController extends Controller
 {
