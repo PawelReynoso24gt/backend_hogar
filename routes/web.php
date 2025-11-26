@@ -182,4 +182,5 @@ Route::prefix('pago_pendientes')->group(function () {
 
 Route::prefix('saldar_anticipos')->group(function () {
     Route::post('/saldarAnticipo', [App\Http\Controllers\saldarAnticipos::class, 'saldarAnticipo']);
+    Route::post('/getMontoFaltante', [App\Http\Controllers\saldarAnticipos::class, 'getMontoFaltante']);
 });

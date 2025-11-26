@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 // Importe los controlador necesarios para tener un mejor control de las funciones
 use App\Http\Controllers\ingresos_egresosController;
 use App\Http\Controllers\pagoPendientesController;
+use App\Models\pago_pendientes;
+use App\Models\ingresos_egresos;
 
 class saldarAnticipos extends Controller
 {
@@ -102,6 +104,44 @@ class saldarAnticipos extends Controller
             });
 
             return response()->json($result, 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function getMontoFaltante(Request $request)
+    {
+        // Validar que venga el id del ingreso/egreso
+        $request->validate([
+            'id_ingresos_egresos' => 'required|integer|exists:ingresos_egresos,id_ingresos_egresos',
+        ]);
+
+        try {
+            $id = $request->input('id_ingresos_egresos');
+
+            // Obtener el monto original del ingreso/egreso
+            $ingreso = ingresos_egresos::find($id);
+            if (!$ingreso) {
+                return response()->json(['error' => 'Registro de ingreso/egreso no encontrado.'], 404);
+            }
+
+            $monto_original = (float) $ingreso->monto;
+
+            // Sumar todos los pagos registrados en pago_pendientes para ese id_ingresos_egresos
+            $monto_pagado = (float) pago_pendientes::where('id_ingresos_egresos', $id)->sum('monto_pago');
+
+            // Calcular monto faltante en tiempo real (no se guarda en BD)
+            $monto_faltante = $monto_original - $monto_pagado;
+            if ($monto_faltante < 0) {
+                $monto_faltante = 0;
+            }
+
+            return response()->json([
+                'id_ingresos_egresos' => $id,
+                'monto_original' => $monto_original,
+                'monto_pagado' => $monto_pagado,
+                'monto_faltante' => $monto_faltante,
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
