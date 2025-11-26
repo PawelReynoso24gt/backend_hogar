@@ -15,7 +15,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 class saldarAnticipos extends Controller
 {
     // Método que salda un anticipo: crea un registro en ingresos_egresos y registra el pago pendiente
-    public function saldarAnticipo(Request $request)
+    public function saldarAnticipoAG(Request $request)
     {
         // Validar los campos necesarios para crear el registro y para crear el pago pendiente
         // Nota: ya no requerimos 'id_abono' en la petición — se usará el id creado como id_abono
@@ -140,7 +140,7 @@ class saldarAnticipos extends Controller
         }
     }
 
-    public function getMontoFaltante(Request $request)
+    public function getMontoFaltanteAG(Request $request)
     {
         // Validar que venga el id del ingreso/egreso y opcionalmente un monto a pagar
         $request->validate([
