@@ -15,6 +15,7 @@ class saldarAnticipos extends Controller
     public function saldarAnticipo(Request $request)
     {
         // Validar los campos necesarios para crear el registro y para crear el pago pendiente
+        // Nota: ya no requerimos 'id_abono' en la petición — se usará el id creado como id_abono
         $request->validate([
             // campos requeridos por ingresos_egresosController::create
             'fecha' => 'required|date',
@@ -24,9 +25,10 @@ class saldarAnticipos extends Controller
             'monto' => 'required|numeric',
             'tipo' => 'required',
             'cuenta' => 'required',
-            // campos requeridos por pagoPendientesController::addNewPendientes (excepto id_ingresos_egresos que se genera aquí)
+            // campos requeridos por pagoPendientesController::addNewPendientes
             'fecha_pago' => 'required|date',
-            'id_abono' => 'required|integer|exists:ingresos_egresos,id_ingresos_egresos',
+            // ahora se espera el id del ingreso/egreso que se va a saldar (id_ingresos_egresos)
+            'id_ingresos_egresos' => 'required|integer|exists:ingresos_egresos,id_ingresos_egresos',
             'monto_pago' => 'required|numeric|min:0',
         ]);
 
@@ -76,10 +78,11 @@ class saldarAnticipos extends Controller
                 // Llamar al método addNewPendientes del controlador pagoPendientesController
                 $ppController = new pagoPendientesController();
 
+                // Enviar el id creado como 'id_abono' y el id original a saldar como 'id_ingresos_egresos'
                 $pagoPayload = new Request([
                     'fecha_pago' => $request->input('fecha_pago'),
-                    'id_ingresos_egresos' => $createdId,
-                    'id_abono' => $request->input('id_abono'),
+                    'id_ingresos_egresos' => $request->input('id_ingresos_egresos'),
+                    'id_abono' => $createdId,
                     'monto_pago' => $request->input('monto_pago'),
                 ]);
 
