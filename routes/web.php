@@ -91,8 +91,9 @@ Route::prefix('cuentas')->group(function () {
 Route::prefix('in_eg')->group(function() {
     Route::get('/get', [ingresos_egresosController::class, 'get']);
 
-    // get de pendientes de ingreso y egresos
+    // get y post de pendientes de ingreso y egresos
     Route::get('/get/transacciones_pendientes', [ingresos_egresosController::class, 'getTransaccionesPendientes']);
+    Route::post('/saldar_pendiente', [ingresos_egresosController::class, 'pendienteSaldado']);
 
     Route::get('/getWithCuenta', [ingresos_egresosController::class, 'getWithCuentas']);
     // cuentas a usar

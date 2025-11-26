@@ -12,6 +12,7 @@ use App\Models\datos_de_pago_ingresos;
 use App\Models\datos_de_pago_egresos;
 use App\Models\cuentas_bancarias;
 use App\Models\bancos;
+use App\Models\pago_pendientes;
 
 // Para el manejo de Cuentas por Pagar y Cobrar
 use App\Utils\CuentasPorPagarCobrar;
@@ -46,7 +47,9 @@ class ingresos_egresosController extends Controller
                                                 // Se quita la dependencia de nomenclatura ('IN%', 'EG%')
                                                 ->whereHas('cuentas', function ($query) use ($idProyecto, $idClasificacion) {
                                                     $query->where('id_clasificacion', $idClasificacion) 
-                                                        ->where('id_proyectos', $idProyecto);
+                                                        ->where('id_proyectos', $idProyecto)
+                                                        // se excluye esta cuenta específicamente porque eso es de otro método
+                                                        ->where('cuenta', '!=', 'Anticipo de compras y gastos');
                                                 })
                                                 
                                                 ->with('cuentas') 
@@ -57,10 +60,211 @@ class ingresos_egresosController extends Controller
                 return response()->json(['message' => 'No se encontraron registros de transacciones pendientes (Clasificación: ' . $tipo . ', Proyecto ID: ' . $idProyecto . ').'], 404);
             }
 
-            return response()->json($transaccionesPendientes, 200);
+            // --- CÁLCULO DEL SALDO RESTANTE ---
+            $resultado = $transaccionesPendientes->map(function ($item) {
+
+                // 1. Determinar Monto Original (Deuda Total)
+                $montoOriginal = $item->monto_debe > 0
+                    ? $item->monto_debe
+                    : $item->monto_haber;
+
+                // 2. Sumar todos los pagos parciales hechos a esta deuda
+                $totalAbonado = $item->pagosRealizados->sum('monto_pago');
+
+                // 3. Calcular la resta
+                $saldoPendiente = $montoOriginal - $totalAbonado;
+
+                // 4. Agregamos campos calculados
+                $item->saldo_pendiente = number_format($saldoPendiente, 2, '.', '');
+                $item->total_abonado   = number_format($totalAbonado, 2, '.', '');
+
+                return $item;
+            });
+
+            // Filtramos para no mostrar las que ya están en 0 (totalmente pagadas)
+            // Si quieres ver historial de pagadas, quita este filter.
+            $resultadoFiltrado = $resultado->filter(function ($item) {
+                return $item->saldo_pendiente > 0;
+            })->values();
+
+            return response()->json($resultadoFiltrado, 200);
 
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Error al obtener transacciones pendientes: ' . $th->getMessage()], 500);
+        }
+    }
+
+    // método para saldar una deuda
+    public function pendienteSaldado(Request $request)
+    {
+        // 1. Validar los datos de entrada
+        $request->validate([
+            'fecha'            => 'required|date',
+            'identificacion'   => 'required',
+            'nombre'           => 'required',
+            'descripcion'      => 'required',
+            'monto'            => 'required|numeric|min:0.01',
+            'tipo'             => 'required|in:caja,bancos', // Medio de pago
+            'cuenta'           => 'required', // Nombre de la cuenta
+            'id_proyectos'     => 'required|integer|in:1,2',
+            'id_clasificacion' => 'required|integer|in:1,2',
+
+            // >> NUEVO: Necesitamos saber QUÉ deuda estamos pagando
+            'deuda_original_id' => 'required|integer|exists:ingresos_egresos,id_ingresos_egresos',
+            
+            // Validaciones bancarias condicionales
+            'documento'        => 'required_if:tipo,bancos',
+            'numero_documento' => 'required_if:tipo,bancos',
+            'fecha_emision'    => 'required_if:tipo,bancos',
+            'cuenta_bancaria'  => 'required_if:tipo,bancos', // Enviar el número de cuenta
+        ]);
+
+        try {
+            return DB::transaction(function () use ($request) {
+                
+                $idProyecto = $request->input('id_proyectos');
+                $idClasificacion = $request->input('id_clasificacion');
+                $nombreCuenta = $request->input('cuenta');
+                $tipo = strtolower($request->input('tipo'));
+                $monto = $request->input('monto');
+                $deudaOriginalId = $request->input('deuda_original_id'); // Capturamos el ID
+
+                // 2. Buscar la cuenta contable dinámicamente
+                $cuenta = cuentas::where('cuenta', $nombreCuenta)
+                                ->where('id_clasificacion', $idClasificacion)
+                                ->where('id_proyectos', $idProyecto)
+                                ->first();
+
+                if (!$cuenta) {
+                    return response()->json(['error' => 'La cuenta proporcionada no existe para el proyecto y clasificación indicados.'], 404);
+                }
+
+                // >>> 3. OBTENER LA DEUDA ORIGINAL Y VALIDAR CONTRA LA SUMA DE ABONOS <<<
+                $deudaOriginal = ingresos_egresos::find($deudaOriginalId);
+
+                if (!$deudaOriginal) {
+                    // Por si acaso, aunque el validate ya lo revisa
+                    return response()->json([
+                        'error' => 'La deuda original no existe.'
+                    ], 404);
+                }
+
+                // Monto total de la deuda (original)
+                $montoTotalDeuda = $deudaOriginal->monto_debe > 0
+                    ? $deudaOriginal->monto_debe
+                    : $deudaOriginal->monto_haber;
+
+                // Total abonado ANTES de este nuevo pago
+                $totalAbonadoPrevio = pago_pendientes::where('id_ingresos_egresos', $deudaOriginalId)
+                    ->sum('monto_pago');
+
+                // Suma FINAL con el nuevo abono
+                $totalAbonadoDespues = $totalAbonadoPrevio + $monto;
+
+                // Si la suma final es MAYOR que la deuda original: NO permitimos la transacción
+                if ($totalAbonadoDespues > $montoTotalDeuda) {
+                    return response()->json([
+                        'error' => 'El monto del abono excede el saldo pendiente de la deuda. ' .
+                                'Deuda total: ' . number_format($montoTotalDeuda, 2) . 
+                                ', Abonado previo: ' . number_format($totalAbonadoPrevio, 2) . 
+                                ', Intento de abono: ' . number_format($monto, 2)
+                    ], 422);
+                }
+
+                // 3. Determinar DEBE / HABER
+                // Aunque es_pendiente = 0, registramos el movimiento contable del pago.
+                $montoDebe = 0.00;
+                $montoHaber = 0.00;
+
+                if ($idClasificacion == 1) { 
+                    // Clasificación 1 (INGRESOS) -> El abono se registra en HABER
+                    $montoDebe = $monto;
+                } elseif ($idClasificacion == 2) { 
+                    // Clasificación 2 (EGRESOS) -> El abono se registra en DEBE
+                    $montoHaber = $monto;
+                }
+
+                // 4. Crear el registro en ingresos_egresos
+                $ingreso_egreso = new ingresos_egresos();
+                $ingreso_egreso->fecha = $request->input('fecha');
+                $ingreso_egreso->identificacion = $request->input('identificacion');
+                $ingreso_egreso->nombre = $request->input('nombre');
+                $ingreso_egreso->descripcion = $request->input('descripcion');
+                $ingreso_egreso->monto = $monto;
+                $ingreso_egreso->tipo = $tipo;
+                $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+
+                // Asignación específica solicitada
+                $ingreso_egreso->monto_debe = $montoDebe;
+                $ingreso_egreso->monto_haber = $montoHaber;
+                $ingreso_egreso->es_pendiente = 0; // Siempre 0 porque es el pago
+
+                $ingreso_egreso->save();
+
+                // >> 5. NUEVO: REGISTRAR EN LA TABLA DE SEGUIMIENTO <<
+                // Aquí vinculamos la Deuda Original con este Nuevo Registro (Abono)
+                pago_pendientes::create([
+                    'fecha_pago' => $request->input('fecha'),
+                    'id_ingresos_egresos' => $deudaOriginalId, // La deuda que estamos pagando
+                    'id_abono' => $ingreso_egreso->id_ingresos_egresos, // El nuevo registro que acabamos de crear
+                    'monto_pago' => $monto,
+                ]);
+
+                // 7. Calcular saldo restante con la suma FINAL (después del abono)
+                $saldoRestante = $montoTotalDeuda - $totalAbonadoDespues;
+
+                // >>> 8. ACTUALIZAR es_pendiente DE LA DEUDA ORIGINAL <<<
+                // Si la suma de abonos == deuda original -> es_pendiente = 0 (ya no está pendiente)
+                // Si no son iguales -> sigue pendiente
+                if (abs($saldoRestante) < 0.01) { // tolerancia por decimales
+                    $deudaOriginal->es_pendiente = 0;
+                } else {
+                    $deudaOriginal->es_pendiente = 1;
+                }
+                $deudaOriginal->save();
+
+                // 6. Registrar datos bancarios si aplica
+                $datos_pago = null;
+                if ($tipo === 'bancos') {
+                    $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
+
+                    if (!$cuenta_bancaria) {
+                        throw new \Exception('La cuenta bancaria proporcionada no existe.');
+                    }
+
+                    // Determinamos qué modelo usar para los detalles (Ingreso o Egreso)
+                    if ($idClasificacion == 1) {
+                        $datos_pago = new datos_de_pago_ingresos(); // Si la cuenta es de Ingresos
+                    } else {
+                        $datos_pago = new datos_de_pago_egresos(); // Si la cuenta es de Egresos
+                    }
+
+                    $datos_pago->id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
+                    $datos_pago->documento = $request->input('documento');
+                    $datos_pago->numero_documento = $request->input('numero_documento');
+                    $datos_pago->fecha_emision = $request->input('fecha_emision');
+                    $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
+                    $datos_pago->save();
+                }
+
+                return response()->json([
+                    'message'         => 'Abono registrado correctamente',
+                    'registro'        => $ingreso_egreso,
+                    'detalles_banco'  => $datos_pago,
+                    'abono'           => $ingreso_egreso,
+                    'saldo_restante'  => number_format($saldoRestante, 2, '.', ''),
+                    'total_abonado'   => number_format($totalAbonadoDespues, 2, '.', ''),
+                    'deuda_original'  => [
+                        'id'             => $deudaOriginal->id_ingresos_egresos,
+                        'monto_deuda'    => number_format($montoTotalDeuda, 2, '.', ''),
+                        'es_pendiente'   => $deudaOriginal->es_pendiente,
+                    ],
+                ], 201);
+
+            });
+
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 

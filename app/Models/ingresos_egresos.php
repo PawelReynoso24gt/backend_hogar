@@ -27,4 +27,11 @@ class ingresos_egresos extends Model
     {
         return $this->hasMany(datos_de_pago_egresos::class, 'id_ingresos_egresos');
     }
+
+    // Relación: Una deuda (ingresos_egresos) tiene muchos pagos registrados en pago_pendientes
+    public function pagosRealizados()
+    {
+        // La llave foránea en pago_pendientes es 'id_ingresos_egresos' (la deuda original)
+        return $this->hasMany(pago_pendientes::class, 'id_ingresos_egresos', 'id_ingresos_egresos');
+    }
 }
