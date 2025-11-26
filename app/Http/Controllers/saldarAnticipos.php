@@ -10,6 +10,7 @@ use App\Http\Controllers\ingresos_egresosController;
 use App\Http\Controllers\pagoPendientesController;
 use App\Models\pago_pendientes;
 use App\Models\ingresos_egresos;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class saldarAnticipos extends Controller
 {
@@ -38,6 +39,34 @@ class saldarAnticipos extends Controller
             $result = DB::transaction(function () use ($request) {
                 // Llamar al método create del controlador ingresos_egresosController
                 $ieController = new ingresos_egresosController();
+
+                // Antes de crear, validar que el monto_pago solicitado no exceda el faltante
+                $originalId = $request->input('id_ingresos_egresos');
+
+                // Bloquear la fila del ingreso/egreso para evitar condiciones de carrera
+                $ingresoLock = ingresos_egresos::where('id_ingresos_egresos', $originalId)->lockForUpdate()->first();
+                if (!$ingresoLock) {
+                    throw new HttpResponseException(response()->json(['error' => 'Registro de ingreso/egreso no encontrado.'], 404));
+                }
+
+                $monto_original_check = (float) $ingresoLock->monto;
+                $monto_pagado_raw_check = (float) pago_pendientes::where('id_ingresos_egresos', $originalId)->sum('monto_pago');
+                $monto_pagado_check = min($monto_pagado_raw_check, $monto_original_check);
+                $monto_faltante_check = $monto_original_check - $monto_pagado_check;
+                if ($monto_faltante_check < 0) {
+                    $monto_faltante_check = 0;
+                }
+
+                $requestedPago = (float) $request->input('monto_pago');
+                if ($requestedPago > $monto_faltante_check) {
+                    throw new HttpResponseException(response()->json([
+                        'error' => 'El monto solicitado a pagar excede el monto faltante.',
+                        'monto_original' => $monto_original_check,
+                        'monto_pagado' => $monto_pagado_check,
+                        'monto_faltante' => $monto_faltante_check,
+                        'monto_solicitado' => $requestedPago,
+                    ], 422));
+                }
 
                 // incluir 'monto_pago' para que createSaldarAG lo use como monto_haber
                 $createPayload = new Request($request->only([
@@ -104,6 +133,8 @@ class saldarAnticipos extends Controller
             });
 
             return response()->json($result, 201);
+        } catch (HttpResponseException $e) {
+            return $e->getResponse();
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
@@ -111,9 +142,10 @@ class saldarAnticipos extends Controller
 
     public function getMontoFaltante(Request $request)
     {
-        // Validar que venga el id del ingreso/egreso
+        // Validar que venga el id del ingreso/egreso y opcionalmente un monto a pagar
         $request->validate([
             'id_ingresos_egresos' => 'required|integer|exists:ingresos_egresos,id_ingresos_egresos',
+            'monto_pago' => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -128,12 +160,44 @@ class saldarAnticipos extends Controller
             $monto_original = (float) $ingreso->monto;
 
             // Sumar todos los pagos registrados en pago_pendientes para ese id_ingresos_egresos
-            $monto_pagado = (float) pago_pendientes::where('id_ingresos_egresos', $id)->sum('monto_pago');
+            $monto_pagado_raw = (float) pago_pendientes::where('id_ingresos_egresos', $id)->sum('monto_pago');
+
+            // No permitir que la suma reportada de pagos exceda el monto original a efectos del cálculo
+            $monto_pagado = min($monto_pagado_raw, $monto_original);
 
             // Calcular monto faltante en tiempo real (no se guarda en BD)
             $monto_faltante = $monto_original - $monto_pagado;
-            if ($monto_faltante < 0) {
+            if ($monto_faltante <= 0) {
                 $monto_faltante = 0;
+
+                // Si ya no falta monto, asegurarse de marcar el registro como no pendiente
+                if ((int) $ingreso->es_pendiente === 1) {
+                    try {
+                        DB::beginTransaction();
+                        $ingreso->es_pendiente = 0;
+                        $ingreso->save();
+                        DB::commit();
+                    } catch (\Throwable $e) {
+                        DB::rollBack();
+                        // No detener la respuesta por error en el update; incluir mensaje en la respuesta opcionalmente
+                        return response()->json(['error' => 'Error al actualizar es_pendiente: ' . $e->getMessage()], 500);
+                    }
+                }
+            }
+
+            // Si el cliente envía un monto a pagar, validar que no exceda el faltante
+            $requestedPago = $request->input('monto_pago');
+            if (!is_null($requestedPago)) {
+                $requestedPago = (float) $requestedPago;
+                if ($requestedPago > $monto_faltante) {
+                    return response()->json([
+                        'error' => 'El monto solicitado a pagar excede el monto faltante.',
+                        'monto_original' => $monto_original,
+                        'monto_pagado' => $monto_pagado,
+                        'monto_faltante' => $monto_faltante,
+                        'monto_solicitado' => $requestedPago,
+                    ], 422);
+                }
             }
 
             return response()->json([
