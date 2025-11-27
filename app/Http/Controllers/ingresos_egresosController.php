@@ -8491,6 +8491,7 @@ class ingresos_egresosController extends Controller
             $data = DB::table('ingresos_egresos')
                 ->leftJoin('cuentas', 'ingresos_egresos.id_cuentas', '=', 'cuentas.id_cuentas')
                 ->select(
+                    'ingresos_egresos.id_ingresos_egresos',
                     'ingresos_egresos.fecha',
                     'ingresos_egresos.nomenclatura',
                     'ingresos_egresos.nombre',
