@@ -65,6 +65,8 @@ class cuentasController extends Controller
                     'codigo' => $cuenta->codigo,
                     'id_clasificacion' => $cuenta->id_clasificacion,
                     'id_proyectos' => $cuenta->id_proyectos,
+                    'tipo_cuenta' => $cuenta->tipo_cuenta,
+                    'corriente' => $cuenta->corriente,
                     // 'created_at' => $cuenta->created_at,
                     // 'updated_at' => $cuenta->updated_at,
                     'clasificacion' => $cuenta->clasificacion->clasificacion,
@@ -101,6 +103,8 @@ class cuentasController extends Controller
                         'codigo' => $cuenta->codigo,
                         'id_proyectos' => $cuenta->id_proyectos,
                         'id_clasificacion' => $cuenta->id_clasificacion,
+                        'tipo_cuenta' => $cuenta->tipo_cuenta,
+                        'corriente' => $cuenta->corriente,
                         // 'created_at' => $cuenta->created_at,
                         // 'updated_at' => $cuenta->updated_at,
                         'clasificacion' => $cuenta->clasificacion ? $cuenta->clasificacion->clasificacion : null,
@@ -123,7 +127,9 @@ class cuentasController extends Controller
             //estado' => 'required|boolean',
             'codigo' => 'required|string',
             'clasificacion' => 'required|string',
-            'proyecto' => 'required|string'
+            'proyecto' => 'required|string',
+            'tipo_cuenta' => 'required|integer',
+            'corriente' => 'required|integer'
         ]);
 
         try {
@@ -150,6 +156,8 @@ class cuentasController extends Controller
             $cuenta->codigo = $request->input('codigo');
             $cuenta->id_clasificacion = $clasificacion->id_clasificacion;
             $cuenta->id_proyectos = $proyecto->id_proyectos;
+            $cuenta->tipo_cuenta = $request->input('tipo_cuenta');
+            $cuenta->corriente = $request->input('corriente');
             $cuenta->save();
 
             return response()->json($cuenta, 201);
@@ -180,7 +188,9 @@ class cuentasController extends Controller
                 'estado' => $cuenta->estado = 1,
                 'codigo' => $cuenta->codigo,
                 'clasificacion' => $cuenta->clasificacion ? $cuenta->clasificacion->tipo : null,
-                'proyecto' => $cuenta->proyecto ? $cuenta->proyecto->nombre : null
+                'proyecto' => $cuenta->proyecto ? $cuenta->proyecto->nombre : null,
+                'tipo_cuenta' => $cuenta->tipo_cuenta,
+                'corriente' => $cuenta->corriente,
                 // Puedes agregar más atributos si lo deseas
             ];
 
@@ -237,6 +247,14 @@ class cuentasController extends Controller
                 }
 
                 $cuenta->id_proyectos = $proyecto->id_proyectos;
+            }
+
+            if ($request->has('tipo_cuenta')) {
+                $cuenta->tipo_cuenta = $request->input('tipo_cuenta');
+            }
+
+            if ($request->has('corriente')) {
+                $cuenta->corriente = $request->input('corriente');
             }
 
             // Guardar los cambios
@@ -383,7 +401,9 @@ class cuentasController extends Controller
                     'id_clasificacion' => $cuenta->id_clasificacion,
                     'id_proyectos' => $cuenta->id_proyectos,
                     'clasificacion' => $cuenta->clasificacion->clasificacion,
-                    'proyecto' => $cuenta->proyecto->proyecto
+                    'proyecto' => $cuenta->proyecto->proyecto,
+                    'tipo_cuenta' => $cuenta->tipo_cuenta,
+                    'corriente' => $cuenta->corriente,
                 ];
             });
 
