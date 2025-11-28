@@ -86,12 +86,92 @@ class reportesGenerales extends Controller
                     })->sum('monto');
 
                     if ($ingresos > 0 || $egresos > 0) {
-                        $result = ['cuenta' => $group->first()->cuentas->cuenta];
+                        $firstCuenta = $group->first()->cuentas ?? null;
+                        $cuentaName = $firstCuenta ? $firstCuenta->cuenta : ($group->first()->cuentas->cuenta ?? 'Sin cuenta');
+                        $tipo_cuenta = $firstCuenta ? intval($firstCuenta->tipo_cuenta) : null;
+                        $corriente = $firstCuenta ? intval($firstCuenta->corriente) : null;
+
+                        $result = ['cuenta' => $cuentaName, 'tipo_cuenta' => $tipo_cuenta, 'corriente' => $corriente];
                         if ($ingresos > 0) $result['ingresos'] = number_format($ingresos, 2);
                         if ($egresos > 0) $result['egresos'] = number_format($egresos, 2);
                         return $result;
                     }
                 })->filter()->values();
+            };
+
+            // Helper to build the ordered APARTADO structure requested by the user
+            $buildApartados = function ($dataCaja, $dataBancos) {
+                $apartados = [
+                    'APARTADO INGRESOS' => [
+                        'ACTIVO' => [
+                            'CAJA GENERAL' => ['CORRIENTE' => [], 'NO CORRIENTE' => []],
+                            'BANCOS' => ['CORRIENTE' => [], 'NO CORRIENTE' => []]
+                        ]
+                    ],
+                    'APARTADO EGRESOS' => [
+                        'PASIVO' => [
+                            'CAJA GENERAL' => ['CORRIENTE' => [], 'NO CORRIENTE' => []],
+                            'BANCOS' => ['CORRIENTE' => [], 'NO CORRIENTE' => []]
+                        ]
+                    ]
+                ];
+
+                $groupByCuenta = function ($collection) {
+                    return $collection->groupBy('cuentas.cuenta')->map(function ($group) {
+                        $ingresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'IN') === 0;
+                        })->sum('monto');
+
+                        $egresos = $group->filter(function ($item) {
+                            return strpos($item->nomenclatura, 'EG') === 0;
+                        })->sum('monto');
+
+                        $firstCuenta = $group->first()->cuentas ?? null;
+                        $cuentaName = $firstCuenta ? $firstCuenta->cuenta : ($group->first()->cuentas->cuenta ?? 'Sin cuenta');
+                        $tipo = $firstCuenta ? intval($firstCuenta->tipo_cuenta) : 1;
+                        $corriente = $firstCuenta ? intval($firstCuenta->corriente) : 1;
+
+                        $result = [
+                            'cuenta' => $cuentaName,
+                            'tipo_cuenta' => $tipo,
+                            'corriente' => $corriente
+                        ];
+                        if ($ingresos > 0) $result['ingresos'] = number_format($ingresos, 2);
+                        if ($egresos > 0) $result['egresos'] = number_format($egresos, 2);
+                        return $result;
+                    })->filter()->values();
+                };
+
+                $cajaGrouped = $groupByCuenta($dataCaja);
+                $bancosGrouped = $groupByCuenta($dataBancos);
+
+                // Fill CAJA GENERAL first
+                foreach ($cajaGrouped as $item) {
+                    $corriente = $item['corriente'];
+                    if (isset($item['ingresos'])) {
+                        if ($corriente === 1) $apartados['APARTADO INGRESOS']['ACTIVO']['CAJA GENERAL']['CORRIENTE'][] = $item;
+                        else $apartados['APARTADO INGRESOS']['ACTIVO']['CAJA GENERAL']['NO CORRIENTE'][] = $item;
+                    }
+                    if (isset($item['egresos'])) {
+                        if ($corriente === 1) $apartados['APARTADO EGRESOS']['PASIVO']['CAJA GENERAL']['CORRIENTE'][] = $item;
+                        else $apartados['APARTADO EGRESOS']['PASIVO']['CAJA GENERAL']['NO CORRIENTE'][] = $item;
+                    }
+                }
+
+                // Then BANCOS
+                foreach ($bancosGrouped as $item) {
+                    $corriente = $item['corriente'];
+                    if (isset($item['ingresos'])) {
+                        if ($corriente === 1) $apartados['APARTADO INGRESOS']['ACTIVO']['BANCOS']['CORRIENTE'][] = $item;
+                        else $apartados['APARTADO INGRESOS']['ACTIVO']['BANCOS']['NO CORRIENTE'][] = $item;
+                    }
+                    if (isset($item['egresos'])) {
+                        if ($corriente === 1) $apartados['APARTADO EGRESOS']['PASIVO']['BANCOS']['CORRIENTE'][] = $item;
+                        else $apartados['APARTADO EGRESOS']['PASIVO']['BANCOS']['NO CORRIENTE'][] = $item;
+                    }
+                }
+
+                return $apartados;
             };
 
             // Para cada tipo calculamos fechaInicial y fechaFinal; replicamos la lógica original
@@ -180,6 +260,8 @@ class reportesGenerales extends Controller
                 $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
                 $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
 
+                $apartados = $buildApartados($dataCaja, $dataBancos);
+
                 return response()->json([
                     'fecha_anterior' => $fechaAnterior,
                     'mes' => $mes,
@@ -196,6 +278,8 @@ class reportesGenerales extends Controller
                     'total_general_egresos' => $totalGeneralEgresos,
                     'data_caja' => $dataGroupedCaja,
                     'data_bancos' => $dataGroupedBancos,
+                    'APARTADO INGRESOS' => $apartados['APARTADO INGRESOS'],
+                    'APARTADO EGRESOS' => $apartados['APARTADO EGRESOS'],
                     'total_saldo_final' => $saldoFinal,
                     'total_saldo_final_caja' => $saldoFinalCaja,
                     'total_saldo_final_bancos' => $saldoFinalBancos,
@@ -255,6 +339,8 @@ class reportesGenerales extends Controller
                 $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
                 $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
 
+                $apartados = $buildApartados($dataCaja, $dataBancos);
+
                 return response()->json([
                     'fecha_anterior' => $fechaAnterior,
                     'mes' => $mes,
@@ -271,6 +357,8 @@ class reportesGenerales extends Controller
                     'total_general_egresos' => $totalGeneralEgresos,
                     'data_caja' => $dataGroupedCaja,
                     'data_bancos' => $dataGroupedBancos,
+                    'APARTADO INGRESOS' => $apartados['APARTADO INGRESOS'],
+                    'APARTADO EGRESOS' => $apartados['APARTADO EGRESOS'],
                     'total_saldo_final' => $saldoFinal,
                     'total_saldo_final_caja' => $saldoFinalCaja,
                     'total_saldo_final_bancos' => $saldoFinalBancos,
@@ -322,6 +410,8 @@ class reportesGenerales extends Controller
                 $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
                 $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
 
+                $apartados = $buildApartados($dataCaja, $dataBancos);
+
                 return response()->json([
                     'fecha_anterior' => $fechaAnterior,
                     'mes' => $mes,
@@ -338,6 +428,8 @@ class reportesGenerales extends Controller
                     'total_general_egresos' => $totalGeneralEgresos,
                     'data_caja' => $dataGroupedCaja,
                     'data_bancos' => $dataGroupedBancos,
+                    'APARTADO INGRESOS' => $apartados['APARTADO INGRESOS'],
+                    'APARTADO EGRESOS' => $apartados['APARTADO EGRESOS'],
                     'total_saldo_final' => $saldoFinal,
                     'total_saldo_final_caja' => $saldoFinalCaja,
                     'total_saldo_final_bancos' => $saldoFinalBancos,
