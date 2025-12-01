@@ -99,6 +99,10 @@ class ingresos_egresosController extends Controller
                 'proyecto' => $ingreso_egreso->cuentas && $ingreso_egreso->cuentas->proyecto 
                     ? $ingreso_egreso->cuentas->proyecto->nombre 
                     : 'Proyecto no especificado',
+                // Se envía como 'proyecto_id' para que coincida con VueJS
+                'proyecto_id' => $ingreso_egreso->cuentas && $ingreso_egreso->cuentas->proyecto 
+                    ? $ingreso_egreso->cuentas->proyecto->id_proyectos // Accedemos al atributo id_proyectos
+                    : null,
                 'movimientos' => []
             ];
             
