@@ -91,6 +91,9 @@ Route::prefix('cuentas')->group(function () {
 Route::prefix('in_eg')->group(function() {
     Route::get('/get', [ingresos_egresosController::class, 'get']);
 
+    // get para partidas (se trae un ingreso o egreso específico)
+    Route::get('/partida-contable/{id}', [ingresos_egresosController::class, 'generarPartidaContable']);
+
     // get y post de pendientes de ingreso y egresos
     Route::get('/get/transacciones_pendientes', [ingresos_egresosController::class, 'getTransaccionesPendientes']);
     Route::post('/saldar_pendiente', [ingresos_egresosController::class, 'pendienteSaldado']);

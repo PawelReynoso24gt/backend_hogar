@@ -29,6 +29,163 @@ class ingresos_egresosController extends Controller
         }
     }
 
+    // Método para generar partida contable con IVA (con inversión para pendientes)
+    public function generarPartidaContable($id_ingresos_egresos)
+    {
+        try {
+            $ingreso_egreso = ingresos_egresos::with('cuentas.clasificacion')
+                ->findOrFail($id_ingresos_egresos);
+            
+            $monto_original = floatval($ingreso_egreso->monto);
+            
+            // Cálculos con alta precisión
+            $base_calculada = $monto_original / 1.12;
+            $iva_calculado = $monto_original - $base_calculada;
+            
+            // Redondear a 2 decimales
+            $base = round($base_calculada, 2);
+            $iva = round($iva_calculado, 2);
+            
+            // Ajustar para que base + IVA = monto_original
+            $diferencia_ajuste = $monto_original - ($base + $iva);
+            
+            // Si hay diferencia por redondeo, ajustar en la base (cuenta principal)
+            if (abs($diferencia_ajuste) > 0) {
+                $base += $diferencia_ajuste;
+            }
+            
+            // Formatear para mostrar (2 decimales)
+            $monto = number_format($monto_original, 2, '.', '');
+            $base = number_format($base, 2, '.', '');
+            $iva = number_format($iva, 2, '.', '');
+            
+            $tipoClasificacion = $ingreso_egreso->cuentas->clasificacion->tipo;
+            $cuentaPrincipal = $ingreso_egreso->cuentas->cuenta;
+            $medioPago = $ingreso_egreso->tipo; // caja o bancos
+            
+            // LÓGICA DE INVERSIÓN - DETERMINAR CUENTA DE MEDIO DE PAGO
+            $cuentaMedioPago = '';
+            $codigoMedioPago = '';
+            
+            if ($tipoClasificacion == 'INGRESOS') {
+                // PARA INGRESOS: Si tiene monto_haber, es cuenta por cobrar, sino caja/bancos
+                if ($ingreso_egreso->monto_haber && floatval($ingreso_egreso->monto_haber) > 0) {
+                    $cuentaMedioPago = 'Cuentas por Cobrar';
+                    $codigoMedioPago = '1103'; // Código para Cuentas por Cobrar
+                } else {
+                    $cuentaMedioPago = ($medioPago == 'caja') ? 'Caja' : 'Bancos';
+                    $codigoMedioPago = ($medioPago == 'caja') ? '1101' : '1102';
+                }
+            } elseif ($tipoClasificacion == 'EGRESOS') {
+                // PARA EGRESOS: Si tiene monto_debe, es cuenta por pagar, sino caja/bancos
+                if ($ingreso_egreso->monto_debe && floatval($ingreso_egreso->monto_debe) > 0) {
+                    $cuentaMedioPago = 'Cuentas por Pagar';
+                    $codigoMedioPago = '2102'; // Código para Cuentas por Pagar
+                } else {
+                    $cuentaMedioPago = ($medioPago == 'caja') ? 'Caja' : 'Bancos';
+                    $codigoMedioPago = ($medioPago == 'caja') ? '1101' : '1102';
+                }
+            }
+            
+            $partida = [
+                'id_ingresos_egresos' => $ingreso_egreso->id_ingresos_egresos,
+                'nomenclatura' => $ingreso_egreso->nomenclatura,
+                'fecha' => $ingreso_egreso->fecha,
+                'descripcion' => $ingreso_egreso->descripcion,
+                'tipo_clasificacion' => $tipoClasificacion,
+                'es_pendiente' => $ingreso_egreso->es_pendiente,
+                'monto_debe' => $ingreso_egreso->monto_debe,
+                'monto_haber' => $ingreso_egreso->monto_haber, 
+                'proyecto' => $ingreso_egreso->cuentas && $ingreso_egreso->cuentas->proyecto 
+                    ? $ingreso_egreso->cuentas->proyecto->nombre 
+                    : 'Proyecto no especificado',
+                'movimientos' => []
+            ];
+            
+            if ($tipoClasificacion == 'INGRESOS') {
+                // PARTIDA PARA INGRESOS
+                $partida['movimientos'] = [
+                    [
+                        'codigo' => $codigoMedioPago,
+                        'cuenta' => $cuentaMedioPago,
+                        'debito' => (float) $monto,
+                        'credito' => 0.00,
+                        'descripcion' => 'Recibo de ingreso en ' . $cuentaMedioPago
+                    ],
+                    [
+                        'codigo' => '4101',
+                        'cuenta' => $cuentaPrincipal,
+                        'debito' => 0.00,
+                        'credito' => (float) $base,
+                        'descripcion' => 'Ingreso por venta/servicio'
+                    ],
+                    [
+                        'codigo' => '2101',
+                        'cuenta' => 'IVA por Pagar',
+                        'debito' => 0.00,
+                        'credito' => (float) $iva,
+                        'descripcion' => 'IVA generado'
+                    ]
+                ];
+                
+            } elseif ($tipoClasificacion == 'EGRESOS') {
+                // PARTIDA PARA EGRESOS
+                $partida['movimientos'] = [
+                    [
+                        'codigo' => '5101',
+                        'cuenta' => $cuentaPrincipal,
+                        'debito' => (float) $base,
+                        'credito' => 0.00,
+                        'descripcion' => 'Gasto por ' . strtolower($cuentaPrincipal)
+                    ],
+                    [
+                        'codigo' => '1105',
+                        'cuenta' => 'IVA por Cobrar',
+                        'debito' => (float) $iva,
+                        'credito' => 0.00,
+                        'descripcion' => 'IVA crédito fiscal'
+                    ],
+                    [
+                        'codigo' => $codigoMedioPago,
+                        'cuenta' => $cuentaMedioPago,
+                        'debito' => 0.00,
+                        'credito' => (float) $monto,
+                        'descripcion' => 'Pago realizado en ' . $cuentaMedioPago
+                    ]
+                ];
+            }
+            
+            // Calcular totales
+            $totalDebito = array_sum(array_column($partida['movimientos'], 'debito'));
+            $totalCredito = array_sum(array_column($partida['movimientos'], 'credito'));
+            
+            $partida['totales'] = [
+                'total_debito' => number_format($totalDebito, 2, '.', ''),
+                'total_credito' => number_format($totalCredito, 2, '.', ''),
+                'diferencia' => number_format($totalDebito - $totalCredito, 2, '.', ''),
+                'balanceada' => ($totalDebito == $totalCredito)
+            ];
+            
+            // Información de cálculo para debugging
+            $partida['calculos_internos'] = [
+                'base_calculada' => number_format($base_calculada, 6, '.', ''),
+                'iva_calculado' => number_format($iva_calculado, 6, '.', ''),
+                'base_redondeada' => $base,
+                'iva_redondeado' => $iva,
+                'diferencia_ajuste' => number_format($diferencia_ajuste, 6, '.', ''),
+                'monto_original' => $ingreso_egreso->monto,
+                'verificacion' => number_format((float)$base + (float)$iva, 2, '.', '') . ' = ' . $monto,
+                'cuenta_medio_pago' => $cuentaMedioPago,
+                'codigo_medio_pago' => $codigoMedioPago
+            ];
+            
+            return response()->json($partida, 200);
+            
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
     public function getTransaccionesPendientes(Request $request)
     {
         // 1. Validar y obtener los filtros
