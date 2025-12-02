@@ -34,4 +34,4 @@ class ingresos_egresos extends Model
         // La llave foránea en pago_pendientes es 'id_ingresos_egresos' (la deuda original)
         return $this->hasMany(pago_pendientes::class, 'id_ingresos_egresos', 'id_ingresos_egresos');
     }
-}
+} 
