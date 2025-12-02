@@ -505,6 +505,7 @@ class cuentasController extends Controller
             }
 
             $movimientos[] = [
+                'id_ingresos_egresos' => $row->id_ingresos_egresos,
                 'nomenclatura'     => $row->nomenclatura,
                 'numero_documento' => $numeroDocumento,
                 'fecha'            => $row->fecha,
