@@ -10,7 +10,7 @@ class cuentas extends Model
     use HasFactory;
     protected $table = 'cuentas';
     protected $primaryKey = 'id_cuentas';
-    protected $fillable = ['cuenta', 'estado', 'codigo', 'id_clasificacion', 'id_proyectos'];
+    protected $fillable = ['cuenta', 'estado', 'codigo', 'id_clasificacion', 'id_proyectos', 'tipo_cuenta', 'corriente'];
 
 
     //FUncion para el estado 1 cuando se crea
