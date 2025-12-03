@@ -87,40 +87,49 @@ class cuentasController extends Controller
 
     //metodo buscar cuentas crud cuentas
     // Método get de cuentas con nombres de proyectos
-        // Método get de cuentas con nombres de proyectos
-        public function GetCuentasCRUD($nombre)
-        {
-            try {
-                $data = cuentas::with(['clasificacion' => function ($query) {
-                        $query->select('id_clasificacion', 'tipo as clasificacion');
-                    }, 'proyecto' => function ($query) {
-                        $query->select('id_proyectos', 'nombre as proyecto');
-                    }])->where('cuenta', $nombre)->get();
-        
-                // Mapear los resultados para formatear la respuesta
-                $formattedData = $data->map(function ($cuenta) {
-                    return [
-                        'id_cuentas' => $cuenta->id_cuentas,
-                        'cuenta' => $cuenta->cuenta,
-                        'estado' => $cuenta->estado,
-                        'codigo' => $cuenta->codigo,
-                        'id_proyectos' => $cuenta->id_proyectos,
-                        'id_clasificacion' => $cuenta->id_clasificacion,
-                        'tipo_cuenta' => $cuenta->tipo_cuenta,
-                        'corriente' => $cuenta->corriente,
-                        // 'created_at' => $cuenta->created_at,
-                        // 'updated_at' => $cuenta->updated_at,
-                        'clasificacion' => $cuenta->clasificacion ? $cuenta->clasificacion->clasificacion : null,
-                        'proyecto' => $cuenta->proyecto ? $cuenta->proyecto->proyecto : null
-                    ];
-                });
-        
-                return response()->json($formattedData, 200);
-            } catch (\Throwable $th) {
-                return response()->json(['error' => $th->getMessage()], 500);
+    // Método get de cuentas con nombres de proyectos
+    // Método get de cuentas con filtro por nombre y opcionalmente por id
+    public function GetCuentasCRUD($nombre, Request $request)
+    {
+        try {
+            // Obtener id_cuentas del query string si está presente
+            $idCuentas = $request->query('id_cuentas');
+            
+            $query = cuentas::with(['clasificacion' => function ($query) {
+                    $query->select('id_clasificacion', 'tipo as clasificacion');
+                }, 'proyecto' => function ($query) {
+                    $query->select('id_proyectos', 'nombre as proyecto');
+                }])->where('cuenta', $nombre);
+            
+            // Si se proporciona id_cuentas, filtrar por él
+            if ($idCuentas) {
+                $query->where('id_cuentas', $idCuentas);
             }
+            
+            $data = $query->get();
+            
+            // Mapear los resultados para formatear la respuesta
+            $formattedData = $data->map(function ($cuenta) {
+                return [
+                    'id_cuentas' => $cuenta->id_cuentas,
+                    'cuenta' => $cuenta->cuenta,
+                    'estado' => $cuenta->estado,
+                    'codigo' => $cuenta->codigo,
+                    'id_proyectos' => $cuenta->id_proyectos,
+                    'id_clasificacion' => $cuenta->id_clasificacion,
+                    'tipo_cuenta' => $cuenta->tipo_cuenta,
+                    'corriente' => $cuenta->corriente,
+                    'clasificacion' => $cuenta->clasificacion ? $cuenta->clasificacion->clasificacion : null,
+                    'proyecto' => $cuenta->proyecto ? $cuenta->proyecto->proyecto : null
+                ];
+            });
+            
+            return response()->json($formattedData, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
         }
-        
+    }
+
     // Métdo Create con nombres
     public function create(Request $request)
     {
@@ -203,70 +212,63 @@ class cuentasController extends Controller
         }
     }
 
-    // Método update por nombre de cuenta
-    public function update(Request $request, $cuenta)
+    // Método para actualizar cuenta por id_cuentas
+    public function updateById(Request $request, $id_cuentas)
     {
         try {
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', $cuenta)->first();
-
-            // Verificar si la cuenta existe
+            $cuenta = cuentas::find($id_cuentas);
+            
             if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta no existe'], 404);
+                return response()->json(['error' => 'Cuenta no encontrada'], 404);
             }
 
-            // Actualizar solo los campos que se hayan enviado en la solicitud
+            // Validar y actualizar los campos
             if ($request->has('cuenta')) {
-                $cuenta->cuenta = $request->input('cuenta');
+                $cuenta->cuenta = $request->cuenta;
             }
-
-            if ($request->has('codigo')) {
-                $cuenta->codigo = $request->input('codigo');
-            }
-
+            
             if ($request->has('estado')) {
-                $cuenta->estado = $request->input('estado');
+                $cuenta->estado = $request->estado;
             }
-
+            
+            if ($request->has('codigo')) {
+                $cuenta->codigo = $request->codigo;
+            }
+            
             if ($request->has('clasificacion')) {
-                // Buscar la clasificación por su tipo
-                $clasificacion = clasificacion::where('tipo', $request->input('clasificacion'))->first();
-
-                // Si la clasificación no se encuentra, devolver un error
-                if (!$clasificacion) {
-                    return response()->json(['error' => 'La clasificación proporcionada no existe'], 404);
+                // Aquí necesitas convertir el nombre de clasificación a id
+                // Supongamos que tienes una tabla clasificaciones
+                $clasificacion = DB::table('clasificacion')
+                    ->where('tipo', $request->clasificacion)
+                    ->first();
+                    
+                if ($clasificacion) {
+                    $cuenta->id_clasificacion = $clasificacion->id_clasificacion;
                 }
-
-                $cuenta->id_clasificacion = $clasificacion->id_clasificacion;
             }
-
+            
             if ($request->has('proyecto')) {
-                // Buscar el proyecto por su nombre
-                $proyecto = proyectos::where('nombre', $request->input('proyecto'))->first();
-
-                // Si el proyecto no se encuentra, devolver un error
-                if (!$proyecto) {
-                    return response()->json(['error' => 'El proyecto proporcionado no existe'], 404);
+                // Convertir nombre de proyecto a id
+                $proyecto = DB::table('proyectos')
+                    ->where('nombre', $request->proyecto)
+                    ->first();
+                    
+                if ($proyecto) {
+                    $cuenta->id_proyectos = $proyecto->id_proyectos;
                 }
-
-                $cuenta->id_proyectos = $proyecto->id_proyectos;
             }
-
+            
             if ($request->has('tipo_cuenta')) {
-                $cuenta->tipo_cuenta = $request->input('tipo_cuenta');
+                $cuenta->tipo_cuenta = $request->tipo_cuenta;
             }
-
+            
             if ($request->has('corriente')) {
-                $cuenta->corriente = $request->input('corriente');
+                $cuenta->corriente = $request->corriente;
             }
-
-            // Guardar los cambios
+            
             $cuenta->save();
-
-            // Obtener la cuenta actualizada
-            $updatedCuenta = Cuentas::find($cuenta->id_cuentas);
-
-            return response()->json($updatedCuenta, 200);
+            
+            return response()->json(['message' => 'Cuenta actualizada correctamente'], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

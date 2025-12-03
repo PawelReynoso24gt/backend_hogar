@@ -82,7 +82,7 @@ Route::prefix('cuentas')->group(function () {
     Route::get('/getCuentasEgresos', [cuentasController::class, 'getCuentasEgresos']);
     Route::post('/create', [cuentasController::class, 'create']);
     Route::get('/getCuentaName/{nombre}', [cuentasController::class, 'getByNombre']);
-    Route::put('/update/{cuenta}', [cuentasController::class, 'update']);
+    Route::put('/updateById/{id_cuentas}', [cuentasController::class, 'updateById']);
     Route::post('/libro-diario/por-cuenta', [cuentasController::class, 'getMovimientosPorCuenta']);
     // Route::post('/create', [cuentasController::class, 'create']);
     // Route::put('/update/{id}', [cuentasController::class, 'update']);
