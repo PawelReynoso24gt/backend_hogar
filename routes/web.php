@@ -164,7 +164,7 @@ Route::prefix('in_eg')->group(function () {
     // reportes generales (nuevos controladores optimizados)
     Route::post('/reporteGeneralAG', [reportesGenerales::class, 'reporteGeneralAgricola']);
     Route::post('/reporteGeneralCA', [reportesGenerales::class, 'reporteGeneralCapilla']);
-    Route::post('/getReporteEstadoResultadosCA', [ingresos_egresosController::class, 'getReporteEstadoResultadosCA']);
+    Route::post('/getReporteEstadoResultadosCA', [ingresos_egresosController::class, 'getReporteEstadoResultadosCA']); // son estos
     Route::post('/getReporteEstadoResultadosAG', [ingresos_egresosController::class, 'getReporteEstadoResultadosAG']);
 
     // Anticipo sobre compras
