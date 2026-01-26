@@ -1,8 +1,8 @@
-<?php
+    <?php
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\LoginController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,3 +24,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/protected-route', [YourController::class, 'yourMethod']);
 });
 
+Route::post('/authenticate', [LoginController::class, 'authenticate']);

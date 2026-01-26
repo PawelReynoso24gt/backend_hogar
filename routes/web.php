@@ -28,15 +28,15 @@ Route::get('/', function () {
 });
 
 // Rutas de logins
-Route::prefix('logins')->group(function () {
-    Route::get('/getLogins', [LoginController::class, 'get']);
-    Route::get('/getLogins/{id}', [LoginController::class, 'getById']);
-    Route::get('/getProjectName/{usuarios}', [LoginController::class, 'getByNombre']);
-    Route::post('/create', [LoginController::class, 'create']);
-    Route::put('/update/{usuarios}', [LoginController::class, 'update']);
-    Route::delete('/delete/{id}', [LoginController::class, 'delete']);
-    Route::post('/authenticate', [LoginController::class, 'authenticate']);
-});
+    Route::prefix('logins')->group(function () {
+        Route::get('/getLogins', [LoginController::class, 'get']);
+        Route::get('/getLogins/{id}', [LoginController::class, 'getById']);
+        Route::get('/getProjectName/{usuarios}', [LoginController::class, 'getByNombre']);
+        Route::post('/create', [LoginController::class, 'create']);
+        Route::put('/update/{usuarios}', [LoginController::class, 'update']);
+        Route::delete('/delete/{id}', [LoginController::class, 'delete']);
+      
+    });
 // Rutas de Proyectos
 Route::prefix('proyectos')->group(function () {
     Route::get('/get', [ProjectsController::class, 'get']);
