@@ -9,494 +9,537 @@ use App\Models\cuentas;
 
 class reportesGenerales extends Controller
 {
-    // Reporte general para proyecto agrícola (id_proyectos = 1)
-    public function reporteGeneralAgricola(Request $request)
-    {
-        $validated = $request->validate([
-            'tipo' => 'required|string',
-            'mes' => 'required|string|in:enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
-        ]);
 
-        return $this->generateReport(1, $validated['tipo'], $validated['mes']);
-    }
-
-    // Reporte general para proyecto capilla (id_proyectos = 2)
-    public function reporteGeneralCapilla(Request $request)
-    {
-        $validated = $request->validate([
-            'tipo' => 'required|string',
-            'mes' => 'required|string|in:enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
-        ]);
-
-        return $this->generateReport(2, $validated['tipo'], $validated['mes']);
-    }
-
-    // Generador común del reporte, parametrizado por id_proyectos
-    private function generateReport(int $projectId, string $tipo, string $mes)
+   public function reporteGeneralAgricola(Request $request)
     {
         try {
-            // Variables comunes
-            $añoActual = Carbon::now()->year;
-            $fechaInicial = null;
-            $fechaFinal = null;
-            $fechaAnterior = null;
+            $idProyecto = 1;
 
-            // Helper para calcular saldos iniciales por tipo (bancos/caja)
-            $calcIniciales = function ($fechaInicial) use ($projectId) {
-                $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->where('tipo', 'bancos')
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+            $validated = $request->validate([
+                'tipo' => 'required|string|in:mensual,trimestral,semestral,anual',
 
-                $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->where('tipo', 'bancos')
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+                'mes' => 'nullable|string|in:enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
+                'year' => 'nullable|integer|min:2000|max:2100',
 
-                $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->where('tipo', 'caja')
-                    ->where('nomenclatura', 'like', 'IN%')
-                    ->sum('monto');
+                'fecha_inicio' => 'nullable|date',
+                'fecha_fin'    => 'nullable|date|after_or_equal:fecha_inicio',
+            ]);
 
-                $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->where('tipo', 'caja')
-                    ->where('nomenclatura', 'like', 'EG%')
-                    ->sum('monto');
+            $tipo = $validated['tipo'];
 
-                $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
-                $saldoInicialCaja = $ingresosAntCaja - $egresosAntCaja;
-                $saldoInicial = $saldoInicialBancos + $saldoInicialCaja;
-
-                return [$saldoInicialBancos, $saldoInicialCaja, $saldoInicial];
-            };
-
-            // Helper para agrupar y formatear datos por tipo (caja/bancos)
-            $groupAndFormat = function ($collection) {
-                return $collection->groupBy('cuentas.cuenta')->map(function ($group) {
-                    $ingresos = $group->filter(function ($item) {
-                        return strpos($item->nomenclatura, 'IN') === 0;
-                    })->sum('monto');
-
-                    $egresos = $group->filter(function ($item) {
-                        return strpos($item->nomenclatura, 'EG') === 0;
-                    })->sum('monto');
-
-                    if ($ingresos > 0 || $egresos > 0) {
-                        $firstCuenta = $group->first()->cuentas ?? null;
-                        $cuentaName = $firstCuenta ? $firstCuenta->cuenta : ($group->first()->cuentas->cuenta ?? 'Sin cuenta');
-                        $tipo_cuenta = $firstCuenta ? intval($firstCuenta->tipo_cuenta) : null;
-                        $corriente = $firstCuenta ? intval($firstCuenta->corriente) : null;
-
-                        $result = ['cuenta' => $cuentaName, 'tipo_cuenta' => $tipo_cuenta, 'corriente' => $corriente];
-                        if ($ingresos > 0) $result['ingresos'] = number_format($ingresos, 2);
-                        if ($egresos > 0) $result['egresos'] = number_format($egresos, 2);
-                        return $result;
-                    }
-                })->filter()->values();
-            };
-
-            // Helper to build the ordered APARTADO structure requested by the user
-            $buildApartados = function ($dataCaja, $dataBancos) {
-                $apartados = [
-                    'APARTADO INGRESOS' => [
-                        'ACTIVO' => [
-                            'CAJA GENERAL' => ['CORRIENTE' => [], 'NO CORRIENTE' => []],
-                            'BANCOS' => ['CORRIENTE' => [], 'NO CORRIENTE' => []]
-                        ]
-                    ],
-                    'APARTADO EGRESOS' => [
-                        'PASIVO' => [
-                            'CAJA GENERAL' => ['CORRIENTE' => [], 'NO CORRIENTE' => []],
-                            'BANCOS' => ['CORRIENTE' => [], 'NO CORRIENTE' => []]
-                        ]
-                    ]
-                ];
-
-                $groupByCuenta = function ($collection) {
-                    return $collection->groupBy('cuentas.cuenta')->map(function ($group) {
-                        $ingresos = $group->filter(function ($item) {
-                            return strpos($item->nomenclatura, 'IN') === 0;
-                        })->sum('monto');
-
-                        $egresos = $group->filter(function ($item) {
-                            return strpos($item->nomenclatura, 'EG') === 0;
-                        })->sum('monto');
-
-                        $firstCuenta = $group->first()->cuentas ?? null;
-                        $cuentaName = $firstCuenta ? $firstCuenta->cuenta : ($group->first()->cuentas->cuenta ?? 'Sin cuenta');
-                        $tipo = $firstCuenta ? intval($firstCuenta->tipo_cuenta) : 1;
-                        $corriente = $firstCuenta ? intval($firstCuenta->corriente) : 1;
-
-                        $result = [
-                            'cuenta' => $cuentaName,
-                            'tipo_cuenta' => $tipo,
-                            'corriente' => $corriente
-                        ];
-                        if ($ingresos > 0) $result['ingresos'] = number_format($ingresos, 2);
-                        if ($egresos > 0) $result['egresos'] = number_format($egresos, 2);
-                        return $result;
-                    })->filter()->values();
-                };
-
-                $cajaGrouped = $groupByCuenta($dataCaja);
-                $bancosGrouped = $groupByCuenta($dataBancos);
-
-                // Fill CAJA GENERAL first
-                foreach ($cajaGrouped as $item) {
-                    $corriente = $item['corriente'];
-                    if (isset($item['ingresos'])) {
-                        if ($corriente === 1) $apartados['APARTADO INGRESOS']['ACTIVO']['CAJA GENERAL']['CORRIENTE'][] = $item;
-                        else $apartados['APARTADO INGRESOS']['ACTIVO']['CAJA GENERAL']['NO CORRIENTE'][] = $item;
-                    }
-                    if (isset($item['egresos'])) {
-                        if ($corriente === 1) $apartados['APARTADO EGRESOS']['PASIVO']['CAJA GENERAL']['CORRIENTE'][] = $item;
-                        else $apartados['APARTADO EGRESOS']['PASIVO']['CAJA GENERAL']['NO CORRIENTE'][] = $item;
-                    }
-                }
-
-                // Then BANCOS
-                foreach ($bancosGrouped as $item) {
-                    $corriente = $item['corriente'];
-                    if (isset($item['ingresos'])) {
-                        if ($corriente === 1) $apartados['APARTADO INGRESOS']['ACTIVO']['BANCOS']['CORRIENTE'][] = $item;
-                        else $apartados['APARTADO INGRESOS']['ACTIVO']['BANCOS']['NO CORRIENTE'][] = $item;
-                    }
-                    if (isset($item['egresos'])) {
-                        if ($corriente === 1) $apartados['APARTADO EGRESOS']['PASIVO']['BANCOS']['CORRIENTE'][] = $item;
-                        else $apartados['APARTADO EGRESOS']['PASIVO']['BANCOS']['NO CORRIENTE'][] = $item;
-                    }
-                }
-
-                return $apartados;
-            };
-
-            // Para cada tipo calculamos fechaInicial y fechaFinal; replicamos la lógica original
-            if ($tipo === 'mensual') {
-                switch ($mes) {
-                    case 'enero':
-                        $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 1, 31);
-                        break;
-                    case 'febrero':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 1, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 2, Carbon::createFromDate($añoActual, 2, 1)->daysInMonth);
-                        break;
-                    case 'marzo':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 2, Carbon::createFromDate($añoActual, 2, 1)->daysInMonth);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 3, 31);
-                        break;
-                    case 'abril':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 3, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 4, 30);
-                        break;
-                    case 'mayo':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 4, 30);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 5, 31);
-                        break;
-                    case 'junio':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 5, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 6, 30);
-                        break;
-                    case 'julio':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 6, 30);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 7, 31);
-                        break;
-                    case 'agosto':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 7, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 8, 31);
-                        break;
-                    case 'septiembre':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 8, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 9, 30);
-                        break;
-                    case 'octubre':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 9, 30);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 10, 31);
-                        break;
-                    case 'noviembre':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 10, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 11, 30);
-                        break;
-                    case 'diciembre':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 11, 30);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
-                        break;
-                    default:
-                        return response()->json(['error' => 'Mes inválido'], 400);
-                }
-
-                $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
-
-                list($saldoInicialBancos, $saldoInicialCaja, $saldoInicial) = $calcIniciales($fechaInicial);
-
-                $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->get();
-
-                $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->get();
-
-                $dataGroupedCaja = $groupAndFormat($dataCaja);
-                $dataGroupedBancos = $groupAndFormat($dataBancos);
-
-                $totalIngresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'IN') === 0; })->sum('monto');
-                $totalEgresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
-                $totalIngresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'IN') === 0; })->sum('monto');
-                $totalEgresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
-
-                $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
-                $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
-
-                $saldoFinal = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
-                $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
-                $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
-
-                $apartados = $buildApartados($dataCaja, $dataBancos);
-
-                return response()->json([
-                    'fecha_anterior' => $fechaAnterior,
-                    'mes' => $mes,
-                    'fecha_inicial' => $fechaInicial->toDateString(),
-                    'fecha_final' => $fechaFinal->toDateString(),
-                    'saldo_inicial_bancos' => $saldoInicialBancos,
-                    'saldo_inicial_caja' => $saldoInicialCaja,
-                    'saldo_inicial' => $saldoInicial,
-                    'total_ingresos_caja' => $totalIngresosCaja,
-                    'total_egresos_caja' => $totalEgresosCaja,
-                    'total_ingresos_bancos' => $totalIngresosBancos,
-                    'total_egresos_bancos' => $totalEgresosBancos,
-                    'total_general_ingresos' => $totalGeneralIngresos,
-                    'total_general_egresos' => $totalGeneralEgresos,
-                    'data_caja' => $dataGroupedCaja,
-                    'data_bancos' => $dataGroupedBancos,
-                    'APARTADO INGRESOS' => $apartados['APARTADO INGRESOS'],
-                    'APARTADO EGRESOS' => $apartados['APARTADO EGRESOS'],
-                    'total_saldo_final' => $saldoFinal,
-                    'total_saldo_final_caja' => $saldoFinalCaja,
-                    'total_saldo_final_bancos' => $saldoFinalBancos,
-                ]);
-            }
-
-            // Trimestral
-            if ($tipo === 'trimestral') {
-                switch ($mes) {
-                    case 'enero':
-                        $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 3, 31);
-                        break;
-                    case 'abril':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 3, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 6, 30);
-                        break;
-                    case 'julio':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 6, 30);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 9, 30);
-                        break;
-                    case 'octubre':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 9, 30);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
-                        break;
-                    default:
-                        return response()->json(['error' => 'Mes inválido'], 400);
-                }
-
-                $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
-                list($saldoInicialBancos, $saldoInicialCaja, $saldoInicial) = $calcIniciales($fechaInicial);
-
-                $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->get();
-
-                $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->get();
-
-                $dataGroupedCaja = $groupAndFormat($dataCaja);
-                $dataGroupedBancos = $groupAndFormat($dataBancos);
-
-                $totalIngresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'IN') === 0; })->sum('monto');
-                $totalEgresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
-                $totalIngresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'IN') === 0; })->sum('monto');
-                $totalEgresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
-
-                $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
-                $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
-
-                $saldoFinal = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
-                $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
-                $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
-
-                $apartados = $buildApartados($dataCaja, $dataBancos);
-
-                return response()->json([
-                    'fecha_anterior' => $fechaAnterior,
-                    'mes' => $mes,
-                    'fecha_inicial' => $fechaInicial->toDateString(),
-                    'fecha_final' => $fechaFinal->toDateString(),
-                    'saldo_inicial_bancos' => $saldoInicialBancos,
-                    'saldo_inicial_caja' => $saldoInicialCaja,
-                    'saldo_inicial' => $saldoInicial,
-                    'total_ingresos_caja' => $totalIngresosCaja,
-                    'total_egresos_caja' => $totalEgresosCaja,
-                    'total_ingresos_bancos' => $totalIngresosBancos,
-                    'total_egresos_bancos' => $totalEgresosBancos,
-                    'total_general_ingresos' => $totalGeneralIngresos,
-                    'total_general_egresos' => $totalGeneralEgresos,
-                    'data_caja' => $dataGroupedCaja,
-                    'data_bancos' => $dataGroupedBancos,
-                    'APARTADO INGRESOS' => $apartados['APARTADO INGRESOS'],
-                    'APARTADO EGRESOS' => $apartados['APARTADO EGRESOS'],
-                    'total_saldo_final' => $saldoFinal,
-                    'total_saldo_final_caja' => $saldoFinalCaja,
-                    'total_saldo_final_bancos' => $saldoFinalBancos,
-                ]);
-            }
-
-            // Semestral
-            if ($tipo === 'semestral') {
-                switch ($mes) {
-                    case 'enero':
-                        $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 6, 30);
-                        break;
-                    case 'julio':
-                        $fechaInicial = Carbon::createFromDate($añoActual, 6, 30);
-                        $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
-                        break;
-                    default:
-                        return response()->json(['error' => 'Mes inválido'], 400);
-                }
-
-                $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
-                list($saldoInicialBancos, $saldoInicialCaja, $saldoInicial) = $calcIniciales($fechaInicial);
-
-                $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->get();
-
-                $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->get();
-
-                $dataGroupedCaja = $groupAndFormat($dataCaja);
-                $dataGroupedBancos = $groupAndFormat($dataBancos);
-
-                $totalIngresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'IN') === 0; })->sum('monto');
-                $totalEgresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
-                $totalIngresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'IN') === 0; })->sum('monto');
-                $totalEgresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
-
-                $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
-                $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
-
-                $saldoFinal = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
-                $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
-                $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
-
-                $apartados = $buildApartados($dataCaja, $dataBancos);
-
-                return response()->json([
-                    'fecha_anterior' => $fechaAnterior,
-                    'mes' => $mes,
-                    'fecha_inicial' => $fechaInicial->toDateString(),
-                    'fecha_final' => $fechaFinal->toDateString(),
-                    'saldo_inicial_bancos' => $saldoInicialBancos,
-                    'saldo_inicial_caja' => $saldoInicialCaja,
-                    'saldo_inicial' => $saldoInicial,
-                    'total_ingresos_caja' => $totalIngresosCaja,
-                    'total_egresos_caja' => $totalEgresosCaja,
-                    'total_ingresos_bancos' => $totalIngresosBancos,
-                    'total_egresos_bancos' => $totalEgresosBancos,
-                    'total_general_ingresos' => $totalGeneralIngresos,
-                    'total_general_egresos' => $totalGeneralEgresos,
-                    'data_caja' => $dataGroupedCaja,
-                    'data_bancos' => $dataGroupedBancos,
-                    'APARTADO INGRESOS' => $apartados['APARTADO INGRESOS'],
-                    'APARTADO EGRESOS' => $apartados['APARTADO EGRESOS'],
-                    'total_saldo_final' => $saldoFinal,
-                    'total_saldo_final_caja' => $saldoFinalCaja,
-                    'total_saldo_final_bancos' => $saldoFinalBancos,
-                ]);
-            }
-
-            // Anual
             if ($tipo === 'anual') {
-                $fechaInicial = Carbon::createFromDate($añoActual - 1, 12, 31);
-                $fechaFinal = Carbon::createFromDate($añoActual, 12, 31);
-                $fechaAnterior = date('Y-m-d', strtotime($fechaInicial . ' -1 day'));
+                if (empty($validated['fecha_inicio']) || empty($validated['fecha_fin'])) {
+                    return response()->json([
+                        'error' => 'Para ANUAL debes enviar fecha_inicio y fecha_fin'
+                    ], 400);
+                }
 
-                list($saldoInicialBancos, $saldoInicialCaja, $saldoInicial) = $calcIniciales($fechaInicial);
+                $fechaInicial = Carbon::parse($validated['fecha_inicio']);
+                $fechaFinal   = Carbon::parse($validated['fecha_fin']);
 
-                $dataCaja = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'caja')
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->get();
-
-                $dataBancos = ingresos_egresos::with('cuentas')
-                    ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
-                    ->where('tipo', 'bancos')
-                    ->whereHas('cuentas', function ($query) use ($projectId) { $query->where('id_proyectos', $projectId); })
-                    ->get();
-
-                $dataGroupedCaja = $groupAndFormat($dataCaja);
-                $dataGroupedBancos = $groupAndFormat($dataBancos);
-
-                $totalIngresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'IN') === 0; })->sum('monto');
-                $totalEgresosCaja = $dataCaja->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
-                $totalIngresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'IN') === 0; })->sum('monto');
-                $totalEgresosBancos = $dataBancos->filter(function ($item) { return strpos($item->nomenclatura, 'EG') === 0; })->sum('monto');
-
-                $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
-                $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
-
-                $saldoFinal = ($saldoInicial + $totalGeneralIngresos) - $totalGeneralEgresos;
-                $saldoFinalCaja = ($saldoInicialCaja + $totalIngresosCaja) - $totalEgresosCaja;
-                $saldoFinalBancos = ($saldoInicialBancos + $totalIngresosBancos) - $totalEgresosBancos;
-
-                return response()->json([
-                    'fecha_anterior' => $fechaAnterior,
-                    'mes' => $mes,
-                    'fecha_inicial' => $fechaInicial->toDateString(),
-                    'fecha_final' => $fechaFinal->toDateString(),
-                    'saldo_inicial_bancos' => $saldoInicialBancos,
-                    'saldo_inicial_caja' => $saldoInicialCaja,
-                    'saldo_inicial' => $saldoInicial,
-                    'total_ingresos_caja' => $totalIngresosCaja,
-                    'total_egresos_caja' => $totalEgresosCaja,
-                    'total_ingresos_bancos' => $totalIngresosBancos,
-                    'total_egresos_bancos' => $totalEgresosBancos,
-                    'total_general_ingresos' => $totalGeneralIngresos,
-                    'total_general_egresos' => $totalGeneralEgresos,
-                    'data_caja' => $dataGroupedCaja,
-                    'data_bancos' => $dataGroupedBancos,
-                    'total_saldo_final' => $saldoFinal,
-                    'total_saldo_final_caja' => $saldoFinalCaja,
-                    'total_saldo_final_bancos' => $saldoFinalBancos,
-                ]);
+                return $this->generateReportByFechas($idProyecto, $fechaInicial, $fechaFinal);
             }
 
-            return response()->json(['error' => 'Tipo inválido'], 400);
+        
+            if (empty($validated['mes'])) {
+                return response()->json([
+                    'error' => 'El mes es obligatorio para este período'
+                ], 400);
+            }
+
+            $mes  = $validated['mes'];
+            $year = $validated['year'] ?? Carbon::now()->year;
+
+            return $this->generateReportBalanceAgricola($idProyecto, $tipo, $mes, $year);
 
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
+    private function generateReportBalanceAgricola($idProyecto, $tipo, $mes, $year)
+    {
+        $fechaInicial = null;
+        $fechaFinal   = null;
+
+        switch ($tipo) {
+            case 'mensual':
+                switch ($mes) {
+                    case 'enero':
+                        $fechaInicial = Carbon::createFromDate($year - 1, 12, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 1, 31);
+                        break;
+                    case 'febrero':
+                        $fechaInicial = Carbon::createFromDate($year, 1, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 2, Carbon::create($year, 2, 1)->daysInMonth);
+                        break;
+                    case 'marzo':
+                        $fechaInicial = Carbon::createFromDate($year, 2, Carbon::create($year, 2, 1)->daysInMonth);
+                        $fechaFinal   = Carbon::createFromDate($year, 3, 31);
+                        break;
+                    case 'abril':
+                        $fechaInicial = Carbon::createFromDate($year, 3, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 4, 30);
+                        break;
+                    case 'mayo':
+                        $fechaInicial = Carbon::createFromDate($year, 4, 30);
+                        $fechaFinal   = Carbon::createFromDate($year, 5, 31);
+                        break;
+                    case 'junio':
+                        $fechaInicial = Carbon::createFromDate($year, 5, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 6, 30);
+                        break;
+                    case 'julio':
+                        $fechaInicial = Carbon::createFromDate($year, 6, 30);
+                        $fechaFinal   = Carbon::createFromDate($year, 7, 31);
+                        break;
+                    case 'agosto':
+                        $fechaInicial = Carbon::createFromDate($year, 7, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 8, 31);
+                        break;
+                    case 'septiembre':
+                        $fechaInicial = Carbon::createFromDate($year, 8, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 9, 30);
+                        break;
+                    case 'octubre':
+                        $fechaInicial = Carbon::createFromDate($year, 9, 30);
+                        $fechaFinal   = Carbon::createFromDate($year, 10, 31);
+                        break;
+                    case 'noviembre':
+                        $fechaInicial = Carbon::createFromDate($year, 10, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 11, 30);
+                        break;
+                    case 'diciembre':
+                        $fechaInicial = Carbon::createFromDate($year, 11, 30);
+                        $fechaFinal   = Carbon::createFromDate($year, 12, 31);
+                        break;
+                }
+                break;
+
+            case 'trimestral':
+                switch ($mes) {
+                    case 'enero':
+                        $fechaInicial = Carbon::createFromDate($year - 1, 12, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 3, 31);
+                        break;
+                    case 'abril':
+                        $fechaInicial = Carbon::createFromDate($year, 3, 31);
+                        $fechaFinal   = Carbon::createFromDate($year, 6, 30);
+                        break;
+                    case 'julio':
+                        $fechaInicial = Carbon::createFromDate($year, 6, 30);
+                        $fechaFinal   = Carbon::createFromDate($year, 9, 30);
+                        break;
+                    case 'octubre':
+                        $fechaInicial = Carbon::createFromDate($year, 9, 30);
+                        $fechaFinal   = Carbon::createFromDate($year, 12, 31);
+                        break;
+                }
+                break;
+
+            case 'semestral':
+                if ($mes === 'enero') {
+                    $fechaInicial = Carbon::createFromDate($year - 1, 12, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 6, 30);
+                } elseif ($mes === 'julio') {
+                    $fechaInicial = Carbon::createFromDate($year, 6, 30);
+                    $fechaFinal   = Carbon::createFromDate($year, 12, 31);
+                }
+                break;
+        }
+
+        if (!$fechaInicial || !$fechaFinal) {
+            return response()->json(['error' => 'No se pudo calcular el rango de fechas'], 400);
+        }
+
+        return $this->generateReportByFechas($idProyecto, $fechaInicial, $fechaFinal);
+    }
+    private function generateReportByFechas($idProyecto, $fechaInicial, $fechaFinal)
+    {
+        $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+            ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+            ->where('tipo', 'caja')
+            ->where('nomenclatura', 'like', 'IN%')
+            ->sum('monto');
+
+        $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+            ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+            ->where('tipo', 'caja')
+            ->where('nomenclatura', 'like', 'EG%')
+            ->sum('monto');
+
+        $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+            ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+            ->where('tipo', 'bancos')
+            ->where('nomenclatura', 'like', 'IN%')
+            ->sum('monto');
+
+        $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+            ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+            ->where('tipo', 'bancos')
+            ->where('nomenclatura', 'like', 'EG%')
+            ->sum('monto');
+
+        $saldoInicialCaja   = $ingresosAntCaja - $egresosAntCaja;
+        $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
+        $saldoInicial       = $saldoInicialCaja + $saldoInicialBancos;
+
+        $cuentasProyecto = cuentas::where('id_proyectos', $idProyecto)->get();
+
+        $dataCaja = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
+            $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                ->where('tipo', 'caja')
+                ->where('nomenclatura', 'like', 'IN%')
+                ->sum('monto');
+
+            $eg = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                ->where('tipo', 'caja')
+                ->where('nomenclatura', 'like', 'EG%')
+                ->sum('monto');
+
+            return [
+                'cuenta'      => $cuenta->cuenta,
+                'tipo_cuenta' => $cuenta->tipo_cuenta ?? null,
+                'corriente'   => $cuenta->corriente ?? null,
+                'ingresos'    => number_format($ing, 2, '.', ''),
+                'egresos'     => number_format($eg, 2, '.', ''),
+            ];
+        })->values();
+
+        $dataBancos = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
+            $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                ->where('tipo', 'bancos')
+                ->where('nomenclatura', 'like', 'IN%')
+                ->sum('monto');
+
+            $eg = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                ->where('tipo', 'bancos')
+                ->where('nomenclatura', 'like', 'EG%')
+                ->sum('monto');
+
+            return [
+                'cuenta'      => $cuenta->cuenta,
+                'tipo_cuenta' => $cuenta->tipo_cuenta ?? null,
+                'corriente'   => $cuenta->corriente ?? null,
+                'ingresos'    => number_format($ing, 2, '.', ''),
+                'egresos'     => number_format($eg, 2, '.', ''),
+            ];
+        })->values();
+
+        $totalIngresosCaja   = $dataCaja->sum(fn($x) => (float)$x['ingresos']);
+        $totalEgresosCaja    = $dataCaja->sum(fn($x) => (float)$x['egresos']);
+        $totalIngresosBancos = $dataBancos->sum(fn($x) => (float)$x['ingresos']);
+        $totalEgresosBancos  = $dataBancos->sum(fn($x) => (float)$x['egresos']);
+
+        $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
+        $totalGeneralEgresos  = $totalEgresosCaja + $totalEgresosBancos;
+        $saldoFinalCaja   = $saldoInicialCaja + $totalIngresosCaja - $totalEgresosCaja;
+        $saldoFinalBancos = $saldoInicialBancos + $totalIngresosBancos - $totalEgresosBancos;
+        $saldoFinal       = $saldoFinalCaja + $saldoFinalBancos;
+
+        return response()->json([
+            'id_proyecto'              => $idProyecto,
+            'fecha_inicial'            => $fechaInicial->toDateString(),
+            'fecha_final'              => $fechaFinal->toDateString(),
+
+            'saldo_inicial'            => $saldoInicial,
+            'saldo_inicial_caja'       => $saldoInicialCaja,
+            'saldo_inicial_bancos'     => $saldoInicialBancos,
+
+            'total_general_ingresos'   => $totalGeneralIngresos,
+            'total_ingresos_caja'      => $totalIngresosCaja,
+            'total_ingresos_bancos'    => $totalIngresosBancos,
+
+            'total_general_egresos'    => $totalGeneralEgresos,
+            'total_egresos_caja'       => $totalEgresosCaja,
+            'total_egresos_bancos'     => $totalEgresosBancos,
+
+            'data_caja'                => $dataCaja,
+            'data_bancos'              => $dataBancos,
+
+            'total_saldo_final'        => $saldoFinal,
+            'total_saldo_final_caja'   => $saldoFinalCaja,
+            'total_saldo_final_bancos' => $saldoFinalBancos,
+        ], 200);
+    }
+
+    // --------------------CAPILLA----------------------
+
+
+   // ✅ Reporte general para proyecto capilla (id_proyectos = 2)
+public function reporteGeneralCapilla(Request $request)
+{
+    try {
+        $idProyecto = 2;
+
+        $validated = $request->validate([
+            'tipo' => 'required|string|in:mensual,trimestral,semestral,anual',
+
+            'mes'  => 'nullable|string|in:enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
+            'year' => 'nullable|integer|min:2000|max:2100',
+
+            'fecha_inicio' => 'nullable|date',
+            'fecha_fin'    => 'nullable|date|after_or_equal:fecha_inicio',
+        ]);
+
+        $tipo = $validated['tipo'];
+
+        // ✅ ANUAL → usa fechas (NO mes)
+        if ($tipo === 'anual') {
+
+            if (empty($validated['fecha_inicio']) || empty($validated['fecha_fin'])) {
+                return response()->json([
+                    'error' => 'Para ANUAL debes enviar fecha_inicio y fecha_fin'
+                ], 400);
+            }
+
+            $fechaInicial = Carbon::parse($validated['fecha_inicio']);
+            $fechaFinal   = Carbon::parse($validated['fecha_fin']);
+
+            return $this->generateReportCapillaByFechas($idProyecto, $fechaInicial, $fechaFinal);
+        }
+
+        // ✅ Mensual/Trimestral/Semestral → mes + year obligatorios
+        if (empty($validated['mes'])) {
+            return response()->json([
+                'error' => 'El mes es obligatorio para este período'
+            ], 400);
+        }
+
+        $mes  = $validated['mes'];
+        $year = $validated['year'] ?? Carbon::now()->year;
+
+        return $this->generateReportBalanceCapilla($idProyecto, $tipo, $mes, $year);
+
+    } catch (\Throwable $th) {
+        return response()->json(['error' => $th->getMessage()], 500);
+    }
+}
+
+
+// ✅ Calcula fechas según mensual/trimestral/semestral + mes + year
+private function generateReportBalanceCapilla($idProyecto, $tipo, $mes, $year)
+{
+    $fechaInicial = null;
+    $fechaFinal   = null;
+
+    switch ($tipo) {
+
+        case 'mensual':
+            switch ($mes) {
+                case 'enero':
+                    $fechaInicial = Carbon::createFromDate($year - 1, 12, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 1, 31);
+                    break;
+                case 'febrero':
+                    $fechaInicial = Carbon::createFromDate($year, 1, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 2, Carbon::create($year, 2, 1)->daysInMonth);
+                    break;
+                case 'marzo':
+                    $fechaInicial = Carbon::createFromDate($year, 2, Carbon::create($year, 2, 1)->daysInMonth);
+                    $fechaFinal   = Carbon::createFromDate($year, 3, 31);
+                    break;
+                case 'abril':
+                    $fechaInicial = Carbon::createFromDate($year, 3, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 4, 30);
+                    break;
+                case 'mayo':
+                    $fechaInicial = Carbon::createFromDate($year, 4, 30);
+                    $fechaFinal   = Carbon::createFromDate($year, 5, 31);
+                    break;
+                case 'junio':
+                    $fechaInicial = Carbon::createFromDate($year, 5, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 6, 30);
+                    break;
+                case 'julio':
+                    $fechaInicial = Carbon::createFromDate($year, 6, 30);
+                    $fechaFinal   = Carbon::createFromDate($year, 7, 31);
+                    break;
+                case 'agosto':
+                    $fechaInicial = Carbon::createFromDate($year, 7, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 8, 31);
+                    break;
+                case 'septiembre':
+                    $fechaInicial = Carbon::createFromDate($year, 8, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 9, 30);
+                    break;
+                case 'octubre':
+                    $fechaInicial = Carbon::createFromDate($year, 9, 30);
+                    $fechaFinal   = Carbon::createFromDate($year, 10, 31);
+                    break;
+                case 'noviembre':
+                    $fechaInicial = Carbon::createFromDate($year, 10, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 11, 30);
+                    break;
+                case 'diciembre':
+                    $fechaInicial = Carbon::createFromDate($year, 11, 30);
+                    $fechaFinal   = Carbon::createFromDate($year, 12, 31);
+                    break;
+            }
+            break;
+
+        case 'trimestral':
+            switch ($mes) {
+                case 'enero':
+                    $fechaInicial = Carbon::createFromDate($year - 1, 12, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 3, 31);
+                    break;
+                case 'abril':
+                    $fechaInicial = Carbon::createFromDate($year, 3, 31);
+                    $fechaFinal   = Carbon::createFromDate($year, 6, 30);
+                    break;
+                case 'julio':
+                    $fechaInicial = Carbon::createFromDate($year, 6, 30);
+                    $fechaFinal   = Carbon::createFromDate($year, 9, 30);
+                    break;
+                case 'octubre':
+                    $fechaInicial = Carbon::createFromDate($year, 9, 30);
+                    $fechaFinal   = Carbon::createFromDate($year, 12, 31);
+                    break;
+            }
+            break;
+
+        case 'semestral':
+            if ($mes === 'enero') {
+                $fechaInicial = Carbon::createFromDate($year - 1, 12, 31);
+                $fechaFinal   = Carbon::createFromDate($year, 6, 30);
+            } elseif ($mes === 'julio') {
+                $fechaInicial = Carbon::createFromDate($year, 6, 30);
+                $fechaFinal   = Carbon::createFromDate($year, 12, 31);
+            }
+            break;
+    }
+
+    if (!$fechaInicial || !$fechaFinal) {
+        return response()->json(['error' => 'No se pudo calcular el rango de fechas'], 400);
+    }
+
+    return $this->generateReportCapillaByFechas($idProyecto, $fechaInicial, $fechaFinal);
+}
+
+
+// ✅ Generador REAL del reporte Capilla (NO TOCA TU FORMATO, devuelve saldo/data/totales)
+private function generateReportCapillaByFechas($idProyecto, $fechaInicial, $fechaFinal)
+{
+    // 🔥 saldos iniciales antes del rango
+    $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+        ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+        ->where('tipo', 'caja')
+        ->where('nomenclatura', 'like', 'IN%')
+        ->sum('monto');
+
+    $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+        ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+        ->where('tipo', 'caja')
+        ->where('nomenclatura', 'like', 'EG%')
+        ->sum('monto');
+
+    $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+        ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+        ->where('tipo', 'bancos')
+        ->where('nomenclatura', 'like', 'IN%')
+        ->sum('monto');
+
+    $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+        ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+        ->where('tipo', 'bancos')
+        ->where('nomenclatura', 'like', 'EG%')
+        ->sum('monto');
+
+    $saldoInicialCaja   = $ingresosAntCaja - $egresosAntCaja;
+    $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
+    $saldoInicial       = $saldoInicialCaja + $saldoInicialBancos;
+
+    // ✅ cuentas del proyecto
+    $cuentasProyecto = cuentas::where('id_proyectos', $idProyecto)->get();
+
+    // ✅ data de caja
+    $dataCaja = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
+        $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+            ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+            ->where('tipo', 'caja')
+            ->where('nomenclatura', 'like', 'IN%')
+            ->sum('monto');
+
+        $eg = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+            ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+            ->where('tipo', 'caja')
+            ->where('nomenclatura', 'like', 'EG%')
+            ->sum('monto');
+
+        return [
+            'cuenta'      => $cuenta->cuenta,
+            'tipo_cuenta' => $cuenta->tipo_cuenta ?? null,
+            'corriente'   => $cuenta->corriente ?? null,
+            'ingresos'    => number_format($ing, 2, '.', ''),
+            'egresos'     => number_format($eg, 2, '.', ''),
+        ];
+    })->values();
+
+    // ✅ data de bancos
+    $dataBancos = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
+        $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+            ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+            ->where('tipo', 'bancos')
+            ->where('nomenclatura', 'like', 'IN%')
+            ->sum('monto');
+
+        $eg = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+            ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+            ->where('tipo', 'bancos')
+            ->where('nomenclatura', 'like', 'EG%')
+            ->sum('monto');
+
+        return [
+            'cuenta'      => $cuenta->cuenta,
+            'tipo_cuenta' => $cuenta->tipo_cuenta ?? null,
+            'corriente'   => $cuenta->corriente ?? null,
+            'ingresos'    => number_format($ing, 2, '.', ''),
+            'egresos'     => number_format($eg, 2, '.', ''),
+        ];
+    })->values();
+
+    // ✅ totales
+    $totalIngresosCaja   = $dataCaja->sum(fn($x) => (float)$x['ingresos']);
+    $totalEgresosCaja    = $dataCaja->sum(fn($x) => (float)$x['egresos']);
+    $totalIngresosBancos = $dataBancos->sum(fn($x) => (float)$x['ingresos']);
+    $totalEgresosBancos  = $dataBancos->sum(fn($x) => (float)$x['egresos']);
+
+    $totalGeneralIngresos = $totalIngresosCaja + $totalIngresosBancos;
+    $totalGeneralEgresos  = $totalEgresosCaja + $totalEgresosBancos;
+
+    $saldoFinalCaja   = $saldoInicialCaja + $totalIngresosCaja - $totalEgresosCaja;
+    $saldoFinalBancos = $saldoInicialBancos + $totalIngresosBancos - $totalEgresosBancos;
+    $saldoFinal       = $saldoFinalCaja + $saldoFinalBancos;
+
+    return response()->json([
+        'id_proyecto'              => $idProyecto,
+        'fecha_inicial'            => $fechaInicial->toDateString(),
+        'fecha_final'              => $fechaFinal->toDateString(),
+
+        'saldo_inicial'            => $saldoInicial,
+        'saldo_inicial_caja'       => $saldoInicialCaja,
+        'saldo_inicial_bancos'     => $saldoInicialBancos,
+
+        'total_general_ingresos'   => $totalGeneralIngresos,
+        'total_ingresos_caja'      => $totalIngresosCaja,
+        'total_ingresos_bancos'    => $totalIngresosBancos,
+
+        'total_general_egresos'    => $totalGeneralEgresos,
+        'total_egresos_caja'       => $totalEgresosCaja,
+        'total_egresos_bancos'     => $totalEgresosBancos,
+
+        'data_caja'                => $dataCaja,
+        'data_bancos'              => $dataBancos,
+
+        'total_saldo_final'        => $saldoFinal,
+        'total_saldo_final_caja'   => $saldoFinalCaja,
+        'total_saldo_final_bancos' => $saldoFinalBancos,
+    ], 200);
+}
+
 }
