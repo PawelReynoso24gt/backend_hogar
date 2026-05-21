@@ -13,17 +13,10 @@ class cuentas extends Model
     protected $fillable = ['cuenta', 'estado', 'codigo', 'id_clasificacion', 'id_proyectos', 'tipo_cuenta', 'corriente'];
 
 
-    //FUncion para el estado 1 cuando se crea
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (is_null($model->estado)) {
-                $model->estado = 1;
-            }
-        });
-    }
+    // Asignación por defecto
+    protected $attributes = [
+        'estado' => 1,
+    ];
 
     public function clasificacion()
     {
