@@ -174,15 +174,15 @@ Route::prefix('in_eg')->group(function () {
 });
 // Rutas de cuentas bancarias
 Route::prefix('cuentasB')->group(function () {
-    Route::get('/get', [cuentas_bancariasController::class, 'get']);
+    Route::get('/get', [cuentas_bancariasController::class, 'get']); // --
     Route::get('/getWithBancos', [cuentas_bancariasController::class, 'getWithBancos']);
     Route::get('/get/{cuentaB}', [cuentas_bancariasController::class, 'getByCuentaB']);
-    Route::post('/create', [cuentas_bancariasController::class, 'create']);
-    Route::put('/update/{cuentaB}', [cuentas_bancariasController::class, 'update']);
-    Route::get('/getConcatenada', [cuentas_bancariasController::class, 'getByCuentaBName']);
+    Route::post('/create', [cuentas_bancariasController::class, 'create']); // --
+    Route::put('/update/{cuentaB}', [cuentas_bancariasController::class, 'update']); //--
+    Route::get('/getConcatenada', [cuentas_bancariasController::class, 'getByCuentaBName']); // --
     Route::post('/getNumeroCuenta/{numero_cuenta}', [cuentas_bancariasController::class, 'getByCuentaId']);
-    Route::get('/cuentas_bancarias/{numero_cuenta}', [cuentas_bancariasController::class, 'getByCuenta']);
-    Route::get('/for-select', [cuentas_bancariasController::class, 'getIdCuenta']);
+    Route::get('/cuentas_bancarias/{numero_cuenta}', [cuentas_bancariasController::class, 'getByCuenta']); // --
+    Route::get('/for-select', [cuentas_bancariasController::class, 'getIdCuenta']); // --
 
 });
 
