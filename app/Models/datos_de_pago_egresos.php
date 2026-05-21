@@ -10,7 +10,7 @@ class datos_de_pago_egresos extends Model
     use HasFactory;
     protected $table = 'datos_de_pago_egresos';
     protected $primaryKey = 'id_datos_de_pago_egresos';
-    protected $fillable = ['documento', 'numero_documento', 'fecha_emision', 'id_cuentas_bancarias', 'id_ingresos_egresos',];
+    protected $fillable = ['documento', 'numero_documento', 'fecha_emision', 'id_cuentas_bancarias', 'id_ingresos_egresos'];
 
     public function cuentas_bancarias()
     {
