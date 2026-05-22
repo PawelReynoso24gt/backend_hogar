@@ -14,7 +14,6 @@ use App\Models\cuentas_bancarias;
 use App\Models\bancos;
 use App\Models\pago_pendientes;
 use Illuminate\Validation\Rule;
-// Para el manejo de Cuentas por Pagar y Cobrar
 use App\Utils\CuentasPorPagarCobrar;
 
 class ingresos_egresosController extends Controller
@@ -191,6 +190,7 @@ class ingresos_egresosController extends Controller
         }
     }
 
+    //Obtener transacciones pendientes
     public function getTransaccionesPendientes(Request $request)
     {
         // 1. Validar y obtener los filtros
@@ -430,6 +430,8 @@ class ingresos_egresosController extends Controller
         }
     }
 
+
+    //Datos de reoporte estado de resultados capilla
 public function getReporteEstadoResultadosCA(Request $request)
 {
     try {
@@ -707,7 +709,7 @@ public function getReporteEstadoResultadosCA(Request $request)
     }
 }
 
-    //metodo get estado de resultados agricola
+    //metodo get de datos para reporte estado de resultados agricola
    public function getReporteEstadoResultadosAG(Request $request)
 {
     try {
@@ -941,6 +943,7 @@ public function getReporteEstadoResultadosCA(Request $request)
     }
 }
 
+    //get cuentas con datos de ingreso o egreso
     public function getWithCuentas()
     {
         try {
@@ -963,46 +966,8 @@ public function getReporteEstadoResultadosCA(Request $request)
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-    // Método create con nombres de cuentas
-    public function create(Request $request)
-    {
-        // Validar los datos de entrada
-        $request->validate([
-            'fecha' => 'required|date',
-            'identificacion' => 'required',
-            'nombre' => 'required',
-            'descripcion' => 'required',
-            'monto' => 'required|numeric',
-            'tipo' => 'required',
-            'cuenta' => 'required'
-        ]);
 
-        try {
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
-
-            // Si la cuenta no se encuentra, devolver un error
-            if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-            }
-
-            // Crear un nuevo registro en la tabla ingresos_egresos
-            $ingreso_egreso = new ingresos_egresos();
-            $ingreso_egreso->fecha = $request->input('fecha');
-            $ingreso_egreso->identificacion = $request->input('identificacion');
-            $ingreso_egreso->nombre = $request->input('nombre');
-            $ingreso_egreso->descripcion = $request->input('descripcion');
-            $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
-            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-            $ingreso_egreso->save();
-
-            return response()->json($ingreso_egreso, 201);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
-    }
-
+    //metodo get para cuentas egresos por clasificacion
     public function getAllCuentasEgreso()
     {
         try {
@@ -1016,6 +981,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
+    //get cuentas ingresos por clasificacion
     public function getAllCuentasIngreso()
     {
         try {
@@ -1029,7 +995,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
-    // get de cuentas de ingresos de proyecto agrícola
+    // get de cuentas de ingresos por clasificacion y cuenta de proyecto agrícola
     public function getAllCuentasIngresoAG()
     {
         try {
@@ -1046,7 +1012,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
-    // get de cuentas de egresos de proyecto agrícola
+    // get de cuentas de egresos por clasificacion y cuenta de proyecto agrícola
     public function getAllCuentasEgresoAG()
     {
         try {
@@ -1063,7 +1029,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
-    // get de cuentas de ingresos de proyecto capilla
+    // get de cuentas de ingresos por clasificacion y cuenta de proyecto capilla
     public function getAllCuentasIngresoCA()
     {
         try {
@@ -1080,7 +1046,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
-    // get de cuentas de egresos de proyecto capilla
+    // get de cuentas de egresos por clasificacion y cuenta de proyecto capilla
     public function getAllCuentasEgresoCA()
     {
         try {
@@ -1097,6 +1063,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
+    //get cuentas bancarias 
     public function getByNombreBanco()
     {
         try {
@@ -1106,7 +1073,6 @@ public function getReporteEstadoResultadosCA(Request $request)
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-
 
     // Método update con nombres de cuentas
     public function update(Request $request, $nomenclatura)
@@ -1164,11 +1130,9 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
-
-
     // INGRESOS Y EGRESOS DE BANCOS
 
-    // Método get
+    // Método get datos de pago ingresos
     public function getDatosIngresoBancos()
     {
         try {
@@ -1179,6 +1143,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
+    // get datos ingresos y cuenta bancarias
     public function getWithDatosINGB()
     {
         try {
@@ -1204,139 +1169,6 @@ public function getReporteEstadoResultadosCA(Request $request)
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-
-    // public function getWithDatosINGB()
-    // {
-    //     try {
-    //         $data = datos_de_pago_ingresos::with(['cuentas_bancarias.bancos', 'ingresos_egresos' => function ($query) {
-    //             $query->where('tipo', 'INGRESOS');
-    //         }])->get();
-
-    //         // Filtrar solo los ingresos
-    //         $filteredData = $data->filter(function ($ingreso) {
-    //             return $ingreso->ingresos_egresos->isNotEmpty();
-    //         });
-
-    //         // Mapear los resultados para formatear la respuesta
-    //         $formattedData = $filteredData->map(function ($ingreso) {
-    //             return [
-    //                 'id_datos_de_pago_ingresos' => $ingreso->id_datos_de_pago_ingresos,
-    //                 'documento' => $ingreso->documento,
-    //                 'numero_documento' => $ingreso->numero_documento,
-    //                 'fecha_emision' => $ingreso->fecha_emision,
-    //                 'cuenta_bancaria' => $ingreso->cuentas_bancarias->numero_cuenta,
-    //                 'banco' => $ingreso->cuentas_bancarias->bancos->banco,
-    //                 'ingresos_egresos' => 'INGRESOS', // Aquí asumimos que solo obtendremos ingresos debido a la condición de consulta
-    //                 'created_at' => $ingreso->created_at,
-    //                 'updated_at' => $ingreso->updated_at,
-    //             ];
-    //         });
-
-    //         return response()->json($formattedData, 200);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['error' => $th->getMessage()], 500);
-    //     }
-    // }
-
-    // public function createALLIN(Request $request) // este igual, sorry TT
-    // {
-    //     try {
-    //         // Buscar la cuenta por su nombre
-    //         $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
-
-    //         // Si la cuenta no se encuentra, devolver un error
-    //         if (!$cuenta) {
-    //             return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-    //         }
-
-    //         // Buscar la cuenta bancaria por su número
-    //         $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
-
-    //         // Si la cuenta bancaria no se encuentra, devolver un error
-    //         if (!$cuenta_bancaria) {
-    //             return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
-    //         }
-
-    //         // Crear un nuevo registro en la tabla ingresos_egresos
-    //         $ingreso_egreso = new ingresos_egresos();
-    //         $ingreso_egreso->fecha = $request->input('fecha');
-    //         $ingreso_egreso->identificacion = $request->input('identificacion');
-    //         $ingreso_egreso->nombre = $request->input('nombre');
-    //         $ingreso_egreso->descripcion = $request->input('descripcion');
-    //         $ingreso_egreso->monto = $request->input('monto');
-    //         $ingreso_egreso->tipo = $request->input('tipo');
-    //         $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-    //         $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
-
-    //         // Obtener el id del ingreso/egreso recién creado
-    //         $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
-
-    //         // Crear un nuevo registro en la tabla datos_de_pago_ingresos
-    //         $datos_pago = new datos_de_pago_ingresos();
-    //         $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
-    //         $datos_pago->documento = $request->input('documento');
-    //         $datos_pago->numero_documento = $request->input('numero_documento');
-    //         $datos_pago->fecha_emision = $request->input('fecha_emision');
-    //         // Asociar la cuenta bancaria
-    //         $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-    //         // Llenar los otros campos según el request
-    //         $datos_pago->save();
-
-    //         return response()->json($ingreso_egreso, 201);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['error' => $th->getMessage()], 500);
-    //     }
-    // }
-
-    // public function createALLEG(Request $request) // este tampoco
-    // {
-    //     try {
-    //         // Buscar la cuenta por su nombre
-    //         $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
-
-    //         // Si la cuenta no se encuentra, devolver un error
-    //         if (!$cuenta) {
-    //             return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-    //         }
-
-    //         // Buscar la cuenta bancaria por su número
-    //         $cuenta_bancaria = cuentas_bancarias::where('numero_cuenta', $request->input('cuenta_bancaria'))->first();
-
-    //         // Si la cuenta bancaria no se encuentra, devolver un error
-    //         if (!$cuenta_bancaria) {
-    //             return response()->json(['error' => 'La cuenta bancaria proporcionada no existe'], 404);
-    //         }
-
-    //         // Crear un nuevo registro en la tabla ingresos_egresos
-    //         $ingreso_egreso = new ingresos_egresos();
-    //         $ingreso_egreso->fecha = $request->input('fecha');
-    //         $ingreso_egreso->identificacion = $request->input('identificacion');
-    //         $ingreso_egreso->nombre = $request->input('nombre');
-    //         $ingreso_egreso->descripcion = $request->input('descripcion');
-    //         $ingreso_egreso->monto = $request->input('monto');
-    //         $ingreso_egreso->tipo = $request->input('tipo');
-    //         $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-    //         $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
-
-    //         // Obtener el id del ingreso/egreso recién creado
-    //         $id_ingresos_egresos = $ingreso_egreso->id_ingresos_egresos;
-
-    //         // Crear un nuevo registro en la tabla datos_de_pago_ingresos
-    //         $datos_pago = new datos_de_pago_egresos();
-    //         $datos_pago->id_ingresos_egresos = $id_ingresos_egresos; // Asignar el id del ingreso/egreso
-    //         $datos_pago->documento = $request->input('documento');
-    //         $datos_pago->numero_documento = $request->input('numero_documento');
-    //         $datos_pago->fecha_emision = $request->input('fecha_emision');
-    //         // Asociar la cuenta bancaria
-    //         $datos_pago->id_cuentas_bancarias = $cuenta_bancaria->id_cuentas_bancarias;
-    //         // Llenar los otros campos según el request
-    //         $datos_pago->save();
-
-    //         return response()->json($ingreso_egreso, 201);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['error' => $th->getMessage()], 500);
-    //     }
-    // }
 
     // ingresos de proyecto agrícola (bancos)
     // ingresos de bancos
@@ -1646,45 +1478,6 @@ public function getReporteEstadoResultadosCA(Request $request)
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-
-    // public function createALLINEGCaja(Request $request) // la neta no recuerdo de que era este
-    // {
-    //     // Validar los datos de entrada
-    //     $request->validate([
-    //         'fecha' => 'required|date',
-    //         'identificacion' => 'required',
-    //         'nombre' => 'required',
-    //         'descripcion' => 'required',
-    //         'monto' => 'required|numeric',
-    //         'tipo' => 'required',
-    //         'cuenta' => 'required',
-    //     ]);
-
-    //     try {
-    //         // Buscar la cuenta por su nombre
-    //         $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
-
-    //         // Si la cuenta no se encuentra, devolver un error
-    //         if (!$cuenta) {
-    //             return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-    //         }
-
-    //         // Crear un nuevo registro en la tabla ingresos_egresos
-    //         $ingreso_egreso = new ingresos_egresos();
-    //         $ingreso_egreso->fecha = $request->input('fecha');
-    //         $ingreso_egreso->identificacion = $request->input('identificacion');
-    //         $ingreso_egreso->nombre = $request->input('nombre');
-    //         $ingreso_egreso->descripcion = $request->input('descripcion');
-    //         $ingreso_egreso->monto = $request->input('monto');
-    //         $ingreso_egreso->tipo = $request->input('tipo');
-    //         $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-    //         $ingreso_egreso->save(); // Guardar el ingreso/egreso primero
-
-    //         return response()->json($ingreso_egreso, 201);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['error' => $th->getMessage()], 500);
-    //     }
-    // }
 
     // ingreso o egreso de caja agricola
     public function createALLINEGCajaAG(Request $request)
@@ -8649,6 +8442,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
+    //Registrar anticipos Agricola
      public function anticipoAG(Request $request)
     {
         // Aqui vamos a validar los datos (los campos calculados se asignan automáticamente)
@@ -8742,6 +8536,8 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
+
+    //registrar anticipos caja
       public function anticipoCA(Request $request)
     {
 
@@ -8900,49 +8696,6 @@ public function getReporteEstadoResultadosCA(Request $request)
                 ->get();
 
             return response()->json($data, 200);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
-    }
-
-    public function createSaldarAG(Request $request)
-    {
-        // Validar los datos de entrada
-        $request->validate([
-            'fecha' => 'required|date',
-            'identificacion' => 'required',
-            'nombre' => 'required',
-            'descripcion' => 'required',
-            'monto' => 'required|numeric',
-            'tipo' => 'required',
-            // ahora aceptamos 'monto_pago' y lo usaremos para asignar a monto_haber
-            'monto_pago' => 'required|numeric',
-            'cuenta' => 'required'
-        ]);
-
-        try {
-            // Buscar la cuenta por su nombre
-            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
-
-            // Si la cuenta no se encuentra, devolver un error
-            if (!$cuenta) {
-                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
-            }
-
-            // Crear un nuevo registro en la tabla ingresos_egresos
-            $ingreso_egreso = new ingresos_egresos();
-            $ingreso_egreso->fecha = $request->input('fecha');
-            $ingreso_egreso->identificacion = $request->input('identificacion');
-            $ingreso_egreso->nombre = $request->input('nombre');
-            $ingreso_egreso->descripcion = $request->input('descripcion');
-            $ingreso_egreso->monto = $request->input('monto');
-            $ingreso_egreso->tipo = $request->input('tipo');
-            // Asignar monto_haber con el valor enviado en 'monto_pago'
-            $ingreso_egreso->monto_haber = $request->input('monto_pago');
-            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
-            $ingreso_egreso->save();
-
-            return response()->json($ingreso_egreso, 201);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

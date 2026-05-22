@@ -113,15 +113,12 @@ Route::prefix('in_eg')->group(function () {
     Route::get('/tablaVistaAnticipoAG', [ingresos_egresosController::class, 'tablaVistaAnticipoAG']);
     Route::get('/tablaVistaAnticipoCA', [ingresos_egresosController::class, 'tablaVistaAnticipoCA']);
 
-    // Route::post('/create', [ingresos_egresosController::class, 'create']);
-    //Route::post('/create', [ingresos_egresosController::class, 'create']);
     Route::put('/update/{nomenclatura}', [ingresos_egresosController::class, 'update']);
 
     // datos de ingresos de bancos
     Route::get('/getINB', [ingresos_egresosController::class, 'getDatosIngresoBancos']);
     Route::get('/getINEGBDatos', [ingresos_egresosController::class, 'getWithDatosINGB']);
-    // Route::post('/createALLIN', [ingresos_egresosController::class, 'createALLIN']);
-    // Route::post('/createALLEG', [ingresos_egresosController::class, 'createALLEG']);
+
     // Route::post('/createALLINEGCaja', [ingresos_egresosController::class, 'createALLINEGCaja']);
 
     // ingresos de proyecto agricola ----------------------------------------------------------
