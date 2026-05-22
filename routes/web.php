@@ -13,7 +13,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\logsController;
 use App\Http\Controllers\clasificacionController;
 use App\Http\Controllers\bancosController;
 use App\Http\Controllers\ProjectsController;
@@ -65,11 +64,6 @@ Route::prefix('bancos')->group(function () {
     Route::put('/update/{id}', [bancosController::class, 'update']);
     Route::put('/updatebyname/{banco}', [bancosController::class, 'updateByBanco']);
     Route::delete('/delete/{id}', [bancosController::class, 'delete']);
-});
-// Rutas de Logs
-Route::prefix('logs')->group(function () {
-    Route::get('/get', [logsController::class, 'get']);
-    Route::get('/get/{id}', [logsController::class, 'getById']);
 });
 // Rutas de Cuentas
 Route::prefix('cuentas')->group(function () {
