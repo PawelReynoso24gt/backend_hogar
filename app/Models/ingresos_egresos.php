@@ -10,7 +10,7 @@ class ingresos_egresos extends Model
     use HasFactory;
     protected $table = 'ingresos_egresos';
     protected $primaryKey = 'id_ingresos_egresos';
-    protected $fillable = ['nomenclatura', 'fecha', 'identificación', 'nombre', 'descripcion', 'monto', 
+    protected $fillable = ['nomenclatura', 'fecha', 'identificacion', 'nombre', 'descripcion', 'monto', 
     'monto_debe', 'monto_haber', 'es_pendiente', 'tipo', 'id_cuentas'];
 
     public function cuentas()
@@ -32,6 +32,6 @@ class ingresos_egresos extends Model
     public function pagosRealizados()
     {
         // La llave foránea en pago_pendientes es 'id_ingresos_egresos' (la deuda original)
-        return $this->hasMany(pago_pendientes::class, 'id_ingresos_egresos', 'id_ingresos_egresos');
+        return $this->hasMany(pago_pendientes::class, 'id_ingresos_egresos');
     }
 } 

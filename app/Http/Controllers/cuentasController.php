@@ -13,51 +13,39 @@ use App\Models\ingresos_egresos;
 class cuentasController extends Controller
 {
     //Metodo get
-    public function get(){
-        try{
-            $data = cuentas::get();
-            return response()->json($data, 200);
-        } catch (\Throwable $th){
-            return response()->json(['error' => $th ->getMessage()],500);
-        }
-    }
-
-        // Método para obtener el nombre de clasificación por su ID
-    public function getNombreClasificacionById($id)
+    public function get()
     {
         try {
-            $clasificacion = clasificacion::find($id);
-            if (!$clasificacion) {
-                return response()->json(['error' => 'La clasificación no existe'], 404);
-            }
-            $nombre = $clasificacion->nombre; // Obtener el nombre de la clasificación
-            return response()->json(['nombre' => $nombre], 200);
+            $data = cuentas::get();
+            return response()->json($data, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 
-
-
-       //Metodo get by id
-    public function getById($id){
+    //Metodo get by id
+    public function getById($id)
+    {
         try {
             $data = cuentas::find($id);
             return response()->json($data, 200);
         } catch (\Throwable $th) {
-            return response()->json([ 'error' => $th->getMessage()], 500);
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-    
+
     // Método get de cuentas con nombres de clasificación y proyectos
     public function getWithNombres()
     {
         try {
-            $data = cuentas::with(['clasificacion' => function ($query) {
-                $query->select('id_clasificacion', 'tipo as clasificacion');
-            }, 'proyecto' => function ($query) {
-                $query->select('id_proyectos', 'nombre as proyecto');
-            }])->get();
+            $data = cuentas::with([
+                'clasificacion' => function ($query) {
+                    $query->select('id_clasificacion', 'tipo as clasificacion');
+                },
+                'proyecto' => function ($query) {
+                    $query->select('id_proyectos', 'nombre as proyecto');
+                }
+            ])->get();
 
             // Mapear los resultados para formatear la respuesta
             $formattedData = $data->map(function ($cuenta) {
@@ -83,31 +71,29 @@ class cuentasController extends Controller
         }
     }
 
-
-
-    //metodo buscar cuentas crud cuentas
     // Método get de cuentas con nombres de proyectos
-    // Método get de cuentas con nombres de proyectos
-    // Método get de cuentas con filtro por nombre y opcionalmente por id
     public function GetCuentasCRUD($nombre, Request $request)
     {
         try {
             // Obtener id_cuentas del query string si está presente
             $idCuentas = $request->query('id_cuentas');
-            
-            $query = cuentas::with(['clasificacion' => function ($query) {
+
+            $query = cuentas::with([
+                'clasificacion' => function ($query) {
                     $query->select('id_clasificacion', 'tipo as clasificacion');
-                }, 'proyecto' => function ($query) {
+                },
+                'proyecto' => function ($query) {
                     $query->select('id_proyectos', 'nombre as proyecto');
-                }])->where('cuenta', $nombre);
-            
+                }
+            ])->where('cuenta', $nombre);
+
             // Si se proporciona id_cuentas, filtrar por él
             if ($idCuentas) {
                 $query->where('id_cuentas', $idCuentas);
             }
-            
+
             $data = $query->get();
-            
+
             // Mapear los resultados para formatear la respuesta
             $formattedData = $data->map(function ($cuenta) {
                 return [
@@ -123,7 +109,7 @@ class cuentasController extends Controller
                     'proyecto' => $cuenta->proyecto ? $cuenta->proyecto->proyecto : null
                 ];
             });
-            
+
             return response()->json($formattedData, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
@@ -217,7 +203,7 @@ class cuentasController extends Controller
     {
         try {
             $cuenta = cuentas::find($id_cuentas);
-            
+
             if (!$cuenta) {
                 return response()->json(['error' => 'Cuenta no encontrada'], 404);
             }
@@ -226,163 +212,53 @@ class cuentasController extends Controller
             if ($request->has('cuenta')) {
                 $cuenta->cuenta = $request->cuenta;
             }
-            
+
             if ($request->has('estado')) {
                 $cuenta->estado = $request->estado;
             }
-            
+
             if ($request->has('codigo')) {
                 $cuenta->codigo = $request->codigo;
             }
-            
+
             if ($request->has('clasificacion')) {
                 // Aquí necesitas convertir el nombre de clasificación a id
                 // Supongamos que tienes una tabla clasificaciones
                 $clasificacion = DB::table('clasificacion')
                     ->where('tipo', $request->clasificacion)
                     ->first();
-                    
+
                 if ($clasificacion) {
                     $cuenta->id_clasificacion = $clasificacion->id_clasificacion;
                 }
             }
-            
+
             if ($request->has('proyecto')) {
                 // Convertir nombre de proyecto a id
                 $proyecto = DB::table('proyectos')
                     ->where('nombre', $request->proyecto)
                     ->first();
-                    
+
                 if ($proyecto) {
                     $cuenta->id_proyectos = $proyecto->id_proyectos;
                 }
             }
-            
+
             if ($request->has('tipo_cuenta')) {
                 $cuenta->tipo_cuenta = $request->tipo_cuenta;
             }
-            
+
             if ($request->has('corriente')) {
                 $cuenta->corriente = $request->corriente;
             }
-            
+
             $cuenta->save();
-            
+
             return response()->json(['message' => 'Cuenta actualizada correctamente'], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-
-    //  //Metodo Create
-    //  public function create(Request $request)
-    //  {
-    //      // Validar los datos de entrada
-    //      $validator = Validator::make($request->all(), [
-    //          'cuenta' => 'required|unique:cuentas',
-    //          'codigo' => 'required',
-    //          'id_clasificacion' => 'required|exists:clasificacion,id_clasificacion',
-    //          'id_proyectos' => 'required|exists:proyectos,id_proyectos',
-    //      ]);
-     
-    //      if ($validator->fails()) {
-    //          return response()->json(['error' => $validator->errors()->first()], 400);
-    //      }
-     
-    //      try {
-    //          // Crear una nueva cuenta
-    //          $cuenta = cuentas::create([
-    //              'cuenta' => $request->input('cuenta'),
-    //              'codigo' => $request->input('codigo'),
-    //              'id_clasificacion' => $request->input('id_clasificacion'),
-    //              'id_proyectos' => $request->input('id_proyectos'),
-    //          ]);
-     
-    //          return response()->json($cuenta, 201);
-    //      } catch (\Throwable $th) {
-    //          return response()->json(['error' => $th->getMessage()], 500);
-    //      }
-    //  }
-
-    //  // Metodo Update
-    //  public function update(Request $request, $id)
-    //  {
-    //      // Validar los datos de entrada
-    //      $validator = Validator::make($request->all(), [
-    //          'cuenta' => 'required',
-    //          'estado' => 'required',
-    //          'codigo' => 'required',
-    //          'id_clasificacion' => 'required|exists:clasificacion,id_clasificacion',
-    //          'id_proyectos' => 'required|exists:proyectos,id_proyectos',
-    //      ]);
-     
-    //      if ($validator->fails()) {
-    //          return response()->json(['error' => $validator->errors()->first()], 400);
-    //      }
-     
-    //      try {
-    //          // Buscar la cuenta a actualizar
-    //          $cuenta = cuentas::find($id);
-    //          if (!$cuenta) {
-    //              return response()->json(['error' => 'Cuenta no encontrada'], 404);
-    //          }
-     
-    //          // Actualizar los datos de la cuenta
-    //          $cuenta->update([
-    //              'cuenta' => $request->input('cuenta'),
-    //              'estado' => $request->input('estado'),
-    //              'codigo' => $request->input('codigo'),
-    //              'id_clasificacion' => $request->input('id_clasificacion'),
-    //              'id_proyectos' => $request->input('id_proyectos'),
-    //          ]);
-     
-    //          // Obtener y devolver la cuenta actualizada
-    //          $res = cuentas::find($id);
-    //          return response()->json($res, 200);
-    //      } catch (\Throwable $th) {
-    //          return response()->json(['error' => 'Error al actualizar la cuenta'], 500);
-    //      }
-    //  }
-
-    //      // Método Delete
-    // public function delete($id) {
-    //     try {
-    //         $cuenta = cuentas::find($id);
-    //         if (!$cuenta) {
-    //             return response()->json(['error' => 'Cuenta no encontrado'], 404);
-    //         }
-
-    //         $cuenta->delete();
-    //         return response()->json(['message' => 'Cuenta eliminada correctamente'], 200);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['error' => 'Error al eliminar la cuenta'], 500);
-    //     }
-    // }
-
-    // // Método Update por cuenta
-    // public function updateByCuenta(Request $request, $cuenta)
-    // {
-    //     try {
-    //         // Normalizar el nombre de la cuenta (convertir a minúsculas y eliminar espacios)
-    //         $cuenta = strtolower(str_replace(' ', '', $cuenta));
-    
-    //         // Actualizar la cuenta en la base de datos
-    //         $affectedRows = cuentas::whereRaw('LOWER(REPLACE(cuenta, " ", "")) = ?', [$cuenta])
-    //             ->update($request->except('cuenta')); // Excluir el campo 'cuenta' de los datos a actualizar
-    
-    //         // Verificar si se actualizó alguna fila
-    //         if ($affectedRows === 0) {
-    //             return response()->json(['error' => 'La cuenta no existe'], 404);
-    //         }
-    
-    //         // Obtener la cuenta actualizada
-    //         $updatedCuenta = cuentas::whereRaw('LOWER(REPLACE(cuenta, " ", "")) = ?', [$cuenta])->first();
-    
-    //         return response()->json($updatedCuenta, 200);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['error' => $th->getMessage()], 500);
-    //     }
-    // }
 
     // Método get de cuentas con nombres de clasificación y proyectos, filtrando por clasificación "INGRESOS"
     public function getCuentasIngresos()
@@ -390,11 +266,14 @@ class cuentasController extends Controller
         try {
             $data = cuentas::whereHas('clasificacion', function ($query) {
                 $query->where('tipo', 'INGRESOS');
-            })->with(['clasificacion' => function ($query) {
-                $query->select('id_clasificacion', 'tipo as clasificacion');
-            }, 'proyecto' => function ($query) {
-                $query->select('id_proyectos', 'nombre as proyecto');
-            }])->get();
+            })->with([
+                        'clasificacion' => function ($query) {
+                            $query->select('id_clasificacion', 'tipo as clasificacion');
+                        },
+                        'proyecto' => function ($query) {
+                            $query->select('id_proyectos', 'nombre as proyecto');
+                        }
+                    ])->get();
 
             // Mapear los resultados para formatear la respuesta
             $formattedData = $data->map(function ($cuenta) {
@@ -423,11 +302,14 @@ class cuentasController extends Controller
         try {
             $data = cuentas::whereHas('clasificacion', function ($query) {
                 $query->where('tipo', 'EGRESOS');
-            })->with(['clasificacion' => function ($query) {
-                $query->select('id_clasificacion', 'tipo as clasificacion');
-            }, 'proyecto' => function ($query) {
-                $query->select('id_proyectos', 'nombre as proyecto');
-            }])->get();
+            })->with([
+                        'clasificacion' => function ($query) {
+                            $query->select('id_clasificacion', 'tipo as clasificacion');
+                        },
+                        'proyecto' => function ($query) {
+                            $query->select('id_proyectos', 'nombre as proyecto');
+                        }
+                    ])->get();
 
             // Mapear los resultados para formatear la respuesta
             $formattedData = $data->map(function ($cuenta) {
@@ -449,164 +331,164 @@ class cuentasController extends Controller
         }
     }
 
-     public function getMovimientosPorCuentaCA(Request $request)
-{
-    try {
-        $idProyecto = 2; 
-        $request->validate([
-            'cuenta' => 'required|string',
-            'year'   => 'nullable|integer',
-        ]);
+    public function getMovimientosPorCuentaCA(Request $request)
+    {
+        try {
+            $idProyecto = 2;
+            $request->validate([
+                'cuenta' => 'required|string',
+                'year' => 'nullable|integer',
+            ]);
 
-        $nombreCuenta = $request->input('cuenta');          
-        $year         = $request->input('year', date('Y')); 
-        $cuenta = cuentas::with('clasificacion')
-            ->where('cuenta', $nombreCuenta)
-            ->where('id_proyectos', $idProyecto)
-            ->first();
+            $nombreCuenta = $request->input('cuenta');
+            $year = $request->input('year', date('Y'));
+            $cuenta = cuentas::with('clasificacion')
+                ->where('cuenta', $nombreCuenta)
+                ->where('id_proyectos', $idProyecto)
+                ->first();
 
-        if (!$cuenta) {
+            if (!$cuenta) {
+                return response()->json([
+                    'error' => "No existe una cuenta con nombre: {$nombreCuenta}"
+                ], 404);
+            }
+
+            $esIngreso = $cuenta->clasificacion
+                && strtoupper($cuenta->clasificacion->tipo) === 'INGRESOS';
+
+            $rows = ingresos_egresos::with(['datos_de_pago_ingresos', 'datos_de_pago_egresos'])
+                ->where('id_cuentas', $cuenta->id_cuentas)
+                ->whereYear('fecha', $year)
+                ->get();
+
+
+            $saldo = 0;
+            $movimientos = [];
+
+            foreach ($rows as $row) {
+
+                $numeroDocumento = '-';
+
+                if ($row->datos_de_pago_ingresos->count() > 0) {
+                    $numeroDocumento = $row->datos_de_pago_ingresos->first()->numero_documento;
+                }
+
+                if ($row->datos_de_pago_egresos->count() > 0) {
+                    $numeroDocumento = $row->datos_de_pago_egresos->first()->numero_documento;
+                }
+
+                $monto = (float) $row->monto;
+
+                if ($esIngreso) {
+                    $debita = $monto;
+                    $acredita = 0;
+                    $saldo += $monto;
+                } else {
+                    $debita = 0;
+                    $acredita = $monto;
+                    $saldo -= $monto;
+                }
+
+                $movimientos[] = [
+                    'id_ingresos_egresos' => $row->id_ingresos_egresos,
+                    'nomenclatura' => $row->nomenclatura,
+                    'numero_documento' => $numeroDocumento,
+                    'fecha' => $row->fecha,
+                    'cuenta' => $nombreCuenta,
+                    'descripcion' => $row->descripcion,
+                    'acredita' => number_format($acredita, 2, '.', ''),
+                    'debita' => number_format($debita, 2, '.', ''),
+                    'total' => $saldo,
+                ];
+            }
+
+            return response()->json($movimientos, 200);
+
+        } catch (\Throwable $th) {
             return response()->json([
-                'error' => "No existe una cuenta con nombre: {$nombreCuenta}"
-            ], 404);
+                'error' => $th->getMessage()
+            ], 500);
         }
-
-        $esIngreso = $cuenta->clasificacion
-            && strtoupper($cuenta->clasificacion->tipo) === 'INGRESOS';
-
-      $rows = ingresos_egresos::with(['datos_de_pago_ingresos', 'datos_de_pago_egresos'])
-        ->where('id_cuentas', $cuenta->id_cuentas)
-        ->whereYear('fecha', $year)   
-        ->get();
-
-        
-        $saldo = 0;
-        $movimientos = [];
-
-      foreach ($rows as $row) {
-
-            $numeroDocumento = '-';
-
-            if ($row->datos_de_pago_ingresos->count() > 0) {
-                $numeroDocumento = $row->datos_de_pago_ingresos->first()->numero_documento;
-            }
-
-            if ($row->datos_de_pago_egresos->count() > 0) {
-                $numeroDocumento = $row->datos_de_pago_egresos->first()->numero_documento;
-            }
-
-            $monto = (float) $row->monto;
-
-            if ($esIngreso) {
-                $debita   = $monto;
-                $acredita = 0;
-                $saldo   += $monto;
-            } else {
-                $debita   = 0;
-                $acredita = $monto;
-                $saldo   -= $monto;
-            }
-
-            $movimientos[] = [
-                'id_ingresos_egresos' => $row->id_ingresos_egresos,
-                'nomenclatura'     => $row->nomenclatura,
-                'numero_documento' => $numeroDocumento,
-                'fecha'            => $row->fecha,
-                'cuenta'           => $nombreCuenta,
-                'descripcion'      => $row->descripcion,
-                'acredita'         => number_format($acredita, 2, '.', ''),
-                'debita'           => number_format($debita, 2, '.', ''),
-                'total'            => $saldo,
-            ];
-        }
-
-        return response()->json($movimientos, 200);
-
-    } catch (\Throwable $th) {
-        return response()->json([
-            'error' => $th->getMessage()
-        ], 500);
     }
-}
 
- public function getMovimientosPorCuentaAG(Request $request)
-{
-    try {
-        $idProyecto = 1; 
-        $request->validate([
-            'cuenta' => 'required|string',
-            'year'   => 'nullable|integer',
-        ]);
+    public function getMovimientosPorCuentaAG(Request $request)
+    {
+        try {
+            $idProyecto = 1;
+            $request->validate([
+                'cuenta' => 'required|string',
+                'year' => 'nullable|integer',
+            ]);
 
-        $nombreCuenta = $request->input('cuenta');          
-        $year         = $request->input('year', date('Y')); 
-        $cuenta = cuentas::with('clasificacion')
-            ->where('cuenta', $nombreCuenta)
-            ->where('id_proyectos', $idProyecto)
-            ->first();
+            $nombreCuenta = $request->input('cuenta');
+            $year = $request->input('year', date('Y'));
+            $cuenta = cuentas::with('clasificacion')
+                ->where('cuenta', $nombreCuenta)
+                ->where('id_proyectos', $idProyecto)
+                ->first();
 
-        if (!$cuenta) {
+            if (!$cuenta) {
+                return response()->json([
+                    'error' => "No existe una cuenta con nombre: {$nombreCuenta}"
+                ], 404);
+            }
+
+            $esIngreso = $cuenta->clasificacion
+                && strtoupper($cuenta->clasificacion->tipo) === 'INGRESOS';
+
+            $rows = ingresos_egresos::with(['datos_de_pago_ingresos', 'datos_de_pago_egresos'])
+                ->where('id_cuentas', $cuenta->id_cuentas)
+                ->whereYear('fecha', $year)
+                ->get();
+
+
+            $saldo = 0;
+            $movimientos = [];
+
+            foreach ($rows as $row) {
+
+                $numeroDocumento = '-';
+
+                if ($row->datos_de_pago_ingresos->count() > 0) {
+                    $numeroDocumento = $row->datos_de_pago_ingresos->first()->numero_documento;
+                }
+
+                if ($row->datos_de_pago_egresos->count() > 0) {
+                    $numeroDocumento = $row->datos_de_pago_egresos->first()->numero_documento;
+                }
+
+                $monto = (float) $row->monto;
+
+                if ($esIngreso) {
+                    $debita = $monto;
+                    $acredita = 0;
+                    $saldo += $monto;
+                } else {
+                    $debita = 0;
+                    $acredita = $monto;
+                    $saldo -= $monto;
+                }
+
+                $movimientos[] = [
+                    'id_ingresos_egresos' => $row->id_ingresos_egresos,
+                    'nomenclatura' => $row->nomenclatura,
+                    'numero_documento' => $numeroDocumento,
+                    'fecha' => $row->fecha,
+                    'cuenta' => $nombreCuenta,
+                    'descripcion' => $row->descripcion,
+                    'acredita' => number_format($acredita, 2, '.', ''),
+                    'debita' => number_format($debita, 2, '.', ''),
+                    'total' => $saldo,
+                ];
+            }
+
+            return response()->json($movimientos, 200);
+
+        } catch (\Throwable $th) {
             return response()->json([
-                'error' => "No existe una cuenta con nombre: {$nombreCuenta}"
-            ], 404);
+                'error' => $th->getMessage()
+            ], 500);
         }
-
-        $esIngreso = $cuenta->clasificacion
-            && strtoupper($cuenta->clasificacion->tipo) === 'INGRESOS';
-
-      $rows = ingresos_egresos::with(['datos_de_pago_ingresos', 'datos_de_pago_egresos'])
-        ->where('id_cuentas', $cuenta->id_cuentas)
-        ->whereYear('fecha', $year)   
-        ->get();
-
-        
-        $saldo = 0;
-        $movimientos = [];
-
-      foreach ($rows as $row) {
-
-            $numeroDocumento = '-';
-
-            if ($row->datos_de_pago_ingresos->count() > 0) {
-                $numeroDocumento = $row->datos_de_pago_ingresos->first()->numero_documento;
-            }
-
-            if ($row->datos_de_pago_egresos->count() > 0) {
-                $numeroDocumento = $row->datos_de_pago_egresos->first()->numero_documento;
-            }
-
-            $monto = (float) $row->monto;
-
-            if ($esIngreso) {
-                $debita   = $monto;
-                $acredita = 0;
-                $saldo   += $monto;
-            } else {
-                $debita   = 0;
-                $acredita = $monto;
-                $saldo   -= $monto;
-            }
-
-            $movimientos[] = [
-                'id_ingresos_egresos' => $row->id_ingresos_egresos,
-                'nomenclatura'     => $row->nomenclatura,
-                'numero_documento' => $numeroDocumento,
-                'fecha'            => $row->fecha,
-                'cuenta'           => $nombreCuenta,
-                'descripcion'      => $row->descripcion,
-                'acredita'         => number_format($acredita, 2, '.', ''),
-                'debita'           => number_format($debita, 2, '.', ''),
-                'total'            => $saldo,
-            ];
-        }
-
-        return response()->json($movimientos, 200);
-
-    } catch (\Throwable $th) {
-        return response()->json([
-            'error' => $th->getMessage()
-        ], 500);
     }
-}
 
 }
