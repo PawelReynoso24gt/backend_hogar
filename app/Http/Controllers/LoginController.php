@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Crypt;
 class LoginController extends Controller
 {
     // Método Get (GET)
-    public function get(){
+    public function get()
+    {
         try {
             $data = logins::get();
             return response()->json($data, 200);
@@ -20,10 +21,11 @@ class LoginController extends Controller
     }
 
     // Método GetByID (GET)
-    public function getById($id){
+    public function getById($id)
+    {
         try {
             $data = logins::find($id);
-            if(!$data) {
+            if (!$data) {
                 return response()->json(['error' => 'Usuario no encontrado'], 404);
             }
             return response()->json($data, 200);
@@ -33,7 +35,8 @@ class LoginController extends Controller
     }
 
     // Método GetByNombre (GET)
-    public function getByNombre($usuarios){
+    public function getByNombre($usuarios)
+    {
         try {
             $proyecto = logins::where('usuarios', $usuarios)->first();
             if (!$proyecto) {
@@ -53,34 +56,36 @@ class LoginController extends Controller
         }
     }
 
-    public function create(Request $request){
+    public function create(Request $request)
+    {
         try {
             // Validar los datos de entrada
             $request->validate([
                 'usuarios' => 'required|string',
                 'contrasenias' => 'required|string',
             ]);
-    
+
             // Obtener los datos del request
             $data['usuarios'] = $request->input('usuarios');
             $password = $request->input('contrasenias');
             $data['estado'] = 1; // Establecer estado como 1
-        
+
             // Cifrar la contraseña usando Laravel Crypt
             $data['contrasenias'] = Crypt::encryptString($password);
-        
+
             // Crear el usuario
             $user = logins::create($data);
-    
+
             return response()->json(['message' => 'Usuario creado', 'usuario' => $user], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-    
+
 
     // Método Update (PUT)
-    public function update(Request $request, $usuarios){
+    public function update(Request $request, $usuarios)
+    {
         try {
             // Buscar el proyecto por el nombre
             $proyecto = logins::where('usuarios', $usuarios)->first();
@@ -121,10 +126,11 @@ class LoginController extends Controller
 
 
     // Método Delete (DELETE)
-    public function delete($id){
+    public function delete($id)
+    {
         try {
             $user = logins::find($id);
-            if(!$user) {
+            if (!$user) {
                 return response()->json(['error' => 'Usuario no encontrado'], 404);
             }
 
@@ -161,8 +167,20 @@ class LoginController extends Controller
                 return response()->json(['error' => 'Contraseña incorrecta'], 401);
             }
 
+            // Eliminar tokens antiguos del usuario
+            $user->tokens()->delete();
+
+            // Generar nuevo token
+            $token = $user->createToken('auth-token')->plainTextToken;
+
             // Autenticación exitosa
-            return response()->json(['message' => 'Autenticación exitosa'], 200);
+            return response()->json([
+                'message' => 'Autenticación exitosa',
+                'token' => $token,
+                'usuario' => $user->usuarios,
+                'id_usuario' => $user->id_login,
+                'id_rol' => $user->id_rol
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
