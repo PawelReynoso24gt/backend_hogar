@@ -7,8 +7,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\bancos;
 use App\Models\cuentas_bancarias;
-use App\Models\datos_de_pago_egresos;
-use App\Models\datos_de_pago_ingresos;
 
 class cuentas_bancariasController extends Controller
 {
@@ -31,7 +29,7 @@ class cuentas_bancariasController extends Controller
             $responseData = [
                 'id_cuentas_bancarias' => $cuenta->id_cuentas_bancarias,
                 'numero_cuenta' => $cuenta->numero_cuenta,
-                'estado' => $data['estado'] = 1,
+                'estado' => $cuenta->estado,
                 'banco' => $cuenta->bancos ? $cuenta->bancos->banco : null
                 // Puedes agregar más atributos si lo deseas
             ];
@@ -45,52 +43,10 @@ class cuentas_bancariasController extends Controller
     // Método get
     public function get(){
         try{
-            $data = cuentas_bancarias::get();
+            $data = cuentas_bancarias::all(); // all() es más directo que get() cuando no hay where
             return response()->json($data, 200);
         } catch (\Throwable $th){
             return response()->json(['error' => $th ->getMessage()],500);
-        }
-    }
-
-    // método get con todos los nombres de bancos
-    public function getWithBancos () {
-        try{
-            $data = cuentas_bancarias::with('bancos')->get()->map(function ($cuentas_bancarias) {
-                return [
-                    'id_cuentas_bancarias' => $cuentas_bancarias->id_cuentas_bancarias,
-                    'numero_cuenta' => $cuentas_bancarias->numero_cuenta,
-                    'estado' => $cuentas_bancarias->estado,
-                    'banco' => $cuentas_bancarias->bancos->banco
-                ];
-            });
-            return response()->json($data, 200);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
-    }
-
-    // Método get por número de cuenta
-    public function getByCuentaB($cuentaB)
-    {
-        try {
-            $cuentaB = cuentas_bancarias::where('numero_cuenta', $cuentaB)->first();
-
-            if(!$cuentaB) {
-                return response()->json(['error' => 'La cuenta no existe'], 404);
-            }
-
-            $cuentaB->load('bancos');
-
-            $responseData = [
-                'id_cuentas_bancarias' => $cuentaB->id_cuentas_bancarias,
-                'numero_cuenta' => $cuentaB->numero_cuenta,
-                'estado' => $cuentaB->estado,
-                'banco' => $cuentaB->bancos ? $cuentaB->bancos->banco : null
-            ];
-
-            return response()->json($responseData, 200);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 
@@ -103,30 +59,27 @@ class cuentas_bancariasController extends Controller
                 return response()->json(['error' => 'No hay cuentas bancarias disponibles'], 404);
             }
     
-            $responseData = [];
-    
-            foreach ($cuenta_bancarias as $cuentaB) {
-                $responseData[] = [
+            // Cambiamos el foreach por map() para mantener el mismo estilo de código
+            $responseData = $cuenta_bancarias->map(function ($cuentaB) {
+                return [
                     'cuenta_bancaria' => $cuentaB->numero_cuenta, 
-                    'banco_y_cuenta' => $cuentaB->bancos ? $cuentaB->bancos->banco . ' ' . $cuentaB->numero_cuenta : null
+                    'banco_y_cuenta'  => $cuentaB->bancos ? $cuentaB->bancos->banco . ' ' . $cuentaB->numero_cuenta : null
                 ];
-            }
+            });
     
             return response()->json($responseData, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-    
-
 
     public function create(Request $request)
     {
         // Validar los datos de entrada
         $request->validate([
             'numero_cuenta' => 'required|string',
-            'banco' => 'required|string',
-            'estado' => 'sometimes|integer' // Validación opcional para estado
+            'banco'         => 'required|string',
+            'estado'        => 'sometimes|integer' // Validación opcional para estado
         ]);
 
         try {
@@ -149,78 +102,36 @@ class cuentas_bancariasController extends Controller
         }
     }
 
-
     public function update(Request $request, $cuentaB)
     {
         try {
-            // Buscar la cuenta por su numero
-            $cuentaB = cuentas_bancarias::where('numero_cuenta', $cuentaB)->first();
+            $cuenta = cuentas_bancarias::where('numero_cuenta', $cuentaB)->first();
 
-            // Verificar si la cuenta existe
-            if (!$cuentaB) {
+            if (!$cuenta) {
                 return response()->json(['error' => 'La cuenta no existe'], 404);
             }
 
-            // Actualizar solo los campos que se hayan enviado en la solicitud
             if ($request->has('numero_cuenta')) {
-                $cuentaB->numero_cuenta = $request->input('numero_cuenta');
+                $cuenta->numero_cuenta = $request->input('numero_cuenta');
             }
 
             if ($request->has('banco')) {
-                // Buscar el banco
                 $banco = bancos::where('banco', $request->input('banco'))->first();
-
-                // Si no se encuentra, devolver un error
                 if (!$banco) {
                     return response()->json(['error' => 'El banco proporcionado no existe'], 404);
                 }
-
-                $cuentaB->id_bancos = $banco->id_bancos;
+                $cuenta->id_bancos = $banco->id_bancos;
             }
 
             if ($request->has('estado')) {
-                $cuentaB->estado = $request->input('estado');
+                $cuenta->estado = $request->input('estado');
             }
 
-            // Guardar los cambios
-            $cuentaB->save();
+            $cuenta->save();
 
-            // Obtener la cuenta actualizada
-            $updatedCuenta = cuentas_bancarias::find($cuentaB->id_cuentas_bancarias);
+            $cuenta->load('bancos'); // Cargamos el banco por si cambió para devolver la data completa
 
-            return response()->json($updatedCuenta, 200);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
-    }
-    
-
-    // Método get por cuenta para Id
-    public function getByCuentaId($numero_cuenta)
-    {
-        try {
-            // Comprobar los datos recibidos
-            if (!$numero_cuenta) {
-                return response()->json(['error' => 'The numero cuenta field is required.'], 400);
-            }
-
-            // Buscar la cuenta bancaria por su número de cuenta
-            $cuentaB = cuentas_bancarias::where('numero_cuenta', $numero_cuenta)->first();
-
-            // Verificar si la cuenta existe
-            if (!$cuentaB) {
-                return response()->json(['error' => 'La cuenta no existe'], 404);
-            }
-
-            // Preparar la respuesta
-            $responseData = [
-                'id_cuentas_bancarias' => $cuentaB->id_cuentas_bancarias,
-                'numero_cuenta' => $cuentaB->numero_cuenta,
-                'estado' => $cuentaB->estado,
-                'id_bancos' => $cuentaB->id_bancos
-            ];
-
-            return response()->json($responseData, 200);
+            return response()->json($cuenta, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

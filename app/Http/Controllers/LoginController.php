@@ -61,31 +61,6 @@ class LoginController extends Controller
                 'contrasenias' => 'required|string',
             ]);
     
-           
-    
-            // Validar la contraseña
-            /*if (strlen($password) < 8) {
-                return response()->json(['error' => 'La contraseña no puede ser menor a 8 dígitos'], 400);
-            }
-            if (!preg_match('/[A-Z]/', $password)) {
-                return response()->json(['error' => 'La contraseña debe contener al menos una letra mayúscula'], 400);
-            }
-            if (!preg_match('/[a-z]/', $password)) {
-                return response()->json(['error' => 'La contraseña debe contener al menos una letra minúscula'], 400);
-            }
-            if (!preg_match('/[0-9]/', $password)) {
-                return response()->json(['error' => 'La contraseña debe contener al menos un número'], 400);
-            }
-            if (preg_match('/^[0-9]|[0-9]$/', $password)) {
-                return response()->json(['error' => 'El número en la contraseña no puede estar ni al principio ni al final'], 400);
-            }
-            if (!preg_match('/[!@#$]/', $password)) {
-                return response()->json(['error' => 'La contraseña debe contener al menos uno de estos caracteres especiales: !@#$'], 400);
-            }
-            if (preg_match('/^[!@#$]|[!@#$]$/',     $password)) {
-                return response()->json(['error' => 'Los caracteres especiales no pueden ir ni al principio ni al final'], 400);
-            }*/
-    
             // Obtener los datos del request
             $data['usuarios'] = $request->input('usuarios');
             $password = $request->input('contrasenias');
@@ -118,29 +93,6 @@ class LoginController extends Controller
             // Validar la contraseña si está presente en la solicitud
             if ($request->has('contrasenias')) {
                 $password = $request->input('contrasenias');
-
-                // Validar la contraseña
-               /* if (strlen($password) < 8) {
-                    return response()->json(['error' => 'La contraseña no puede ser menor a 8 dígitos'], 400);
-                }
-                if (!preg_match('/[A-Z]/', $password)) {
-                    return response()->json(['error' => 'La contraseña debe contener al menos una letra mayúscula'], 400);
-                }
-                if (!preg_match('/[a-z]/', $password)) {
-                    return response()->json(['error' => 'La contraseña debe contener al menos una letra minúscula'], 400);
-                }
-                if (!preg_match('/[0-9]/', $password)) {
-                    return response()->json(['error' => 'La contraseña debe contener al menos un número'], 400);
-                }
-                if (preg_match('/^[0-9]|[0-9]$/', $password)) {
-                    return response()->json(['error' => 'El número en la contraseña no puede estar ni al principio ni al final'], 400);
-                }
-                if (!preg_match('/[!@#$]/', $password)) {
-                    return response()->json(['error' => 'La contraseña debe contener al menos uno de estos caracteres especiales: !@#$'], 400);
-                }
-                if (preg_match('/^[!@#$]|[!@#$]$/', $password)) {
-                    return response()->json(['error' => 'Los caracteres especiales no pueden ir ni al principio ni al final'], 400);
-                }*/
 
                 // Cifrar la contraseña usando Laravel Crypt
                 $proyecto->contrasenias = Crypt::encryptString($password);

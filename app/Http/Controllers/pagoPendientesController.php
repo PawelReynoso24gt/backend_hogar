@@ -3,16 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\pago_pendientes;
-
 
 class pagoPendientesController extends Controller
 {
     public function get()
     {
-        try{
-            $data = pago_pendientes::get();
+        try {
+            $data = pago_pendientes::all(); // 'all()' es más estándar que 'get()' cuando quieres traer todo
             return response()->json($data, 200);
         }catch(\Exception $e){
             return response() ->json(['error' => 'Error al obtener los pagos pendientes', 'message' => $e->getMessage()], 500);  
@@ -28,12 +26,8 @@ class pagoPendientesController extends Controller
             'monto_pago' => 'required|numeric|min:0',
         ]);
 
-        $pagoPendiente = pago_pendientes::create([
-            'fecha_pago' => $validatedData['fecha_pago'],
-            'id_ingresos_egresos' => $validatedData['id_ingresos_egresos'],
-            'id_abono' => $validatedData['id_abono'],
-            'monto_pago' => $validatedData['monto_pago'],
-        ]);
+        // Como $validatedData ya tiene exactamente los 4 campos, lo pasamos directo.
+        $pagoPendiente = pago_pendientes::create($validatedData);
 
         return response()->json([
             'message' => 'Pago pendiente registrado exitosamente',

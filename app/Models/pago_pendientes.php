@@ -12,9 +12,9 @@ class pago_pendientes extends Model
     protected $primaryKey = 'id_pago_pendientes';
      protected $fillable = [
         'fecha_pago',
-        'id_ingresos_egresos', // ID de la Deuda Original
-        'id_abono',            // ID del Registro de Abono/Pago
-        'monto_pago',          // Monto aplicado en este abono
+        'id_ingresos_egresos', 
+        'id_abono',           
+        'monto_pago',          
     ];
 
     public function deudaOriginal()

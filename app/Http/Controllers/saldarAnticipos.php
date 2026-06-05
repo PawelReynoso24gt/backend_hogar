@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-// Importe los controlador necesarios para tener un mejor control de las funciones
 use App\Http\Controllers\ingresos_egresosController;
 use App\Http\Controllers\pagoPendientesController;
 use App\Models\pago_pendientes;
@@ -17,8 +16,6 @@ class saldarAnticipos extends Controller
     // Método que salda un anticipo: crea un registro en ingresos_egresos y registra el pago pendiente
     public function saldarAnticipoAG(Request $request)
     {
-        // Validar los campos necesarios para crear el registro y para crear el pago pendiente
-        // Nota: ya no requerimos 'id_abono' en la petición — se usará el id creado como id_abono
         $request->validate([
             // campos requeridos por ingresos_egresosController::create
             'fecha' => 'required|date',

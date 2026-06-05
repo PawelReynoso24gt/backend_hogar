@@ -270,7 +270,7 @@ class reportesGenerales extends Controller
     // --------------------CAPILLA----------------------
 
 
-   // ✅ Reporte general para proyecto capilla (id_proyectos = 2)
+   // Reporte general para proyecto capilla (id_proyectos = 2)
 public function reporteGeneralCapilla(Request $request)
 {
     try {
@@ -288,7 +288,7 @@ public function reporteGeneralCapilla(Request $request)
 
         $tipo = $validated['tipo'];
 
-        // ✅ ANUAL → usa fechas (NO mes)
+        // ANUAL → usa fechas (NO mes)
         if ($tipo === 'anual') {
 
             if (empty($validated['fecha_inicio']) || empty($validated['fecha_fin'])) {
@@ -303,7 +303,7 @@ public function reporteGeneralCapilla(Request $request)
             return $this->generateReportCapillaByFechas($idProyecto, $fechaInicial, $fechaFinal);
         }
 
-        // ✅ Mensual/Trimestral/Semestral → mes + year obligatorios
+        // Mensual/Trimestral/Semestral → mes + year obligatorios
         if (empty($validated['mes'])) {
             return response()->json([
                 'error' => 'El mes es obligatorio para este período'
@@ -321,7 +321,7 @@ public function reporteGeneralCapilla(Request $request)
 }
 
 
-// ✅ Calcula fechas según mensual/trimestral/semestral + mes + year
+// Calcula fechas según mensual/trimestral/semestral + mes + year
 private function generateReportBalanceCapilla($idProyecto, $tipo, $mes, $year)
 {
     $fechaInicial = null;
@@ -422,7 +422,7 @@ private function generateReportBalanceCapilla($idProyecto, $tipo, $mes, $year)
 }
 
 
-// ✅ Generador REAL del reporte Capilla (NO TOCA TU FORMATO, devuelve saldo/data/totales)
+// Generador REAL del reporte Capilla (NO TOCA TU FORMATO, devuelve saldo/data/totales)
 private function generateReportCapillaByFechas($idProyecto, $fechaInicial, $fechaFinal)
 {
     // 🔥 saldos iniciales antes del rango
@@ -454,10 +454,10 @@ private function generateReportCapillaByFechas($idProyecto, $fechaInicial, $fech
     $saldoInicialBancos = $ingresosAntBancos - $egresosAntBancos;
     $saldoInicial       = $saldoInicialCaja + $saldoInicialBancos;
 
-    // ✅ cuentas del proyecto
+    // cuentas del proyecto
     $cuentasProyecto = cuentas::where('id_proyectos', $idProyecto)->get();
 
-    // ✅ data de caja
+    // data de caja
     $dataCaja = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
         $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
             ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
@@ -480,7 +480,7 @@ private function generateReportCapillaByFechas($idProyecto, $fechaInicial, $fech
         ];
     })->values();
 
-    // ✅ data de bancos
+    // data de bancos
     $dataBancos = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
         $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
             ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
@@ -503,7 +503,7 @@ private function generateReportCapillaByFechas($idProyecto, $fechaInicial, $fech
         ];
     })->values();
 
-    // ✅ totales
+    // totales
     $totalIngresosCaja   = $dataCaja->sum(fn($x) => (float)$x['ingresos']);
     $totalEgresosCaja    = $dataCaja->sum(fn($x) => (float)$x['egresos']);
     $totalIngresosBancos = $dataBancos->sum(fn($x) => (float)$x['ingresos']);
