@@ -8700,4 +8700,47 @@ public function getReporteEstadoResultadosCA(Request $request)
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
+    public function createSaldarAG(Request $request)
+    {
+        // Validar los datos de entrada
+        $request->validate([
+            'fecha' => 'required|date',
+            'identificacion' => 'required',
+            'nombre' => 'required',
+            'descripcion' => 'required',
+            'monto' => 'required|numeric',
+            'tipo' => 'required',
+            // ahora aceptamos 'monto_pago' y lo usaremos para asignar a monto_haber
+            'monto_pago' => 'required|numeric',
+            'cuenta' => 'required'
+        ]);
+
+        try {
+            // Buscar la cuenta por su nombre
+            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
+
+            // Si la cuenta no se encuentra, devolver un error
+            if (!$cuenta) {
+                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
+            }
+
+            // Crear un nuevo registro en la tabla ingresos_egresos
+            $ingreso_egreso = new ingresos_egresos();
+            $ingreso_egreso->fecha = $request->input('fecha');
+            $ingreso_egreso->identificacion = $request->input('identificacion');
+            $ingreso_egreso->nombre = $request->input('nombre');
+            $ingreso_egreso->descripcion = $request->input('descripcion');
+            $ingreso_egreso->monto = $request->input('monto');
+            $ingreso_egreso->tipo = $request->input('tipo');
+            // Asignar monto_haber con el valor enviado en 'monto_pago'
+            $ingreso_egreso->monto_haber = $request->input('monto_pago');
+            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
+            $ingreso_egreso->save();
+
+            return response()->json($ingreso_egreso, 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
 }
