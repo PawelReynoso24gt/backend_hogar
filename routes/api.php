@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Esta ruta es pública y no requiere autenticación ya que nos permite iniciar sesion :)
 Route::post('/authenticate', [LoginController::class, 'authenticate']);
 
 Route::middleware('auth:sanctum')->get('/me', function (Request $request) {

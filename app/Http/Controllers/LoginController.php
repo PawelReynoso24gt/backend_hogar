@@ -10,20 +10,43 @@ use Illuminate\Support\Facades\Crypt;
 class LoginController extends Controller
 {
     // Método Get (GET)
-    public function get()
+    public function get(Request $request)
     {
         try {
+
+            if ($request->user()->id_rol != 1) {
+                return response()->json([
+                    'error' => 'No autorizado'
+                ], 403);
+            }
+
             $data = logins::get();
+
             return response()->json($data, 200);
+
         } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
+            return response()->json([
+                'error' => $th->getMessage()
+            ], 500);
         }
     }
 
     // Método GetByID (GET)
-    public function getById($id)
+    // CANDIDATO A IDOR
+    public function getById(Request $request, $id) // Se agrega el Request para obtener el usuario autenticado
     {
         try {
+
+            // Este if nos permite eliminar IDOR, se verifica si la info solicitada pertenece al usuario autenticado, si no es así se devuelve un error de no autorizado
+            if (
+                $request->user()->id_rol != 1 &&
+                $request->user()->id_login != $id
+            ) {
+                return response()->json([
+                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
+                ], 403);
+            }
+
             $data = logins::find($id);
             if (!$data) {
                 return response()->json(['error' => 'Usuario no encontrado'], 404);
@@ -35,9 +58,19 @@ class LoginController extends Controller
     }
 
     // Método GetByNombre (GET)
-    public function getByNombre($usuarios)
+    public function getByNombre(Request $request, $usuarios)
     {
         try {
+
+            if (
+                $request->user()->id_rol != 1 &&
+                $request->user()->usuarios !== $usuarios
+            ) {
+                return response()->json([
+                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
+                ], 403);
+            }
+
             $proyecto = logins::where('usuarios', $usuarios)->first();
             if (!$proyecto) {
                 return response()->json(['error' => 'El proyecto no existe'], 404);
@@ -58,6 +91,13 @@ class LoginController extends Controller
 
     public function create(Request $request)
     {
+
+        if ($request->user()->id_rol != 1) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             // Validar los datos de entrada
             $request->validate([
@@ -76,9 +116,14 @@ class LoginController extends Controller
             // Crear el usuario
             $user = logins::create($data);
 
-            return response()->json(['message' => 'Usuario creado', 'usuario' => $user], 200);
+            return response()->json([
+                'message' => 'Usuario creado',
+                'usuario' => $user
+            ], 200);
         } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
+            return response()->json([
+                'error' => $th->getMessage()
+            ], 500);
         }
     }
 
@@ -87,6 +132,16 @@ class LoginController extends Controller
     public function update(Request $request, $usuarios)
     {
         try {
+
+            if (
+                $request->user()->id_rol != 1 &&
+                $request->user()->usuarios !== $usuarios
+            ) {
+                return response()->json([
+                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
+                ], 403);
+            }
+
             // Buscar el proyecto por el nombre
             $proyecto = logins::where('usuarios', $usuarios)->first();
 
@@ -126,9 +181,19 @@ class LoginController extends Controller
 
 
     // Método Delete (DELETE)
-    public function delete($id)
+    public function delete(Request $request, $id)
     {
         try {
+
+            if (
+                $request->user()->id_rol != 1 &&
+                $request->user()->id_login !== (int) $id
+            ) { //if ($request->user()->usuarios !== $id) Esta es la manera en como se manejaba antes
+                return response()->json([
+                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
+                ], 403);
+            }
+
             $user = logins::find($id);
             if (!$user) {
                 return response()->json(['error' => 'Usuario no encontrado'], 404);
