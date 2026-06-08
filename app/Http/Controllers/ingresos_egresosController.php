@@ -1170,9 +1170,6 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
-    // ingresos de proyecto agrícola (bancos)
-    // ingresos de bancos
-
     public function createALLINAG(Request $request)
     {
         try {
@@ -1611,9 +1608,6 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
-    // TRASLADOS INTERNOS
-
-    // traslado de Depósitos de Caja AGRÍCOLA
 
     public function createTrasDepCajaAG(Request $request)
     {
