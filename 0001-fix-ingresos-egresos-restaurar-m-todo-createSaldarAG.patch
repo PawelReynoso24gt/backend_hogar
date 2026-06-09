@@ -1,0 +1,76 @@
+From eed39458954bf5434d287856f81a78790fa15be0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Josu=C3=A9=20Robles?= <jrobles@mibluemedical.com>
+Date: Fri, 5 Jun 2026 11:35:58 -0600
+Subject: [PATCH] =?UTF-8?q?fix(ingresos-egresos):=20restaurar=20m=C3=A9tod?=
+ =?UTF-8?q?o=20createSaldarAG=20eliminado=20en=20limpieza?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+El commit f96ad13 ("limpieza de codigo angely") eliminó la definición de
+createSaldarAG en ingresos_egresosController.php, pero saldarAnticipos.php
+seguía invocándolo, provocando "Call to undefined method" al saldar anticipos.
+
+Se restaura la función tal como estaba antes del borrado (f96ad13^): valida
+monto_pago y lo asigna a monto_haber al crear el registro en ingresos_egresos.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+---
+ .../ingresos_egresosController.php            | 43 +++++++++++++++++++
+ 1 file changed, 43 insertions(+)
+
+diff --git a/app/Http/Controllers/ingresos_egresosController.php b/app/Http/Controllers/ingresos_egresosController.php
+index 7368b4a..82fb6b1 100644
+--- a/app/Http/Controllers/ingresos_egresosController.php
++++ b/app/Http/Controllers/ingresos_egresosController.php
+@@ -8700,4 +8700,47 @@ public function getInfoAnticipoAG()
+             return response()->json(['error' => $th->getMessage()], 500);
+         }
+     }
++
++    public function createSaldarAG(Request $request)
++    {
++        // Validar los datos de entrada
++        $request->validate([
++            'fecha' => 'required|date',
++            'identificacion' => 'required',
++            'nombre' => 'required',
++            'descripcion' => 'required',
++            'monto' => 'required|numeric',
++            'tipo' => 'required',
++            // ahora aceptamos 'monto_pago' y lo usaremos para asignar a monto_haber
++            'monto_pago' => 'required|numeric',
++            'cuenta' => 'required'
++        ]);
++
++        try {
++            // Buscar la cuenta por su nombre
++            $cuenta = cuentas::where('cuenta', $request->input('cuenta'))->first();
++
++            // Si la cuenta no se encuentra, devolver un error
++            if (!$cuenta) {
++                return response()->json(['error' => 'La cuenta proporcionada no existe'], 404);
++            }
++
++            // Crear un nuevo registro en la tabla ingresos_egresos
++            $ingreso_egreso = new ingresos_egresos();
++            $ingreso_egreso->fecha = $request->input('fecha');
++            $ingreso_egreso->identificacion = $request->input('identificacion');
++            $ingreso_egreso->nombre = $request->input('nombre');
++            $ingreso_egreso->descripcion = $request->input('descripcion');
++            $ingreso_egreso->monto = $request->input('monto');
++            $ingreso_egreso->tipo = $request->input('tipo');
++            // Asignar monto_haber con el valor enviado en 'monto_pago'
++            $ingreso_egreso->monto_haber = $request->input('monto_pago');
++            $ingreso_egreso->id_cuentas = $cuenta->id_cuentas;
++            $ingreso_egreso->save();
++
++            return response()->json($ingreso_egreso, 201);
++        } catch (\Throwable $th) {
++            return response()->json(['error' => $th->getMessage()], 500);
++        }
++    }
+ }
+-- 
+2.53.0.windows.2
+
