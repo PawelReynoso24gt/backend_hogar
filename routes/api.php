@@ -19,9 +19,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Ruta de autenticación con limitación de tasa específica
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/protected-route', [YourController::class, 'yourMethod']);
-});
-
+// Esta ruta es pública y no requiere autenticación ya que nos permite iniciar sesion :)
 Route::post('/authenticate', [LoginController::class, 'authenticate']);
+
+Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
+    return response()->json([
+        'usuario' => $request->user()->usuarios,
+        'id' => $request->user()->id_login,
+        'rol' => $request->user()->id_rol
+    ]);
+});
