@@ -40,8 +40,7 @@ class ProjectsController extends Controller
         }
     }
 
-
-    //Methos post
+    //Post
     public function create(Request $request)
     {
         try {
@@ -62,6 +61,7 @@ class ProjectsController extends Controller
         }
     }
 
+    //Update 
     public function update(Request $request, $nombre){
         try {
             // Buscar el proyecto por el nombre
@@ -93,8 +93,7 @@ class ProjectsController extends Controller
         }
     }
     
-
-    //Method delete
+    //Delete 
     public function delete($id)
     {
         try {
