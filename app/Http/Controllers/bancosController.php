@@ -41,7 +41,6 @@ class bancosController extends Controller
         }
     }
 
-
     //Metodo Create
     public function create(Request $request){
         try {
