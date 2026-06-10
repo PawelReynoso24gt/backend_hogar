@@ -1,1 +1,5 @@
+<<<<<<<< HEAD:storage/framework/sessions/EjUwwnYh2rY68nTHpD7Ptwv9ZKfzg2rVAGh19Vp0
 a:3:{s:6:"_token";s:40:"ENs4aI4giNSFs7XVu6tzWAxR2XvWI1688ARvQR2Z";s:9:"_previous";a:1:{s:3:"url";s:41:"http://127.0.0.1:8000/cuentasB/for-select";}s:6:"_flash";a:2:{s:3:"old";a:0:{}s:3:"new";a:0:{}}}
+========
+a:3:{s:6:"_token";s:40:"MAJGkKCFYXLDYXZoNpAzdKzBHDPj1uhqsh3B0Zje";s:9:"_previous";a:1:{s:3:"url";s:41:"http://127.0.0.1:8000/cuentasB/for-select";}s:6:"_flash";a:2:{s:3:"old";a:0:{}s:3:"new";a:0:{}}}
+>>>>>>>> b19f88b2e359ea1d6b78eb3f77d7826d131847aa:storage/framework/sessions/1xjoLG8gBrxfKgtsnyrtUURBpmFkcU2xC7h3oHrc
