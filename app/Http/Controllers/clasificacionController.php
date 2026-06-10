@@ -43,7 +43,6 @@ class clasificacionController extends Controller
         }
     }
 
-
     //Metodo Create
     public function create(Request $request){
         try {
