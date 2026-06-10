@@ -129,7 +129,7 @@ Route::prefix('cuentasB')->group(function () {
     Route::get('/cuentas_bancarias/{numero_cuenta}', [cuentas_bancariasController::class, 'getByCuenta']); 
     Route::get('/get', [cuentas_bancariasController::class, 'get']); 
     Route::get('/getConcatenada', [cuentas_bancariasController::class, 'getByCuentaBName']); 
-    Route::post('/create', [cuentas_bancariasController::class, 'create']);-
+    Route::post('/create', [cuentas_bancariasController::class, 'create']);
     Route::put('/update/{cuentaB}', [cuentas_bancariasController::class, 'update']); 
     Route::get('/for-select', [cuentas_bancariasController::class, 'getIdCuenta']); 
 
