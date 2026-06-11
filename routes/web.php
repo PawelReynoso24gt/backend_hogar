@@ -26,7 +26,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Rutas de logins
+
+// DE AQUI PARA ADELANTE TODAS LAS RUTAS ESTAN PROTEGIDAS POR AUTENTICACION SANCTUM, SE DEBE INICIAR SESION PARA PODER ACCEDER A ELLAS
+Route::middleware('auth:sanctum')->group(function () {
+    // Rutas de logins LIBRE DE IDOR
     Route::prefix('logins')->group(function () {
         Route::get('/getLogins', [LoginController::class, 'get']);
         Route::get('/getLogins/{id}', [LoginController::class, 'getById']);
@@ -34,7 +37,7 @@ Route::get('/', function () {
         Route::post('/create', [LoginController::class, 'create']);
         Route::put('/update/{usuarios}', [LoginController::class, 'update']);
         Route::delete('/delete/{id}', [LoginController::class, 'delete']);
-      
+
     });
 // Rutas de Proyectos
 Route::prefix('proyectos')->group(function () {
@@ -133,15 +136,17 @@ Route::prefix('cuentasB')->group(function () {
     Route::put('/update/{cuentaB}', [cuentas_bancariasController::class, 'update']); 
     Route::get('/for-select', [cuentas_bancariasController::class, 'getIdCuenta']); 
 
-});
+    });
 
-Route::prefix('pago_pendientes')->group(function () {
-    Route::post('/createNewPagoPendiente', [pagoPendientesController::class, 'addNewPendientes']);
-});
+    Route::prefix('pago_pendientes')->group(function () {
+        Route::post('/createNewPagoPendiente', [pagoPendientesController::class, 'addNewPendientes']);
+    });
 
-Route::prefix('saldar_anticipos')->group(function () {
-    Route::post('/saldarAnticipoAG', [App\Http\Controllers\saldarAnticipos::class, 'saldarAnticipoAG']);
-    Route::post('/saldarAnticipoCA', [App\Http\Controllers\saldarAnticipos::class, 'saldarAnticipoCA']);
-    Route::post('/getMontoFaltanteAG', [App\Http\Controllers\saldarAnticipos::class, 'getMontoFaltanteAG']);
-    Route::post('/getMontoFaltanteCA', [App\Http\Controllers\saldarAnticipos::class, 'getMontoFaltanteCA']);
+    Route::prefix('saldar_anticipos')->group(function () {
+        Route::post('/saldarAnticipoAG', [App\Http\Controllers\saldarAnticipos::class, 'saldarAnticipoAG']);
+        Route::post('/saldarAnticipoCA', [App\Http\Controllers\saldarAnticipos::class, 'saldarAnticipoCA']);
+        Route::post('/getMontoFaltanteAG', [App\Http\Controllers\saldarAnticipos::class, 'getMontoFaltanteAG']);
+        Route::post('/getMontoFaltanteCA', [App\Http\Controllers\saldarAnticipos::class, 'getMontoFaltanteCA']);
+    });
+
 });
