@@ -57,7 +57,7 @@ class clasificacionController extends Controller
     //Metodo Create
     public function create(Request $request)
     {
-        if (!$this->authorizationService->hasPermission($request->user(), 'manage_projects')) {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_classification')) {
             return response()->json([
                 'error' => 'No autorizado'
             ], 403);
@@ -75,7 +75,7 @@ class clasificacionController extends Controller
     // Metodo Update
     public function update(Request $request, $id)
     {
-        if (!$this->authorizationService->hasPermission($request->user(), 'manage_projects')) {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_classification')) {
             return response()->json([
                 'error' => 'No autorizado'
             ], 403);
@@ -99,7 +99,7 @@ class clasificacionController extends Controller
     // Método Update por tipo
     public function updateByTipo(Request $request, $tipo)
     {
-        if (!$this->authorizationService->hasPermission($request->user(), 'manage_projects')) {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_classification')) {
             return response()->json([
                 'error' => 'No autorizado'
             ], 403);
@@ -134,7 +134,7 @@ class clasificacionController extends Controller
     // Metodo Delete
     public function delete(Request $request, $id)
     {
-        if (!$this->authorizationService->hasPermission($request->user(), 'manage_projects')) {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_classification')) {
             return response()->json([
                 'error' => 'No autorizado'
             ], 403);

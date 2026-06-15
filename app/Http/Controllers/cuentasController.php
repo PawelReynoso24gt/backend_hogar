@@ -8,10 +8,19 @@ use App\Models\clasificacion;
 use App\Models\cuentas;
 use Illuminate\Support\Facades\DB;
 use App\Models\ingresos_egresos;
+use App\Contracts\AuthorizationServiceInterface;
 
 
 class cuentasController extends Controller
 {
+    private $authorizationService;
+
+    public function __construct(
+        AuthorizationServiceInterface $authorizationService
+    ) {
+        $this->authorizationService = $authorizationService;
+    }
+
     //Metodo get
     public function get()
     {
@@ -119,6 +128,12 @@ class cuentasController extends Controller
     // Métdo Create con nombres
     public function create(Request $request)
     {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_accounts')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         // Validar los datos de entrada
         $request->validate([
             'cuenta' => 'required|string',
