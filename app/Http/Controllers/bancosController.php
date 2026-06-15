@@ -5,31 +5,43 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\bancos;
+use App\Contracts\AuthorizationServiceInterface;
+
 
 class bancosController extends Controller
 {
+    private $authorizationService;
+
+    public function __construct(
+        AuthorizationServiceInterface $authorizationService
+    ) {
+        $this->authorizationService = $authorizationService;
+    }
     //Metodo get
-    public function get(){
-        try{
+    public function get()
+    {
+        try {
             $data = bancos::get();
             return response()->json($data, 200);
-            } catch (\Throwable $th){
-                return response()->json(['error' => $th ->getMessage()],500);
-            }
-       }
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
 
-       //Metodo get by id
-       public function getById($id){
+    //Metodo get by id
+    public function getById($id)
+    {
         try {
             $data = bancos::find($id);
             return response()->json($data, 200);
         } catch (\Throwable $th) {
-            return response()->json([ 'error' => $th->getMessage()], 500);
+            return response()->json(['error' => $th->getMessage()], 500);
         }
-    }   
+    }
 
     //Get by name
-       public function getByNombre($banco){
+    public function getByNombre($banco)
+    {
         try {
             $banco = bancos::where('banco', $banco)->first();
             if (!$banco) {
@@ -42,16 +54,24 @@ class bancosController extends Controller
     }
 
     //Metodo Create
-    public function create(Request $request){
+    public function create(Request $request)
+    {
+
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_banks')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             // Validar si ya existe un banco con el mismo nombre
             $existingBanco = bancos::where('banco', $request['banco'])->first();
-    
+
             if ($existingBanco) {
                 // Si ya existe un banco con el mismo nombre, devuelve un error
                 return response()->json(['error' => 'Ya existe un banco con este nombre.'], 400);
             }
-    
+
             // Si no existe un banco con el mismo nombre, crea uno nuevo
             $data['banco'] = $request['banco'];
             $data['estado'] = 1; // Establecer estado como 1
@@ -63,40 +83,54 @@ class bancosController extends Controller
     }
 
     // Metodo Update
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_banks')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             $banco = bancos::find($id);
             if (!$banco) {
                 return response()->json(['error' => 'Banco no encontrado'], 404);
             }
-    
+
             // Crear un arreglo vacío para almacenar los datos que se van a actualizar
             $data = [];
-    
+
             // Verificar si el nombre del banco está presente en la solicitud
             if ($request->has('banco')) {
                 $data['banco'] = $request['banco'];
             }
-    
+
             // Verificar si el estado está presente en la solicitud
             if ($request->has('estado')) {
                 $data['estado'] = $request['estado'];
             }
-    
+
             // Si hay datos para actualizar, hacer la actualización
             if (!empty($data)) {
                 $banco->update($data);
             }
-    
+
             $res = bancos::find($id);
             return response()->json($res, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Error al actualizar el banco'], 500);
         }
-    }    
+    }
 
     // Método Delete
-    public function delete($id) {
+    public function delete(Request $request, $id)
+    {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_banks')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             $banco = bancos::find($id);
             if (!$banco) {
@@ -111,11 +145,18 @@ class bancosController extends Controller
     }
 
     // Método Update por banco
-    public function updateByBanco(Request $request, $banco){
+    public function updateByBanco(Request $request, $banco)
+    {
+        if (!$this->authorizationService->canManageBanks($request->user())) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             // Buscar la clasificación por el tipo
             $bancos = bancos::where('banco', $banco)->first();
-            
+
             // Verificar si la clasificación existe
             if (!$bancos) {
                 return response()->json(['error' => 'El Banco no existe'], 404);
