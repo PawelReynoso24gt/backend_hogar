@@ -125,6 +125,9 @@ Route::prefix('in_eg')->group(function () {
     Route::get('/tablaVistaAnticipoAG', [ingresos_egresosController::class, 'tablaVistaAnticipoAG']);
     Route::get('/tablaVistaAnticipoCA', [ingresos_egresosController::class, 'tablaVistaAnticipoCA']);
     Route::get('/getInfoAnticipoAG', [ingresos_egresosController::class, 'getInfoAnticipoAG']);
+    Route::post('/reporteGeneralAG', [reportesGenerales::class, 'reporteGeneralAgricola']);
+    Route::post('/reporteGeneralCA', [reportesGenerales::class, 'reporteGeneralCapilla']);
+
 
 });
 // Rutas de cuentas bancarias
