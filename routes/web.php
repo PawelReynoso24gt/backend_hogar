@@ -39,92 +39,95 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/delete/{id}', [LoginController::class, 'delete']);
 
     });
-    // Rutas de Proyectos
-    Route::prefix('proyectos')->group(function () {
-        Route::get('/get', [ProjectsController::class, 'get']);
-        Route::get('/getProject/{id}', [ProjectsController::class, 'getById']);
-        Route::get('/getProjectName/{nombre}', [ProjectsController::class, 'getByNombre']);
-        Route::post('/create', [ProjectsController::class, 'create']);
-        Route::put('/update/{nombre}', [ProjectsController::class, 'update']);
-        Route::delete('/delete/{id}', [ProjectsController::class, 'delete']);
-    });
-    // Rutas de Clasificaciones (Ingreso y Egreso)
-    Route::prefix('clasificacion')->group(function () {
-        Route::get('/get', [clasificacionController::class, 'get']);
-        Route::get('/get/{id}', [clasificacionController::class, 'getById']);
-        Route::get('/getTipo/{tipo}', [clasificacionController::class, 'getByTipo']);
-        Route::post('/create', [clasificacionController::class, 'create']);
-        Route::put('/update/{id}', [clasificacionController::class, 'update']);
-        Route::put('/updateTipo/{tipo}', [clasificacionController::class, 'updateByTipo']);
-        Route::delete('/delete/{id}', [clasificacionController::class, 'delete']);
-    });
-    // Rutas de Bancos
-    Route::prefix('bancos')->group(function () {
-        Route::get('/get', [bancosController::class, 'get']);
-        Route::get('/get/{id}', [bancosController::class, 'getById']);
-        Route::get('/getBancoName/{nombre}', [bancosController::class, 'getByNombre']);
-        Route::post('/create', [bancosController::class, 'create']);
-        Route::put('/update/{id}', [bancosController::class, 'update']);
-        Route::put('/updatebyname/{banco}', [bancosController::class, 'updateByBanco']);
-        Route::delete('/delete/{id}', [bancosController::class, 'delete']);
-    });
-    // Rutas de Cuentas
-    Route::prefix('cuentas')->group(function () {
-        Route::get('/get', [cuentasController::class, 'get']);
-        Route::get('/get/{id}', [cuentasController::class, 'getById']);
-        Route::get('/getWithNombres', [cuentasController::class, 'getWithNombres']);
-        Route::get('/getCrud/{nombre}', [cuentasController::class, 'GetCuentasCRUD']);
-        Route::get('/getCuentasIngresos', [cuentasController::class, 'getCuentasIngresos']);
-        Route::get('/getCuentasEgresos', [cuentasController::class, 'getCuentasEgresos']);
-        Route::post('/create', [cuentasController::class, 'create']);
-        Route::get('/getCuentaName/{nombre}', [cuentasController::class, 'getByNombre']);
-        Route::put('/updateById/{id_cuentas}', [cuentasController::class, 'updateById']);
-        Route::post('/libro-diario/por-cuentaCA', [cuentasController::class, 'getMovimientosPorCuentaCA']);
-        Route::post('/libro-diario/por-cuentaAG', [cuentasController::class, 'getMovimientosPorCuentaAG']);
-    });
-    // Rutas de Ingresos y Egresos
-    Route::prefix('in_eg')->group(function () {
-        Route::get('/get', [ingresos_egresosController::class, 'get']);
-        Route::get('/partida-contable/{id}', [ingresos_egresosController::class, 'generarPartidaContable']);
-        Route::get('/get/transacciones_pendientes', [ingresos_egresosController::class, 'getTransaccionesPendientes']);
-        Route::post('/saldar_pendiente', [ingresos_egresosController::class, 'pendienteSaldado']);
-        Route::post('/getReporteEstadoResultadosCA', [ingresos_egresosController::class, 'getReporteEstadoResultadosCA']); // son estos
-        Route::post('/getReporteEstadoResultadosAG', [ingresos_egresosController::class, 'getReporteEstadoResultadosAG']);
-        Route::get('/getWithCuenta', [ingresos_egresosController::class, 'getWithCuentas']);
-        Route::get('/getByCuentas', [ingresos_egresosController::class, 'getAllCuentasEgreso']);
-        Route::get('/getByCuentasI', [ingresos_egresosController::class, 'getAllCuentasIngreso']);
-        Route::get('/getAllCuentasIngresoAG', [ingresos_egresosController::class, 'getAllCuentasIngresoAG']);
-        Route::get('/getAllCuentasEgresoAG', [ingresos_egresosController::class, 'getAllCuentasEgresoAG']);
-        Route::get('/getAllCuentasIngresoCA', [ingresos_egresosController::class, 'getAllCuentasIngresoCA']);
-        Route::get('/getAllCuentasEgresoCA', [ingresos_egresosController::class, 'getAllCuentasEgresoCA']);
-        Route::get('/getByNombreB', [ingresos_egresosController::class, 'getByNombreBanco']);
-        Route::put('/update/{nomenclatura}', [ingresos_egresosController::class, 'update']);
-        Route::get('/getINB', [ingresos_egresosController::class, 'getDatosIngresoBancos']);
-        Route::get('/getINEGBDatos', [ingresos_egresosController::class, 'getWithDatosINGB']);
-        Route::get('/getINBDatos', [ingresos_egresosController::class, 'getWithDatosINGB']);
-        Route::post('/createALLINAG', [ingresos_egresosController::class, 'createALLINAG']);
-        Route::post('/createALLEGAG', [ingresos_egresosController::class, 'createALLEGAG']);
-        Route::post('/createALLINCA', [ingresos_egresosController::class, 'createALLINCA']);
-        Route::post('/createALLEGCA', [ingresos_egresosController::class, 'createALLEGCA']);
-        Route::post('/createALLINEGCajaAG', [ingresos_egresosController::class, 'createALLINEGCajaAG']);
-        Route::post('/createALLINEGCajaCA', [ingresos_egresosController::class, 'createALLINEGCajaCA']);
-        Route::post('/createTrasDepCajaAG', [ingresos_egresosController::class, 'createTrasDepCajaAG']);
-        Route::post('/createTrasRetBanAG', [ingresos_egresosController::class, 'createTrasRetBanAG']);
-        Route::post('/createTrasDepCajaCA', [ingresos_egresosController::class, 'createTrasDepCajaCA']);
-        Route::post('/createTrasRetBanCA', [ingresos_egresosController::class, 'createTrasRetBanCA']);
-        Route::post('/fecha', [ingresos_egresosController::class, 'getWithCuentasByDate']);
-        Route::post('/fechaBanco', [ingresos_egresosController::class, 'getWithCuentasBancosByDate']);
-        Route::post('/libroDiario', [ingresos_egresosController::class, 'getWithCuentasLibroDiario']);
-        Route::post('/fechaCA', [ingresos_egresosController::class, 'getWithCuentasByDateCA']);
-        Route::post('/fechaBancoCA', [ingresos_egresosController::class, 'getWithCuentasBancosByDateCA']);
-        Route::post('/libroDiarioCA', [ingresos_egresosController::class, 'getWithCuentasLibroDiarioCA']);
-        Route::post('/reporteFinalAG', [ingresos_egresosController::class, 'getReporteFinalAG']);
-        Route::post('/reporteFinalCA', [ingresos_egresosController::class, 'getReporteFinalCA']);
-        Route::post('/createAnticipoCompraAG', [ingresos_egresosController::class, 'anticipoAG']);
-        Route::post('/createAnticipoCompraCA', [ingresos_egresosController::class, 'anticipoCA']);
-        Route::get('/tablaVistaAnticipoAG', [ingresos_egresosController::class, 'tablaVistaAnticipoAG']);
-        Route::get('/tablaVistaAnticipoCA', [ingresos_egresosController::class, 'tablaVistaAnticipoCA']);
-        Route::get('/getInfoAnticipoAG', [ingresos_egresosController::class, 'getInfoAnticipoAG']);
+// Rutas de Proyectos
+Route::prefix('proyectos')->group(function () {
+    Route::get('/get', [ProjectsController::class, 'get']);
+    Route::get('/getProject/{id}', [ProjectsController::class, 'getById']);
+    Route::get('/getProjectName/{nombre}', [ProjectsController::class, 'getByNombre']);
+    Route::post('/create', [ProjectsController::class, 'create']);
+    Route::put('/update/{nombre}', [ProjectsController::class, 'update']);
+    Route::delete('/delete/{id}', [ProjectsController::class, 'delete']);
+});
+// Rutas de Clasificaciones (Ingreso y Egreso)
+Route::prefix('clasificacion')->group(function () {
+    Route::get('/get', [clasificacionController::class, 'get']);
+    Route::get('/get/{id}', [clasificacionController::class, 'getById']);
+    Route::get('/getTipo/{tipo}', [clasificacionController::class, 'getByTipo']);
+    Route::post('/create', [clasificacionController::class, 'create']);
+    Route::put('/update/{id}', [clasificacionController::class, 'update']);
+    Route::put('/updateTipo/{tipo}', [clasificacionController::class, 'updateByTipo']);
+    Route::delete('/delete/{id}', [clasificacionController::class, 'delete']);
+});
+// Rutas de Bancos
+Route::prefix('bancos')->group(function () {
+    Route::get('/get', [bancosController::class, 'get']);
+    Route::get('/get/{id}', [bancosController::class, 'getById']);
+    Route::get('/getBancoName/{nombre}', [bancosController::class, 'getByNombre']);
+    Route::post('/create', [bancosController::class, 'create']);
+    Route::put('/update/{id}', [bancosController::class, 'update']);
+    Route::put('/updatebyname/{banco}', [bancosController::class, 'updateByBanco']);
+    Route::delete('/delete/{id}', [bancosController::class, 'delete']);
+});
+// Rutas de Cuentas
+Route::prefix('cuentas')->group(function () {
+    Route::get('/get', [cuentasController::class, 'get']);
+    Route::get('/get/{id}', [cuentasController::class, 'getById']);
+    Route::get('/getWithNombres', [cuentasController::class, 'getWithNombres']);
+    Route::get('/getCrud/{nombre}', [cuentasController::class, 'GetCuentasCRUD']);
+    Route::get('/getCuentasIngresos', [cuentasController::class, 'getCuentasIngresos']);
+    Route::get('/getCuentasEgresos', [cuentasController::class, 'getCuentasEgresos']);
+    Route::post('/create', [cuentasController::class, 'create']);
+    Route::get('/getCuentaName/{nombre}', [cuentasController::class, 'getByNombre']);
+    Route::put('/updateById/{id_cuentas}', [cuentasController::class, 'updateById']);
+    Route::post('/libro-diario/por-cuentaCA', [cuentasController::class, 'getMovimientosPorCuentaCA']);
+    Route::post('/libro-diario/por-cuentaAG', [cuentasController::class, 'getMovimientosPorCuentaAG']);
+});
+// Rutas de Ingresos y Egresos
+Route::prefix('in_eg')->group(function () {
+    Route::get('/get', [ingresos_egresosController::class, 'get']);
+    Route::get('/partida-contable/{id}', [ingresos_egresosController::class, 'generarPartidaContable']);
+    Route::get('/get/transacciones_pendientes', [ingresos_egresosController::class, 'getTransaccionesPendientes']);
+    Route::post('/saldar_pendiente', [ingresos_egresosController::class, 'pendienteSaldado']);
+    Route::post('/getReporteEstadoResultadosCA', [ingresos_egresosController::class, 'getReporteEstadoResultadosCA']); // son estos
+    Route::post('/getReporteEstadoResultadosAG', [ingresos_egresosController::class, 'getReporteEstadoResultadosAG']);
+    Route::get('/getWithCuenta', [ingresos_egresosController::class, 'getWithCuentas']);
+    Route::get('/getByCuentas', [ingresos_egresosController::class, 'getAllCuentasEgreso']);
+    Route::get('/getByCuentasI', [ingresos_egresosController::class, 'getAllCuentasIngreso']);
+    Route::get('/getAllCuentasIngresoAG', [ingresos_egresosController::class, 'getAllCuentasIngresoAG']);
+    Route::get('/getAllCuentasEgresoAG', [ingresos_egresosController::class, 'getAllCuentasEgresoAG']);
+    Route::get('/getAllCuentasIngresoCA', [ingresos_egresosController::class, 'getAllCuentasIngresoCA']);
+    Route::get('/getAllCuentasEgresoCA', [ingresos_egresosController::class, 'getAllCuentasEgresoCA']);
+    Route::get('/getByNombreB', [ingresos_egresosController::class, 'getByNombreBanco']);
+    Route::put('/update/{nomenclatura}', [ingresos_egresosController::class, 'update']);
+    Route::get('/getINB', [ingresos_egresosController::class, 'getDatosIngresoBancos']);
+    Route::get('/getINEGBDatos', [ingresos_egresosController::class, 'getWithDatosINGB']);
+    Route::get('/getINBDatos', [ingresos_egresosController::class, 'getWithDatosINGB']);
+    Route::post('/createALLINAG', [ingresos_egresosController::class, 'createALLINAG']);
+    Route::post('/createALLEGAG', [ingresos_egresosController::class, 'createALLEGAG']);
+    Route::post('/createALLINCA', [ingresos_egresosController::class, 'createALLINCA']);
+    Route::post('/createALLEGCA', [ingresos_egresosController::class, 'createALLEGCA']);
+    Route::post('/createALLINEGCajaAG', [ingresos_egresosController::class, 'createALLINEGCajaAG']);
+    Route::post('/createALLINEGCajaCA', [ingresos_egresosController::class, 'createALLINEGCajaCA']);
+    Route::post('/createTrasDepCajaAG', [ingresos_egresosController::class, 'createTrasDepCajaAG']);
+    Route::post('/createTrasRetBanAG', [ingresos_egresosController::class, 'createTrasRetBanAG']);
+    Route::post('/createTrasDepCajaCA', [ingresos_egresosController::class, 'createTrasDepCajaCA']);
+    Route::post('/createTrasRetBanCA', [ingresos_egresosController::class, 'createTrasRetBanCA']);
+    Route::post('/fecha', [ingresos_egresosController::class, 'getWithCuentasByDate']);
+    Route::post('/fechaBanco', [ingresos_egresosController::class, 'getWithCuentasBancosByDate']);
+    Route::post('/libroDiario', [ingresos_egresosController::class, 'getWithCuentasLibroDiario']);
+    Route::post('/fechaCA', [ingresos_egresosController::class, 'getWithCuentasByDateCA']);
+    Route::post('/fechaBancoCA', [ingresos_egresosController::class, 'getWithCuentasBancosByDateCA']);
+    Route::post('/libroDiarioCA', [ingresos_egresosController::class, 'getWithCuentasLibroDiarioCA']);
+    Route::post('/reporteFinalAG', [ingresos_egresosController::class, 'getReporteFinalAG']);
+    Route::post('/reporteFinalCA', [ingresos_egresosController::class, 'getReporteFinalCA']);
+    Route::post('/createAnticipoCompraAG', [ingresos_egresosController::class, 'anticipoAG']);
+    Route::post('/createAnticipoCompraCA', [ingresos_egresosController::class, 'anticipoCA']);
+    Route::get('/tablaVistaAnticipoAG', [ingresos_egresosController::class, 'tablaVistaAnticipoAG']);
+    Route::get('/tablaVistaAnticipoCA', [ingresos_egresosController::class, 'tablaVistaAnticipoCA']);
+    Route::get('/getInfoAnticipoAG', [ingresos_egresosController::class, 'getInfoAnticipoAG']);
+    Route::post('/reporteGeneralAG', [reportesGenerales::class, 'reporteGeneralAgricola']);
+    Route::post('/reporteGeneralCA', [reportesGenerales::class, 'reporteGeneralCapilla']);
+
 
     });
     // Rutas de cuentas bancarias
