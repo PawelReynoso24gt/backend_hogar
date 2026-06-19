@@ -7,9 +7,18 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\bancos;
 use App\Models\cuentas_bancarias;
+use App\Contracts\AuthorizationServiceInterface;
 
 class cuentas_bancariasController extends Controller
 {
+    private $authorizationService;
+
+    public function __construct(
+        AuthorizationServiceInterface $authorizationService
+    ) {
+        $this->authorizationService = $authorizationService;
+    }
+
     // Método get por número de cuenta con nombre del banco
     public function getByCuenta($numero_cuenta)
     {
@@ -41,12 +50,13 @@ class cuentas_bancariasController extends Controller
     }
 
     // Método get
-    public function get(){
-        try{
+    public function get()
+    {
+        try {
             $data = cuentas_bancarias::all(); // all() es más directo que get() cuando no hay where
             return response()->json($data, 200);
-        } catch (\Throwable $th){
-            return response()->json(['error' => $th ->getMessage()],500);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 
@@ -54,19 +64,19 @@ class cuentas_bancariasController extends Controller
     {
         try {
             $cuenta_bancarias = cuentas_bancarias::with('bancos')->get();
-    
-            if($cuenta_bancarias->isEmpty()) {
+
+            if ($cuenta_bancarias->isEmpty()) {
                 return response()->json(['error' => 'No hay cuentas bancarias disponibles'], 404);
             }
-    
+
             // Cambiamos el foreach por map() para mantener el mismo estilo de código
             $responseData = $cuenta_bancarias->map(function ($cuentaB) {
                 return [
-                    'cuenta_bancaria' => $cuentaB->numero_cuenta, 
-                    'banco_y_cuenta'  => $cuentaB->bancos ? $cuentaB->bancos->banco . ' ' . $cuentaB->numero_cuenta : null
+                    'cuenta_bancaria' => $cuentaB->numero_cuenta,
+                    'banco_y_cuenta' => $cuentaB->bancos ? $cuentaB->bancos->banco . ' ' . $cuentaB->numero_cuenta : null
                 ];
             });
-    
+
             return response()->json($responseData, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
@@ -75,11 +85,17 @@ class cuentas_bancariasController extends Controller
 
     public function create(Request $request)
     {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_accounts')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         // Validar los datos de entrada
         $request->validate([
             'numero_cuenta' => 'required|string',
-            'banco'         => 'required|string',
-            'estado'        => 'sometimes|integer' // Validación opcional para estado
+            'banco' => 'required|string',
+            'estado' => 'sometimes|integer' // Validación opcional para estado
         ]);
 
         try {
@@ -104,6 +120,11 @@ class cuentas_bancariasController extends Controller
 
     public function update(Request $request, $cuentaB)
     {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_accounts')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
         try {
             $cuenta = cuentas_bancarias::where('numero_cuenta', $cuentaB)->first();
 
@@ -138,19 +159,19 @@ class cuentas_bancariasController extends Controller
     }
 
     //mostrar nombre y numero cuenta pero enviar id de cuenta bancaria
-      public function getIdCuenta(): JsonResponse
+    public function getIdCuenta(): JsonResponse
     {
         $rows = cuentas_bancarias::with('bancos:id_bancos,banco')
             ->where('estado', 1)
             ->orderBy('id_cuentas_bancarias', 'asc')
-            ->get(['id_cuentas_bancarias','numero_cuenta','id_bancos']);
+            ->get(['id_cuentas_bancarias', 'numero_cuenta', 'id_bancos']);
 
         $result = $rows->map(fn($r) => [
-            'id'    => (int) $r->id_cuentas_bancarias,
-            'label' => ($r->bancos?->banco ?? 'Sin banco').' • '.$r->numero_cuenta,
+            'id' => (int) $r->id_cuentas_bancarias,
+            'label' => ($r->bancos?->banco ?? 'Sin banco') . ' • ' . $r->numero_cuenta,
         ]);
 
         return response()->json($result, 200);
     }
-    
+
 }

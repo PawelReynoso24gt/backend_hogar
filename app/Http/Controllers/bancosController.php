@@ -147,7 +147,7 @@ class bancosController extends Controller
     // Método Update por banco
     public function updateByBanco(Request $request, $banco)
     {
-        if (!$this->authorizationService->canManageBanks($request->user())) {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_banks')) {
             return response()->json([
                 'error' => 'No autorizado'
             ], 403);

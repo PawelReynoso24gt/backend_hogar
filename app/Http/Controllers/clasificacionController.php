@@ -5,33 +5,44 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\clasificacion;
+use App\Contracts\AuthorizationServiceInterface;
 
 
 class clasificacionController extends Controller
 {
+    private $authorizationService;
+
+    public function __construct(
+        AuthorizationServiceInterface $authorizationService
+    ) {
+        $this->authorizationService = $authorizationService;
+    }
 
     //Metodo get
-    public function get(){
-        try{
+    public function get()
+    {
+        try {
             $data = clasificacion::get();
             return response()->json($data, 200);
-        } catch (\Throwable $th){
-            return response()->json(['error' => $th ->getMessage()],500);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 
     //Metodo get by id
-    public function getById($id){
+    public function getById($id)
+    {
         try {
             $data = clasificacion::find($id);
             return response()->json($data, 200);
         } catch (\Throwable $th) {
-            return response()->json([ 'error' => $th->getMessage()], 500);
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
-    
+
     // Método get by tipo
-    public function getByTipo($tipo){
+    public function getByTipo($tipo)
+    {
         try {
             $data = clasificacion::where('tipo', $tipo)->first();
             if (!$data) {
@@ -44,18 +55,32 @@ class clasificacionController extends Controller
     }
 
     //Metodo Create
-    public function create(Request $request){
+    public function create(Request $request)
+    {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_classification')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             $data['tipo'] = $request['tipo'];
             $res = clasificacion::create($data);
-            return response()->json( $res, 200);
+            return response()->json($res, 200);
         } catch (\Throwable $th) {
-            return response()->json([ 'error' => $th->getMessage()], 500);
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 
     // Metodo Update
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_classification')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             $clasificacion = clasificacion::find($id);
             if (!$clasificacion) {
@@ -72,27 +97,34 @@ class clasificacionController extends Controller
     }
 
     // Método Update por tipo
-    public function updateByTipo(Request $request, $tipo){
+    public function updateByTipo(Request $request, $tipo)
+    {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_classification')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             // Buscar la clasificación por el tipo
             $clasificacion = clasificacion::where('tipo', $tipo)->first();
-            
+
             // Verificar si la clasificación existe
             if (!$clasificacion) {
                 return response()->json(['error' => 'La clasificación no existe'], 404);
             }
-    
+
             // Actualizar solo los campos que se hayan enviado en la solicitud
             if ($request->has('tipo')) {
                 $clasificacion->tipo = $request->input('tipo');
             }
-    
+
             // Guardar los cambios
             $clasificacion->save();
-    
+
             // Obtener la clasificación actualizada
             $updatedClasificacion = clasificacion::find($clasificacion->id);
-    
+
             return response()->json($updatedClasificacion, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
@@ -100,7 +132,14 @@ class clasificacionController extends Controller
     }
 
     // Metodo Delete
-    public function delete($id) {
+    public function delete(Request $request, $id)
+    {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_classification')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
             $clasificacion = clasificacion::find($id);
             if (!$clasificacion) {

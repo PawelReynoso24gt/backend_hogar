@@ -4,9 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\roles;
+use App\Contracts\AuthorizationServiceInterface;
 
 class rolesController extends Controller
 {
+    private $authorizationService;
+
+    public function __construct(
+        AuthorizationServiceInterface $authorizationService
+    ) {
+        $this->authorizationService = $authorizationService;
+    }
+    
     // Obtener todos los roles
     public function get()
     {
@@ -65,6 +74,12 @@ class rolesController extends Controller
     // Crear rol
     public function create(Request $request)
     {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_rols')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
 
             $request->validate([
@@ -93,6 +108,12 @@ class rolesController extends Controller
     // Actualizar rol
     public function update(Request $request, $id)
     {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_rols')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
 
             $rol = roles::find($id);
@@ -130,8 +151,14 @@ class rolesController extends Controller
     }
 
     // Desactivar rol
-    public function desactivar($id)
+    public function desactivar(Request $request, $id)
     {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_rols')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
 
             $rol = roles::find($id);
@@ -164,8 +191,14 @@ class rolesController extends Controller
     }
 
     // Activar rol nuevamente
-    public function activar($id)
+    public function activar(Request $request, $id)
     {
+        if (!$this->authorizationService->hasPermission($request->user(), 'manage_rols')) {
+            return response()->json([
+                'error' => 'No autorizado'
+            ], 403);
+        }
+
         try {
 
             $rol = roles::find($id);
