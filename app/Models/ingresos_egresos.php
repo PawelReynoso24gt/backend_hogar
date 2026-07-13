@@ -10,8 +10,13 @@ class ingresos_egresos extends Model
     use HasFactory;
     protected $table = 'ingresos_egresos';
     protected $primaryKey = 'id_ingresos_egresos';
-    protected $fillable = ['nomenclatura', 'fecha', 'identificacion', 'nombre', 'descripcion', 'monto', 
-    'monto_debe', 'monto_haber', 'es_pendiente', 'tipo', 'id_cuentas'];
+    protected $fillable = ['nomenclatura', 'fecha', 'identificacion', 'nombre', 'descripcion', 'monto',
+    'monto_debe', 'monto_haber', 'es_pendiente', 'estado', 'tipo', 'id_cuentas'];
+
+    // Asignación por defecto
+    protected $attributes = [
+        'estado' => 1,
+    ];
 
     public function cuentas()
     {

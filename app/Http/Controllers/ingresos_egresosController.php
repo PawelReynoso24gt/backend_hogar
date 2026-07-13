@@ -1768,6 +1768,71 @@ public function getReporteEstadoResultadosCA(Request $request)
         }
     }
 
+    // Desactivar (soft-delete) un registro de ingresos_egresos del proyecto Agrícola.
+    // Cubre ingresos, egresos, depósito caja, retiro bancos y anticipo AG, ya que
+    // todos son filas de esta misma tabla, distinguidas por 'tipo'/'nombre'/'identificacion'.
+    public function desactivarAG(Request $request, $id)
+    {
+        try {
+            $ingreso_egreso = ingresos_egresos::with('cuentas')->find($id);
+
+            if (!$ingreso_egreso) {
+                return response()->json(['error' => 'El registro no existe'], 404);
+            }
+
+            if (!$ingreso_egreso->cuentas || $ingreso_egreso->cuentas->id_proyectos != 1) {
+                return response()->json(['error' => 'El registro no pertenece al proyecto agrícola'], 400);
+            }
+
+            // No permitir desactivar un pendiente (ej. anticipo) que ya tiene abonos registrados,
+            // para no romper la trazabilidad de pago_pendientes.
+            if ($ingreso_egreso->es_pendiente && $ingreso_egreso->pagosRealizados()->count() > 0) {
+                return response()->json(['error' => 'No se puede desactivar un registro pendiente que ya tiene pagos registrados'], 409);
+            }
+
+            $ingreso_egreso->estado = 0;
+            $ingreso_egreso->save();
+
+            return response()->json([
+                'message' => 'Registro desactivado correctamente',
+                'data' => $ingreso_egreso
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Desactivar (soft-delete) un registro de ingresos_egresos del proyecto Capilla.
+    // Igual que desactivarAG, pero validando id_proyectos = 2.
+    public function desactivarCA(Request $request, $id)
+    {
+        try {
+            $ingreso_egreso = ingresos_egresos::with('cuentas')->find($id);
+
+            if (!$ingreso_egreso) {
+                return response()->json(['error' => 'El registro no existe'], 404);
+            }
+
+            if (!$ingreso_egreso->cuentas || $ingreso_egreso->cuentas->id_proyectos != 2) {
+                return response()->json(['error' => 'El registro no pertenece al proyecto Capilla'], 400);
+            }
+
+            if ($ingreso_egreso->es_pendiente && $ingreso_egreso->pagosRealizados()->count() > 0) {
+                return response()->json(['error' => 'No se puede desactivar un registro pendiente que ya tiene pagos registrados'], 409);
+            }
+
+            $ingreso_egreso->estado = 0;
+            $ingreso_egreso->save();
+
+            return response()->json([
+                'message' => 'Registro desactivado correctamente',
+                'data' => $ingreso_egreso
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
     // traslado de Depósitos de Caja CAPILLA
 
     public function createTrasDepCajaCA(Request $request)
@@ -8673,6 +8738,170 @@ public function getReporteEstadoResultadosCA(Request $request)
             $data = ingresos_egresos::with('cuentas')
                 ->where('id_cuentas', 75)
                 ->get();
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Query base compartida por los listados paginados AG/CA de abajo:
+    // mismo shape de columnas que tablaVistaAnticipoAG/CA, pero paginado y
+    // filtrando los registros desactivados (estado = 0).
+    private function listadoIngresosEgresos(Request $request, int $idProyecto, \Closure $filtroCuentas)
+    {
+        $perPage = min((int) $request->query('per_page', 5), 50);
+        if ($perPage < 1) {
+            $perPage = 5;
+        }
+
+        $query = DB::table('ingresos_egresos')
+            ->leftJoin('cuentas', 'ingresos_egresos.id_cuentas', '=', 'cuentas.id_cuentas')
+            ->select(
+                'ingresos_egresos.id_ingresos_egresos',
+                'ingresos_egresos.fecha',
+                'ingresos_egresos.nomenclatura',
+                'ingresos_egresos.nombre',
+                DB::raw("COALESCE(cuentas.cuenta, ingresos_egresos.id_cuentas) as cuenta"),
+                'ingresos_egresos.tipo',
+                'ingresos_egresos.monto',
+                'ingresos_egresos.descripcion',
+                'ingresos_egresos.identificacion',
+                'ingresos_egresos.estado'
+            )
+            ->where('cuentas.id_proyectos', $idProyecto)
+            ->whereRaw('(ingresos_egresos.estado IS NULL OR ingresos_egresos.estado != 0)')
+            ->orderByDesc('ingresos_egresos.fecha')
+            ->orderByDesc('ingresos_egresos.id_ingresos_egresos');
+
+        $filtroCuentas($query);
+
+        return $query->paginate($perPage);
+    }
+
+    // Listado paginado de Egresos AG (excluye traslados internos y anticipos, que ya se listan aparte)
+    public function getListaEgresosAG(Request $request)
+    {
+        try {
+            $data = $this->listadoIngresosEgresos($request, 1, function ($query) {
+                $query->where('cuentas.id_clasificacion', 2)
+                    ->whereNotIn('cuentas.cuenta', [
+                        'Traslado a Bancos desde Caja',
+                        'Traslado a Caja desde Bancos',
+                        'Anticipo de compras y gastos',
+                    ]);
+            });
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Listado paginado de Ingresos AG (excluye traslados internos)
+    public function getListaIngresosAG(Request $request)
+    {
+        try {
+            $data = $this->listadoIngresosEgresos($request, 1, function ($query) {
+                $query->where('cuentas.id_clasificacion', 1)
+                    ->whereNotIn('cuentas.cuenta', [
+                        'Traslado a Bancos desde Caja',
+                        'Traslado a Caja desde Bancos',
+                    ]);
+            });
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Listado paginado de Depósitos de Caja AG (incluye ambos lados de la partida: caja y bancos)
+    public function getListaDepositosCajaAG(Request $request)
+    {
+        try {
+            $data = $this->listadoIngresosEgresos($request, 1, function ($query) {
+                $query->where('cuentas.cuenta', 'Traslado a Bancos desde Caja');
+            });
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Listado paginado de Retiros de Bancos AG (incluye ambos lados de la partida: caja y bancos)
+    public function getListaRetirosBancosAG(Request $request)
+    {
+        try {
+            $data = $this->listadoIngresosEgresos($request, 1, function ($query) {
+                $query->where('cuentas.cuenta', 'Traslado a Caja desde Bancos');
+            });
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Listado paginado de Egresos CA (excluye traslados internos y anticipos, que ya se listan aparte)
+    public function getListaEgresosCA(Request $request)
+    {
+        try {
+            $data = $this->listadoIngresosEgresos($request, 2, function ($query) {
+                $query->where('cuentas.id_clasificacion', 2)
+                    ->whereNotIn('cuentas.cuenta', [
+                        'Traslado a Bancos desde Caja',
+                        'Traslado a Caja desde Bancos',
+                        'Anticipo de compras y gastos',
+                    ]);
+            });
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Listado paginado de Ingresos CA (excluye traslados internos)
+    public function getListaIngresosCA(Request $request)
+    {
+        try {
+            $data = $this->listadoIngresosEgresos($request, 2, function ($query) {
+                $query->where('cuentas.id_clasificacion', 1)
+                    ->whereNotIn('cuentas.cuenta', [
+                        'Traslado a Bancos desde Caja',
+                        'Traslado a Caja desde Bancos',
+                    ]);
+            });
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Listado paginado de Depósitos de Caja CA (incluye ambos lados de la partida: caja y bancos)
+    public function getListaDepositosCajaCA(Request $request)
+    {
+        try {
+            $data = $this->listadoIngresosEgresos($request, 2, function ($query) {
+                $query->where('cuentas.cuenta', 'Traslado a Bancos desde Caja');
+            });
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Listado paginado de Retiros de Bancos CA (incluye ambos lados de la partida: caja y bancos)
+    public function getListaRetirosBancosCA(Request $request)
+    {
+        try {
+            $data = $this->listadoIngresosEgresos($request, 2, function ($query) {
+                $query->where('cuentas.cuenta', 'Traslado a Caja desde Bancos');
+            });
 
             return response()->json($data, 200);
         } catch (\Throwable $th) {
