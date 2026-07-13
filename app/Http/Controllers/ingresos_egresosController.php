@@ -15,9 +15,18 @@ use App\Models\bancos;
 use App\Models\pago_pendientes;
 use Illuminate\Validation\Rule;
 use App\Utils\CuentasPorPagarCobrar;
+use App\Contracts\AuthorizationServiceInterface;
 
 class ingresos_egresosController extends Controller
 {
+    private $authorizationService;
+
+    public function __construct(
+        AuthorizationServiceInterface $authorizationService
+    ) {
+        $this->authorizationService = $authorizationService;
+    }
+    
     // Método Get
     public function get()
     {

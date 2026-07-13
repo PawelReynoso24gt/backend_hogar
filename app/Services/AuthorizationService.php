@@ -20,7 +20,9 @@ class AuthorizationService implements AuthorizationServiceInterface
                 'manage_banks',
                 'manage_accounts',
                 'manage_roles',
-                'view_reports'
+                'view_reports',
+                'manage_rols',
+                'manage_classification'
             ],
 
             // Usuario normal
