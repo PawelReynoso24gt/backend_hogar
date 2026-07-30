@@ -227,8 +227,7 @@ class ingresos_egresosController extends Controller
                                                 ->get();
 
             if ($transaccionesPendientes->isEmpty()) {
-                $tipo = ($idClasificacion == 1) ? 'Ingresos' : 'Egresos';
-                return response()->json(['message' => 'No se encontraron registros de transacciones pendientes (Clasificación: ' . $tipo . ', Proyecto ID: ' . $idProyecto . ').'], 404);
+                return response()->json([], 200);
             }
 
             // --- CÁLCULO DEL SALDO RESTANTE ---
