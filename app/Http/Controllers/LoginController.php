@@ -133,8 +133,10 @@ class LoginController extends Controller
     {
         try {
 
+            $esAdmin = $request->user()->id_rol == 1;
+
             if (
-                $request->user()->id_rol != 1 &&
+                !$esAdmin &&
                 $request->user()->usuarios !== $usuarios
             ) {
                 return response()->json([
@@ -158,13 +160,16 @@ class LoginController extends Controller
                 $proyecto->contrasenias = Crypt::encryptString($password);
             }
 
-            // Actualizar los campos que se hayan enviado en la solicitud
-            if ($request->has('usuarios')) {
-                $proyecto->usuarios = $request->input('usuarios');
-            }
+            // Un usuario no administrador solo puede cambiar su propia contraseña,
+            // no su nombre de usuario ni su estado
+            if ($esAdmin) {
+                if ($request->has('usuarios')) {
+                    $proyecto->usuarios = $request->input('usuarios');
+                }
 
-            if ($request->has('estado')) {
-                $proyecto->estado = $request->input('estado');
+                if ($request->has('estado')) {
+                    $proyecto->estado = $request->input('estado');
+                }
             }
 
             // Guardar los cambios

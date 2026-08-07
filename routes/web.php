@@ -110,6 +110,8 @@ Route::prefix('in_eg')->group(function () {
     Route::post('/createALLINEGCajaCA', [ingresos_egresosController::class, 'createALLINEGCajaCA']);
     Route::post('/createTrasDepCajaAG', [ingresos_egresosController::class, 'createTrasDepCajaAG']);
     Route::post('/createTrasRetBanAG', [ingresos_egresosController::class, 'createTrasRetBanAG']);
+    Route::put('/desactivarAG/{id}', [ingresos_egresosController::class, 'desactivarAG']);
+    Route::put('/desactivarCA/{id}', [ingresos_egresosController::class, 'desactivarCA']);
     Route::post('/createTrasDepCajaCA', [ingresos_egresosController::class, 'createTrasDepCajaCA']);
     Route::post('/createTrasRetBanCA', [ingresos_egresosController::class, 'createTrasRetBanCA']);
     Route::post('/fecha', [ingresos_egresosController::class, 'getWithCuentasByDate']);
@@ -125,6 +127,14 @@ Route::prefix('in_eg')->group(function () {
     Route::get('/tablaVistaAnticipoAG', [ingresos_egresosController::class, 'tablaVistaAnticipoAG']);
     Route::get('/tablaVistaAnticipoCA', [ingresos_egresosController::class, 'tablaVistaAnticipoCA']);
     Route::get('/getInfoAnticipoAG', [ingresos_egresosController::class, 'getInfoAnticipoAG']);
+    Route::get('/getListaEgresosAG', [ingresos_egresosController::class, 'getListaEgresosAG']);
+    Route::get('/getListaIngresosAG', [ingresos_egresosController::class, 'getListaIngresosAG']);
+    Route::get('/getListaDepositosCajaAG', [ingresos_egresosController::class, 'getListaDepositosCajaAG']);
+    Route::get('/getListaRetirosBancosAG', [ingresos_egresosController::class, 'getListaRetirosBancosAG']);
+    Route::get('/getListaEgresosCA', [ingresos_egresosController::class, 'getListaEgresosCA']);
+    Route::get('/getListaIngresosCA', [ingresos_egresosController::class, 'getListaIngresosCA']);
+    Route::get('/getListaDepositosCajaCA', [ingresos_egresosController::class, 'getListaDepositosCajaCA']);
+    Route::get('/getListaRetirosBancosCA', [ingresos_egresosController::class, 'getListaRetirosBancosCA']);
     Route::post('/reporteGeneralAG', [reportesGenerales::class, 'reporteGeneralAgricola']);
     Route::post('/reporteGeneralCA', [reportesGenerales::class, 'reporteGeneralCapilla']);
 
