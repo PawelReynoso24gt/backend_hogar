@@ -686,6 +686,10 @@ public function getReporteEstadoResultadosCA(Request $request)
         $totalEgresosBancos  = $dataGroupedBancos->sum(fn($item) => (float) str_replace(',', '', $item['egresos']));
         $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
 
+        // 1. Calcula los saldos finales por cuenta (Caja y Bancos) (Variables de saldos finales)
+        $saldoFinalCaja   = $saldoInicialCaja - $totalEgresosCaja;
+        $saldoFinalBancos = $saldoInicialBancos - $totalEgresosBancos;
+
         $saldoFinal = $saldoInicial - $totalGeneralEgresos;
 
         return response()->json([
@@ -710,6 +714,10 @@ public function getReporteEstadoResultadosCA(Request $request)
             'data_bancos'           => $dataGroupedBancos,
 
             'total_saldo_final'     => $saldoFinal,
+
+            // 2. Añade estas dos llaves que el frontend y el PDF están esperando (Variables de saldos finales)
+            'total_saldo_final_caja'   => $saldoFinalCaja,
+            'total_saldo_final_bancos' => $saldoFinalBancos,
         ], 200);
 
     } catch (\Throwable $th) {
@@ -926,6 +934,10 @@ public function getReporteEstadoResultadosCA(Request $request)
 
         $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
 
+        // 1. Agregar el cálculo de los saldos finales individuales (Variables de saldo finales)
+        $saldoFinalCaja = $saldoInicialCaja - $totalEgresosCaja;
+        $saldoFinalBancos = $saldoInicialBancos - $totalEgresosBancos;
+
         $saldoFinal = ($saldoInicial) - $totalGeneralEgresos;
 
         return response()->json([
@@ -943,7 +955,11 @@ public function getReporteEstadoResultadosCA(Request $request)
             'total_general_egresos' => $totalGeneralEgresos,
             'data_caja' => $dataGroupedCaja,
             'data_bancos' => $dataGroupedBancos,
-            'total_saldo_final' => $saldoFinal
+            'total_saldo_final' => $saldoFinal,
+
+            // 2. Enviar las variables que el frontend está esperando (Variables de saldo finales)
+            'total_saldo_final_caja' => $saldoFinalCaja,
+            'total_saldo_final_bancos' => $saldoFinalBancos
         ], 200);
 
     } catch (\Throwable $th) {
