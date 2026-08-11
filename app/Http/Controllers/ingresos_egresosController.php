@@ -686,7 +686,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         $totalEgresosBancos  = $dataGroupedBancos->sum(fn($item) => (float) str_replace(',', '', $item['egresos']));
         $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
 
-        // 1. Calcula los saldos finales por cuenta (Caja y Bancos) (Variables de saldos finales)
+        // 1. Calcula los saldos finales por cuenta (Caja y Bancos)
         $saldoFinalCaja   = $saldoInicialCaja - $totalEgresosCaja;
         $saldoFinalBancos = $saldoInicialBancos - $totalEgresosBancos;
 
@@ -934,7 +934,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
         $totalGeneralEgresos = $totalEgresosCaja + $totalEgresosBancos;
 
-        // 1. Agregar el cálculo de los saldos finales individuales (Variables de saldo finales)
+        // 1. Agregar el cálculo de los saldos finales individuales (Variables para saldos finales)
         $saldoFinalCaja = $saldoInicialCaja - $totalEgresosCaja;
         $saldoFinalBancos = $saldoInicialBancos - $totalEgresosBancos;
 
@@ -957,7 +957,7 @@ public function getReporteEstadoResultadosCA(Request $request)
             'data_bancos' => $dataGroupedBancos,
             'total_saldo_final' => $saldoFinal,
 
-            // 2. Enviar las variables que el frontend está esperando (Variables de saldo finales)
+            // 2. Enviar las variables que el frontend está esperando (Variables de saldos finales)
             'total_saldo_final_caja' => $saldoFinalCaja,
             'total_saldo_final_bancos' => $saldoFinalBancos
         ], 200);

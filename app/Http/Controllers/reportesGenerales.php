@@ -157,24 +157,28 @@ class reportesGenerales extends Controller
     private function generateReportByFechas($idProyecto, $fechaInicial, $fechaFinal)
     {
         $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+            ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
             ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
             ->where('tipo', 'caja')
             ->where('nomenclatura', 'like', 'IN%')
             ->sum('monto');
 
         $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+            ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
             ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
             ->where('tipo', 'caja')
             ->where('nomenclatura', 'like', 'EG%')
             ->sum('monto');
 
         $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+            ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
             ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
             ->where('tipo', 'bancos')
             ->where('nomenclatura', 'like', 'IN%')
             ->sum('monto');
 
         $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+            ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
             ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
             ->where('tipo', 'bancos')
             ->where('nomenclatura', 'like', 'EG%')
@@ -188,12 +192,14 @@ class reportesGenerales extends Controller
 
         $dataCaja = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
             $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+                ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->where('tipo', 'caja')
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
             $eg = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+                ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->where('tipo', 'caja')
                 ->where('nomenclatura', 'like', 'EG%')
@@ -210,12 +216,14 @@ class reportesGenerales extends Controller
 
         $dataBancos = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
             $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+                ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->where('tipo', 'bancos')
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
             $eg = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+                ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->where('tipo', 'bancos')
                 ->where('nomenclatura', 'like', 'EG%')
@@ -427,24 +435,28 @@ private function generateReportCapillaByFechas($idProyecto, $fechaInicial, $fech
 {
     // 🔥 saldos iniciales antes del rango
     $ingresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+        ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
         ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
         ->where('tipo', 'caja')
         ->where('nomenclatura', 'like', 'IN%')
         ->sum('monto');
 
     $egresosAntCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
+        ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
         ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
         ->where('tipo', 'caja')
         ->where('nomenclatura', 'like', 'EG%')
         ->sum('monto');
 
     $ingresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+        ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
         ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
         ->where('tipo', 'bancos')
         ->where('nomenclatura', 'like', 'IN%')
         ->sum('monto');
 
     $egresosAntBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
+        ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
         ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
         ->where('tipo', 'bancos')
         ->where('nomenclatura', 'like', 'EG%')
@@ -460,12 +472,14 @@ private function generateReportCapillaByFechas($idProyecto, $fechaInicial, $fech
     // data de caja
     $dataCaja = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
         $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+            ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
             ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
             ->where('tipo', 'caja')
             ->where('nomenclatura', 'like', 'IN%')
             ->sum('monto');
 
         $eg = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+            ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
             ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
             ->where('tipo', 'caja')
             ->where('nomenclatura', 'like', 'EG%')
@@ -483,12 +497,14 @@ private function generateReportCapillaByFechas($idProyecto, $fechaInicial, $fech
     // data de bancos
     $dataBancos = $cuentasProyecto->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
         $ing = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+            ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
             ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
             ->where('tipo', 'bancos')
             ->where('nomenclatura', 'like', 'IN%')
             ->sum('monto');
 
         $eg = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
+            ->where('estado', 1) //! aquí se agrega esto para que traiga solo datos activos
             ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
             ->where('tipo', 'bancos')
             ->where('nomenclatura', 'like', 'EG%')
