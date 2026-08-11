@@ -609,24 +609,28 @@ public function getReporteEstadoResultadosCA(Request $request)
 
         $ingresosAnterioresBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
             ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+            ->where('estado', 1) //! para usar los registros que sean activos
             ->where('tipo', 'bancos')
             ->where('nomenclatura', 'like', 'IN%')
             ->sum('monto');
 
         $egresosAnterioresBancos = ingresos_egresos::where('fecha', '<', $fechaInicial)
             ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+            ->where('estado', 1) //! para usar los registros que sean activos
             ->where('tipo', 'bancos')
             ->where('nomenclatura', 'like', 'EG%')
             ->sum('monto');
 
         $ingresosAnterioresCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
             ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+            ->where('estado', 1) //! para usar los registros que sean activos
             ->where('tipo', 'caja')
             ->where('nomenclatura', 'like', 'IN%')
             ->sum('monto');
 
         $egresosAnterioresCaja = ingresos_egresos::where('fecha', '<', $fechaInicial)
             ->whereHas('cuentas', fn($q) => $q->where('id_proyectos', $idProyecto))
+            ->where('estado', 1) //! para usar los registros que sean activos
             ->where('tipo', 'caja')
             ->where('nomenclatura', 'like', 'EG%')
             ->sum('monto');
@@ -659,6 +663,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         $dataGroupedCaja = $cuentasEgreso->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
             $egresos = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
                 ->where('tipo', 'caja')
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->where('nomenclatura', 'like', 'EG%')
                 ->sum('monto');
@@ -672,6 +677,7 @@ public function getReporteEstadoResultadosCA(Request $request)
         $dataGroupedBancos = $cuentasEgreso->map(function ($cuenta) use ($fechaInicial, $fechaFinal) {
             $egresos = ingresos_egresos::where('id_cuentas', $cuenta->id_cuentas)
                 ->where('tipo', 'bancos')
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->where('nomenclatura', 'like', 'EG%')
                 ->sum('monto');
@@ -2409,6 +2415,7 @@ public function getReporteEstadoResultadosCA(Request $request)
             $ingresosAnteriores = ingresos_egresos::whereHas('cuentas', function ($query) {
                 $query->where('id_proyectos', 2); // proyecto capilla
             })
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->where('tipo', 'caja')
                 ->where('fecha', '<', $fechaInicial)
                 ->where('nomenclatura', 'like', 'IN%')
@@ -2417,6 +2424,7 @@ public function getReporteEstadoResultadosCA(Request $request)
             $egresosAnteriores = ingresos_egresos::whereHas('cuentas', function ($query) {
                 $query->where('id_proyectos', 2); // proyecto capilla
             })
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->where('tipo', 'caja')
                 ->where('fecha', '<', $fechaInicial)
                 ->where('nomenclatura', 'like', 'EG%')
@@ -2426,6 +2434,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
             // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
             $data = ingresos_egresos::with('cuentas')
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->where('tipo', 'caja')
                 ->whereHas('cuentas', function ($query) {
@@ -2539,6 +2548,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                 ->whereHas('cuentas', function ($query) {
                     $query->where('id_proyectos', 2);
                 })
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->where('fecha', '<', $fechaInicial)
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
@@ -2548,6 +2558,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                 ->whereHas('cuentas', function ($query) {
                     $query->where('id_proyectos', 2);
                 })
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->where('fecha', '<', $fechaInicial)
                 ->where('nomenclatura', 'like', 'EG%')
                 ->sum('monto');
@@ -2556,6 +2567,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
             // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
             $data = ingresos_egresos::with('cuentas')
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->where('tipo', 'bancos')
                 ->whereIn('id_ingresos_egresos', $ids)
@@ -2657,6 +2669,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     $query->where('tipo', 'bancos')
                         ->orWhere('tipo', 'caja');
                 })
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->where('nomenclatura', 'like', 'IN%')
                 ->sum('monto');
 
@@ -2668,6 +2681,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     $query->where('tipo', 'bancos')
                         ->orWhere('tipo', 'caja');
                 })
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->where('nomenclatura', 'like', 'EG%')
                 ->sum('monto');
 
@@ -2675,6 +2689,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
             // Consultar los datos filtrados por fecha, tipo "bancos" o "caja" y id_proyecto
             $data = ingresos_egresos::with(['cuentas', 'datos_de_pago_ingresos', 'datos_de_pago_egresos'])
+                ->where('estado', 1) //! para usar los registros que sean activos
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->whereHas('cuentas', function ($query) {
                     $query->where('id_proyectos', 2);
@@ -5983,6 +5998,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -5993,6 +6009,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6004,6 +6021,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6014,6 +6032,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6023,6 +6042,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -6051,6 +6071,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -6115,6 +6136,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6125,6 +6147,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6136,6 +6159,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6146,6 +6170,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6155,6 +6180,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -6183,6 +6209,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -6247,6 +6274,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6257,6 +6285,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6268,6 +6297,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6278,6 +6308,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6287,6 +6318,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -6315,6 +6347,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -6379,6 +6412,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6389,6 +6423,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6400,6 +6435,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6410,6 +6446,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6419,6 +6456,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -6447,6 +6485,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -6512,6 +6551,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6522,6 +6562,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6533,6 +6574,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6543,6 +6585,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6553,6 +6596,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -6580,6 +6624,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -6646,6 +6691,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6656,6 +6702,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6667,6 +6714,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6677,6 +6725,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6686,6 +6735,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -6714,6 +6764,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -6778,6 +6829,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6788,6 +6840,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6799,6 +6852,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6809,6 +6863,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6818,6 +6873,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -6846,6 +6902,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -6910,6 +6967,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6920,6 +6978,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6931,6 +6990,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -6941,6 +7001,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -6950,6 +7011,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -6978,6 +7040,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -7042,6 +7105,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7052,6 +7116,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7063,6 +7128,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7073,6 +7139,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7082,6 +7149,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -7110,6 +7178,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -7174,6 +7243,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7184,6 +7254,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7195,6 +7266,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7205,6 +7277,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7214,6 +7287,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -7242,6 +7316,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -7306,6 +7381,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7316,6 +7392,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7327,6 +7404,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7337,6 +7415,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7346,6 +7425,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -7374,6 +7454,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -7438,6 +7519,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7448,6 +7530,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7459,6 +7542,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7469,6 +7553,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7478,6 +7563,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -7506,6 +7592,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -7603,6 +7690,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7613,6 +7701,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7624,6 +7713,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7634,6 +7724,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7643,6 +7734,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -7671,6 +7763,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -7770,6 +7863,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7780,6 +7874,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7791,6 +7886,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7801,6 +7897,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7810,6 +7907,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -7838,6 +7936,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -7902,6 +8001,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7912,6 +8012,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7923,6 +8024,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -7933,6 +8035,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -7942,6 +8045,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -7970,6 +8074,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -8034,6 +8139,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -8044,6 +8150,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -8055,6 +8162,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -8065,6 +8173,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -8074,6 +8183,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -8102,6 +8212,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -8167,6 +8278,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -8177,6 +8289,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -8188,6 +8301,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -8198,6 +8312,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -8207,6 +8322,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -8235,6 +8351,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -8342,6 +8459,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -8352,6 +8470,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -8363,6 +8482,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -8373,6 +8493,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -8382,6 +8503,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -8410,6 +8532,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
@@ -8474,6 +8597,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -8484,6 +8608,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'bancos');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -8495,6 +8620,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'Caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'IN%')
                         ->sum('monto');
 
@@ -8505,6 +8631,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                         ->where(function ($query) {
                             $query->where('tipo', 'caja');
                         })
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->where('nomenclatura', 'like', 'EG%')
                         ->sum('monto');
 
@@ -8514,6 +8641,7 @@ public function getReporteEstadoResultadosCA(Request $request)
 
                     // Consultar los datos filtrados por fecha, tipo "caja" y id_proyecto
                     $dataCaja = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'caja')
                         ->whereHas('cuentas', function ($query) {
@@ -8542,6 +8670,7 @@ public function getReporteEstadoResultadosCA(Request $request)
                     // datos de bancos
                     // Consultar los datos filtrados por fecha, tipo "bancos" y id_proyecto
                     $dataBancos = ingresos_egresos::with('cuentas')
+                        ->where('estado', 1) //! para usar los registros que sean activos
                         ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                         ->where('tipo', 'bancos')
                         ->whereHas('cuentas', function ($query) {
