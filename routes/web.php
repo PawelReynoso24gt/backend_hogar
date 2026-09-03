@@ -26,7 +26,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-//L
+
 // DE AQUI PARA ADELANTE TODAS LAS RUTAS ESTAN PROTEGIDAS POR AUTENTICACION SANCTUM, SE DEBE INICIAR SESION PARA PODER ACCEDER A ELLAS
 Route::middleware('auth:sanctum')->group(function () {
     // Rutas de logins LIBRE DE IDOR
