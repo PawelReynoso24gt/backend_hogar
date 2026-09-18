@@ -462,6 +462,9 @@ public function getReporteEstadoResultadosCA(Request $request)
                     $q->where('id_proyectos', $idProyecto);
                 }),
             ],
+            'contador' => 'required|string',
+            'responsable' => 'required|string',
+            'economa' => 'required|string'
         ]);
 
         $tipo = $validaciondata['tipo'];
@@ -476,6 +479,10 @@ public function getReporteEstadoResultadosCA(Request $request)
 
         $fechaInicial = null;
         $fechaFinal   = null;
+
+        $contador = $validaciondata['contador'];
+        $responsable = $validaciondata['responsable'];
+        $economa = $validaciondata['economa'];
 
         switch ($tipo) {
 
@@ -724,6 +731,9 @@ public function getReporteEstadoResultadosCA(Request $request)
             // 2. Añade estas dos llaves que el frontend y el PDF están esperando (Variables de saldos finales)
             'total_saldo_final_caja'   => $saldoFinalCaja,
             'total_saldo_final_bancos' => $saldoFinalBancos,
+            'responsable' => $responsable,
+            'contador' => $contador,
+            'economa' => $economa
         ], 200);
 
     } catch (\Throwable $th) {
@@ -737,7 +747,7 @@ public function getReporteEstadoResultadosCA(Request $request)
     try {
         $request->validate([
             'tipo' => 'required|string|in:mensual,trimestral,semestral,anual',
-              'contador' => 'required|string',
+            'contador' => 'required|string',
             'responsable' => 'required|string',
             'economa' => 'required|string'
         ]);

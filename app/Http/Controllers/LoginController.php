@@ -128,41 +128,60 @@ class LoginController extends Controller
     }
 
 
-    // Método Update (PUT)
-   public function update(Request $request, $usuarios)
-{
-    try {
-        $proyecto = logins::where('usuarios', $usuarios)->first();
+// Método Update (PUT)
+    public function update(Request $request, $usuarios)
+    {
+        try {
+            // 1. Verificar si el usuario actual es administrador (id_rol == 1)
+            $esAdmin = $request->user()->id_rol == 1;
 
-        if (!$proyecto) {
-            return response()->json(['error' => 'Usuario no encontrado'], 404);
+            // 2. Si no es admin y está intentando editar a otro usuario, se le bloquea
+            if (!$esAdmin && $request->user()->usuarios !== $usuarios) {
+                return response()->json([
+                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
+                ], 403);
+            }
+
+            // 3. Buscar el usuario en la base de datos
+            $proyecto = logins::where('usuarios', $usuarios)->first();
+
+            // 4. Verificar si el usuario existe
+            if (!$proyecto) {
+                return response()->json(['error' => 'Usuario no encontrado'], 404);
+            }
+
+            // 5. Validar y actualizar la contraseña (Permitido para el admin o el propio usuario)
+            if ($request->has('contrasenias')) {
+                $proyecto->contrasenias = Crypt::encryptString(
+                    $request->input('contrasenias')
+                );
+            }
+
+            // 6. Validar nombre de usuario y estado (SOLO PERMITIDO PARA ADMIN)
+            if ($esAdmin) {
+                if ($request->has('usuarios')) {
+                    $proyecto->usuarios = $request->input('usuarios');
+                }
+
+                if ($request->has('estado')) {
+                    $proyecto->estado = $request->input('estado');
+                }
+            }
+
+            // 7. Guardar los cambios
+            $proyecto->save();
+
+            // 8. Retornar respuesta exitosa con el formato del segundo método
+            return response()->json([
+                'message' => 'Usuario actualizado con éxito',
+                'usuario' => $proyecto->usuarios,
+                'estado'  => $proyecto->estado,
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
         }
-
-        if ($request->has('usuarios')) {
-            $proyecto->usuarios = $request->input('usuarios');
-        }
-
-        if ($request->has('contrasenias')) {
-            $proyecto->contrasenias = Crypt::encryptString(
-                $request->input('contrasenias')
-            );
-        }
-
-        if ($request->has('estado')) {
-            $proyecto->estado = $request->input('estado');
-        }
-
-        $proyecto->save();
-
-        return response()->json([
-            'message' => 'Usuario actualizado',
-            'usuario' => $proyecto->usuarios,
-            'estado' => $proyecto->estado,
-        ], 200);
-    } catch (\Throwable $th) {
-        return response()->json(['error' => $th->getMessage()], 500);
     }
-}
 
     // Método Delete (DELETE)
     public function delete(Request $request, $id)
