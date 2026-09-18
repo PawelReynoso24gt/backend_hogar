@@ -43,7 +43,7 @@ class LoginController extends Controller
                 $request->user()->id_login != $id
             ) {
                 return response()->json([
-                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
+                    'error' => 'No autorizado, no puedes acceder a la información de otros usuarios'
                 ], 403);
             }
 
@@ -67,7 +67,7 @@ class LoginController extends Controller
                 $request->user()->usuarios !== $usuarios
             ) {
                 return response()->json([
-                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
+                    'error' => 'No autorizado,  no puedes acceder a la información de otros usuarios'
                 ], 403);
             }
 
@@ -129,61 +129,40 @@ class LoginController extends Controller
 
 
     // Método Update (PUT)
-    public function update(Request $request, $usuarios)
-    {
-        try {
+   public function update(Request $request, $usuarios)
+{
+    try {
+        $proyecto = logins::where('usuarios', $usuarios)->first();
 
-            $esAdmin = $request->user()->id_rol == 1;
-
-            if (
-                !$esAdmin &&
-                $request->user()->usuarios !== $usuarios
-            ) {
-                return response()->json([
-                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
-                ], 403);
-            }
-
-            // Buscar el proyecto por el nombre
-            $proyecto = logins::where('usuarios', $usuarios)->first();
-
-            // Verificar si el proyecto existe
-            if (!$proyecto) {
-                return response()->json(['error' => 'El proyecto no existe'], 404);
-            }
-
-            // Validar la contraseña si está presente en la solicitud
-            if ($request->has('contrasenias')) {
-                $password = $request->input('contrasenias');
-
-                // Cifrar la contraseña usando Laravel Crypt
-                $proyecto->contrasenias = Crypt::encryptString($password);
-            }
-
-            // Un usuario no administrador solo puede cambiar su propia contraseña,
-            // no su nombre de usuario ni su estado
-            if ($esAdmin) {
-                if ($request->has('usuarios')) {
-                    $proyecto->usuarios = $request->input('usuarios');
-                }
-
-                if ($request->has('estado')) {
-                    $proyecto->estado = $request->input('estado');
-                }
-            }
-
-            // Guardar los cambios
-            $proyecto->save();
-
-            // Obtener el proyecto actualizado
-            $updatedProyecto = logins::find($proyecto->id);
-
-            return response()->json($updatedProyecto, 200);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
+        if (!$proyecto) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
         }
-    }
 
+        if ($request->has('usuarios')) {
+            $proyecto->usuarios = $request->input('usuarios');
+        }
+
+        if ($request->has('contrasenias')) {
+            $proyecto->contrasenias = Crypt::encryptString(
+                $request->input('contrasenias')
+            );
+        }
+
+        if ($request->has('estado')) {
+            $proyecto->estado = $request->input('estado');
+        }
+
+        $proyecto->save();
+
+        return response()->json([
+            'message' => 'Usuario actualizado',
+            'usuario' => $proyecto->usuarios,
+            'estado' => $proyecto->estado,
+        ], 200);
+    } catch (\Throwable $th) {
+        return response()->json(['error' => $th->getMessage()], 500);
+    }
+}
 
     // Método Delete (DELETE)
     public function delete(Request $request, $id)
@@ -195,7 +174,7 @@ class LoginController extends Controller
                 $request->user()->id_login !== (int) $id
             ) { //if ($request->user()->usuarios !== $id) Esta es la manera en como se manejaba antes
                 return response()->json([
-                    'error' => 'No autorizado, dummy no puedes acceder a la información de otros usuarios'
+                    'error' => 'No autorizado, no puedes acceder a la información de otros usuarios'
                 ], 403);
             }
 
